@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+package leadspb;
+
+option go_package = "/grpc/leadspb";
+
+service LeadService {
+    rpc CreateLead (CreateLeadRequest) returns (CreateLeadResponse);
+    rpc GetLead (GetLeadRequest) returns (GetLeadResponse);
+    rpc UpdateLead (UpdateLeadRequest) returns (UpdateLeadResponse);
+    rpc DeleteLead (DeleteLeadRequest) returns (DeleteLeadResponse);
+    rpc GetAllLeads (GetAllLeadsRequest) returns (GetAllLeadsResponse); // New method for retrieving all leads
+    rpc GetLeadByEmail (GetLeadByEmailRequest) returns (GetLeadByEmailResponse); // New method for retrieving a lead by email
+}
+
+message Lead {
+    uint32 id = 1;
+    string first_name = 2;
+    string last_name = 3;
+    string email = 4;
+    string phone = 5;
+    string status = 6;
+    string assigned_to = 7;
+    uint32 organization_id = 8;
+}
+
+message CreateLeadRequest {
+    Lead lead = 1;
+}
+
+message CreateLeadResponse {
+    Lead lead = 1;
+}
+
+message GetLeadRequest {
+    uint32 id = 1;
+}
+
+message GetLeadResponse {
+    Lead lead = 1;
+}
+
+message UpdateLeadRequest {
+    Lead lead = 1;
+}
+
+message UpdateLeadResponse {
+    Lead lead = 1;
+}
+
+message DeleteLeadRequest {
+    uint32 id = 1;
+}
+
+message DeleteLeadResponse {
+    bool success = 1;
+}
+
+message GetAllLeadsRequest {}
+
+message GetAllLeadsResponse {
+    repeated Lead leads = 1;
+}
+
+message GetLeadByEmailRequest {
+    string email = 1;
+}
+
+message GetLeadByEmailResponse {
+    Lead lead = 1;
+}

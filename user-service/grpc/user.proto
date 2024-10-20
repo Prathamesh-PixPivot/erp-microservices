@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "/userpb";
+
+// The UserService defines the gRPC service for user-related operations
+service UserService {
+    rpc GetUsersByOrganization (GetUsersByOrganizationRequest) returns (GetUsersByOrganizationResponse);
+    rpc GetUser (GetUserRequest) returns (GetUserResponse);
+    rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
+}
+
+// Message to request creating a user
+message CreateUserRequest {
+    string first_name = 1;
+    string last_name = 2;
+    string email = 3;
+    string phone = 4;
+    string password = 5;  // Add password to create user
+    string role = 6;
+    uint32 organization_id = 7;
+}
+
+// Response message for creating a user
+message CreateUserResponse {
+    uint32 id = 1;
+}
+
+// Message to request a user by ID
+message GetUserRequest {
+    uint32 id = 1;
+}
+
+// Response message for getting a single user
+message GetUserResponse {
+    uint32 id = 1;
+    string first_name = 2;
+    string last_name = 3;
+    string email = 4;
+    string phone = 5;
+    string role = 6;
+    uint32 organization_id = 7;
+    string keycloak_id = 8;
+}
+
+// Request message for getting users by organization ID
+message GetUsersByOrganizationRequest {
+    uint32 organization_id = 1;  // The organization ID to fetch users for
+}
+
+// Response message containing a list of users for an organization
+message GetUsersByOrganizationResponse {
+    repeated User users = 1;  // List of users
+}
+
+// User message represents a user object
+message User {
+    uint32 id = 1;
+    string first_name = 2;
+    string last_name = 3;
+    string email = 4;
+    string phone = 5;
+    string role = 6;
+    uint32 organization_id = 7;
+    string keycloak_id = 8;
+}

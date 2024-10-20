@@ -1,0 +1,135 @@
+// grpc/activitypb/activity.proto
+
+syntax = "proto3";
+
+package activitypb;
+
+option go_package = "/grpc/activitypb";
+
+// Activity Service Definition
+service ActivityService {
+    rpc CreateActivity(CreateActivityRequest) returns (CreateActivityResponse);
+    rpc GetActivity(GetActivityRequest) returns (GetActivityResponse);
+    rpc UpdateActivity(UpdateActivityRequest) returns (UpdateActivityResponse);
+    rpc DeleteActivity(DeleteActivityRequest) returns (DeleteActivityResponse);
+    rpc ListActivities(ListActivitiesRequest) returns (ListActivitiesResponse);
+    rpc CreateTask(CreateTaskRequest) returns (CreateTaskResponse);
+    rpc GetTask(GetTaskRequest) returns (GetTaskResponse);
+    rpc UpdateTask(UpdateTaskRequest) returns (UpdateTaskResponse);
+    rpc DeleteTask(DeleteTaskRequest) returns (DeleteTaskResponse);
+    rpc ListTasks(ListTasksRequest) returns (ListTasksResponse);
+}
+
+// Activity Messages
+message Activity {
+    uint32 id = 1;
+    string title = 2;
+    string description = 3;
+    string type = 4;
+    string status = 5;
+    string due_date = 6;
+    string created_at = 7;
+    string updated_at = 8;
+    uint32 contact_id = 9;
+}
+
+message CreateActivityRequest {
+    Activity activity = 1;
+}
+
+message CreateActivityResponse {
+    Activity activity = 1;
+}
+
+message GetActivityRequest {
+    uint32 id = 1;
+}
+
+message GetActivityResponse {
+    Activity activity = 1;
+}
+
+message UpdateActivityRequest {
+    Activity activity = 1;
+}
+
+message UpdateActivityResponse {
+    Activity activity = 1;
+}
+
+message DeleteActivityRequest {
+    uint32 id = 1;
+}
+
+message DeleteActivityResponse {
+    bool success = 1;
+}
+
+message ListActivitiesRequest {
+    uint32 page_number = 1;
+    uint32 page_size = 2;
+    string sort_by = 3;
+    bool ascending = 4;
+    uint32 contact_id = 5; // Optional filter by Contact
+}
+
+message ListActivitiesResponse {
+    repeated Activity activities = 1;
+}
+
+// Task Messages
+message Task {
+    uint32 id = 1;
+    string title = 2;
+    string description = 3;
+    string status = 4;
+    string priority = 5;
+    string due_date = 6;
+    string created_at = 7;
+    string updated_at = 8;
+    uint32 activity_id = 9;
+}
+
+message CreateTaskRequest {
+    Task task = 1;
+}
+
+message CreateTaskResponse {
+    Task task = 1;
+}
+
+message GetTaskRequest {
+    uint32 id = 1;
+}
+
+message GetTaskResponse {
+    Task task = 1;
+}
+
+message UpdateTaskRequest {
+    Task task = 1;
+}
+
+message UpdateTaskResponse {
+    Task task = 1;
+}
+
+message DeleteTaskRequest {
+    uint32 id = 1;
+}
+
+message DeleteTaskResponse {
+    bool success = 1;
+}
+
+message ListTasksRequest {
+    uint32 page_number = 1;
+    uint32 page_size = 2;
+    string sort_by = 3;
+    bool ascending = 4;
+    uint32 activity_id = 5; // Optional filter by Activity
+}
+
+message ListTasksResponse {
+    repeated Task tasks = 1;
+}

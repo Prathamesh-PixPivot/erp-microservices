@@ -1,0 +1,15 @@
+KEYCLOAK_URL: "http://localhost:8080"
+KEYCLOAK_REALM: "erp"
+KEYCLOAK_ADMIN_REALM: "master"
+KEYCLOAK_CLIENT_ID: "admin-cli"
+KEYCLOAK_CLIENT_SECRET: "8cEZWvHL47gtSsswAeXTrJVmppLIhiHe"
+KEYCLOAK_ADMIN_USER: "admin@thepixpivot.com"
+KEYCLOAK_ADMIN_PASSWORD: "admin"
+
+USER_SERVICE_URL: "localhost:50051"
+ORGANIZATION_SERVICE_URL: "localhost:50052"
+
+SMTP_HOST: "smtp.hostinger.com"
+SMTP_PORT: 587
+SMTP_USER: "admin@thepixpivot.com"
+SMTP_PASSWORD: "AdminPixpivot@2024"

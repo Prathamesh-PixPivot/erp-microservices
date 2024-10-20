@@ -1,0 +1,20 @@
+schema:
+  - gqlgen/schema.graphqls
+
+exec:
+  filename: gqlgen/generated/graphql.go
+  package: generated
+
+model:
+  filename: gqlgen/model/models_gen.go
+  package: model
+
+resolver:
+  filename: gqlgen/resolvers/resolver.go
+  package: resolvers
+
+models:
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.ID
+    

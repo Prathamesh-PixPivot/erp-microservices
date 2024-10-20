@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package opportunitypb;
+
+option go_package = "opportunity-service/grpc/opportunitypb";
+
+service OpportunityService {
+    rpc CreateOpportunity (CreateOpportunityRequest) returns (CreateOpportunityResponse);
+    rpc GetOpportunity (GetOpportunityRequest) returns (GetOpportunityResponse);
+    rpc UpdateOpportunity (UpdateOpportunityRequest) returns (UpdateOpportunityResponse);
+    rpc DeleteOpportunity (DeleteOpportunityRequest) returns (DeleteOpportunityResponse);
+    rpc ListOpportunities (ListOpportunitiesRequest) returns (ListOpportunitiesResponse);
+}
+
+message Opportunity {
+    uint32 id = 1;
+    string name = 2;
+    string description = 3;
+    string stage = 4;
+    double amount = 5;
+    string close_date = 6;
+    double probability = 7;
+    uint32 lead_id = 8;
+    uint32 account_id = 9;
+    uint32 owner_id = 10;
+}
+
+message CreateOpportunityRequest {
+    Opportunity opportunity = 1;
+}
+
+message CreateOpportunityResponse {
+    Opportunity opportunity = 1;
+}
+
+message GetOpportunityRequest {
+    uint32 id = 1;
+}
+
+message GetOpportunityResponse {
+    Opportunity opportunity = 1;
+}
+
+message UpdateOpportunityRequest {
+    Opportunity opportunity = 1;
+}
+
+message UpdateOpportunityResponse {
+    Opportunity opportunity = 1;
+}
+
+message DeleteOpportunityRequest {
+    uint32 id = 1;
+}
+
+message DeleteOpportunityResponse {
+    bool success = 1;
+}
+
+message ListOpportunitiesRequest {
+    uint32 owner_id = 1; // Optional filter
+}
+
+message ListOpportunitiesResponse {
+    repeated Opportunity opportunities = 1;
+}

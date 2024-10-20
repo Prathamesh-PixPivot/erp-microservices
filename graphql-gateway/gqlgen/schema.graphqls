@@ -1,0 +1,388 @@
+# Enum for Activity Status
+enum ActivityStatus {
+  Pending
+  InProgress
+  Completed
+  Canceled
+  Scheduled
+}
+
+# Enum for Sorting Activity Fields
+enum ActivitySortField {
+  TITLE
+  DUEDATE
+  CREATEDAT
+  UPDATEDAT
+}
+
+# Enum for Task Status
+enum TaskStatus {
+  Pending
+  InProgress
+  Completed
+  Canceled
+}
+
+# Enum for Task Priority
+enum TaskPriority {
+  Low
+  Medium
+  High
+}
+
+# Enum for Sorting Task Fields
+enum TaskSortField {
+  TITLE
+  DUEDATE
+  CREATEDAT
+  UPDATEDAT
+}
+
+# Enum for Lead Status
+enum LeadStatus {
+  New
+  Contacted
+  Qualified
+  Converted
+  Unqualified
+}
+
+# Enum for Sorting Contact Fields
+enum ContactSortField {
+  FIRSTNAME
+  LASTNAME
+  EMAIL
+  CREATEDAT
+  UPDATEDAT
+}
+
+# Enum for Sorting Opportunity Fields
+enum OpportunitySortField {
+  NAME
+  AMOUNT
+  CREATEDAT
+  UPDATEDAT
+}
+
+# SignupResponse type
+type SignupResponse {
+  message: String!
+  userId: ID!
+  organizationId: ID!
+}
+
+# SigninResponse type
+type SigninResponse {
+  accessToken: String!
+  refreshToken: String!
+}
+
+# User type
+type User {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String!
+  role: String!
+  organization: Organization!
+}
+
+# Organization type
+type Organization {
+  id: ID!
+  gstIn: String!
+  name: String!
+  phone: String!
+  email: String!
+  address: String!
+  city: String!
+  country: String!
+  state: String!
+  zipcode: String!
+  website: String!
+  industry: String!
+}
+
+# Lead type
+type Lead {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String
+  status: LeadStatus!
+  assignedTo: String!
+  organization: Organization!
+}
+
+# Opportunity type
+type Opportunity {
+  id: ID!
+  name: String!
+  description: String
+  stage: String!
+  amount: Float!
+  closeDate: String!
+  probability: Float
+  lead: Lead!
+  account: Organization
+  owner: User!
+}
+
+# Contact type
+type Contact {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String
+  address: String
+  city: String
+  state: String
+  country: String
+  zipCode: String
+  company: String
+  position: String
+  socialMediaProfiles: String
+  notes: String
+  createdAt: String
+  updatedAt: String
+}
+
+# Activity type
+type Activity {
+  id: ID!
+  title: String!
+  description: String
+  type: String!
+  status: ActivityStatus!
+  dueDate: String
+  createdAt: String!
+  updatedAt: String!
+  contact: Contact!
+  tasks: [Task!]!
+}
+
+# Task type
+type Task {
+  id: ID!
+  title: String!
+  description: String
+  status: TaskStatus!
+  priority: TaskPriority!
+  dueDate: String
+  createdAt: String!
+  updatedAt: String!
+  activity: Activity!
+}
+
+# Input types for creating and updating opportunities
+input CreateOpportunityInput {
+  name: String!
+  description: String
+  stage: String!
+  amount: Float!
+  closeDate: String!
+  probability: Float
+  leadId: ID!
+  accountId: ID
+  ownerId: ID!
+}
+
+input UpdateOpportunityInput {
+  id: ID!
+  name: String
+  description: String
+  stage: String
+  amount: Float
+  closeDate: String
+  probability: Float
+  leadId: ID
+  accountId: ID
+  ownerId: ID
+}
+
+# Input types for creating and updating Contacts
+input CreateContactInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String
+  address: String
+  city: String
+  state: String
+  country: String
+  zipCode: String
+  company: String
+  position: String
+  socialMediaProfiles: String
+  notes: String
+}
+
+input UpdateContactInput {
+  id: ID!
+  firstName: String
+  lastName: String
+  email: String
+  phone: String
+  address: String
+  city: String
+  state: String
+  country: String
+  zipCode: String
+  company: String
+  position: String
+  socialMediaProfiles: String
+  notes: String
+}
+
+# Input types for creating and updating Activities
+input CreateActivityInput {
+  title: String!
+  description: String
+  type: String!
+  status: ActivityStatus!
+  dueDate: String
+  contactId: ID!
+}
+
+input UpdateActivityInput {
+  id: ID!
+  title: String
+  description: String
+  type: String
+  status: ActivityStatus
+  dueDate: String
+  contactId: ID
+}
+
+# Input types for creating and updating Tasks
+input CreateTaskInput {
+  title: String!
+  description: String
+  status: TaskStatus!
+  priority: TaskPriority!
+  dueDate: String
+  activityId: ID!
+}
+
+input UpdateTaskInput {
+  id: ID!
+  title: String
+  description: String
+  status: TaskStatus
+  priority: TaskPriority
+  dueDate: String
+  activityId: ID
+}
+
+# Input types for creating and updating Leads
+input CreateLeadInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String
+  status: LeadStatus!
+  assignedTo: String!
+  organizationId: ID!
+}
+
+input UpdateLeadInput {
+  id: ID!
+  firstName: String
+  lastName: String
+  email: String
+  phone: String
+  status: LeadStatus
+  assignedTo: String!
+  organizationId: ID
+}
+
+# Combining all queries into a single Query type
+type Query {
+    getUser(id: ID!): User!                    # Get user by ID
+    getOrganization(id: ID!): Organization!    # Get organization by ID
+    leads: [Lead!]!                            # Get all leads
+    lead(id: ID!): Lead                        # Get lead by ID
+    leadByEmail(email: String!): Lead          # Get lead by email
+
+    # Opportunity queries
+    getOpportunity(id: ID!): Opportunity       # Get opportunity by ID
+    listOpportunities(ownerId: ID): [Opportunity!]!  # List opportunities, optionally filtered by ownerId
+
+    # Contacts queries
+    getContact(id: ID!): Contact
+    listContacts(
+      pageNumber: Int, 
+      pageSize: Int, 
+      sortBy: ContactSortField,            # Using enum for sortBy
+      ascending: Boolean
+    ): [Contact!]!
+
+    # Activity queries
+    getActivity(id: ID!): Activity
+    listActivities(
+      pageNumber: Int, 
+      pageSize: Int, 
+      sortBy: ActivitySortField!,          # Using enum for sortBy
+      ascending: Boolean!, 
+      contactId: ID
+    ): [Activity!]!
+
+    # Task queries
+    getTask(id: ID!): Task
+    listTasks(
+      pageNumber: Int, 
+      pageSize: Int, 
+      sortBy: TaskSortField!,              # Using enum for sortBy
+      ascending: Boolean!, 
+      activityId: ID
+    ): [Task!]!
+}
+
+# Combining all mutations into a single Mutation type
+type Mutation {
+    signup(
+        firstName: String!,
+        lastName: String!,
+        email: String!,
+        password: String!,
+        phone: String!,
+        role: String!,
+        organizationName: String!,
+        gstIn: String!,
+        address: String!,
+        city: String!,
+        state: String!,
+        country: String!,
+        zipcode: String!,
+        website: String!
+    ): SignupResponse!                         # Signup mutation
+
+    signin(email: String!, password: String!): SigninResponse! # Signin mutation
+
+    createLead(input: CreateLeadInput!): Lead            # Create a lead
+    updateLead(input: UpdateLeadInput!): Lead            # Update a lead
+    deleteLead(id: ID!): Boolean                         # Delete a lead by ID
+
+    # Opportunity mutations
+    createOpportunity(input: CreateOpportunityInput!): Opportunity  # Create an opportunity
+    updateOpportunity(input: UpdateOpportunityInput!): Opportunity  # Update an opportunity
+    deleteOpportunity(id: ID!): Boolean                             # Delete an opportunity by ID
+
+    # Contacts mutations
+    createContact(input: CreateContactInput!): Contact
+    updateContact(input: UpdateContactInput!): Contact
+    deleteContact(id: ID!): Boolean
+
+    # Activity mutations
+    createActivity(input: CreateActivityInput!): Activity
+    updateActivity(input: UpdateActivityInput!): Activity
+    deleteActivity(id: ID!): Boolean
+
+    # Task mutations
+    createTask(input: CreateTaskInput!): Task
+    updateTask(input: UpdateTaskInput!): Task
+    deleteTask(id: ID!): Boolean
+}

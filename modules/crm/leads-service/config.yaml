@@ -1,0 +1,11 @@
+grpc:
+  port: ":50054"
+
+websocket:
+  addr: ":8000"
+
+database:
+  url: "postgres://postgres:root@localhost:5432/leads-service?sslmode=disable"
+
+keycloak:
+  url: "http://localhost:8080"
