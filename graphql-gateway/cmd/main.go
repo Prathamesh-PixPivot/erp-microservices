@@ -1,5 +1,3 @@
-// graphql-gateway/cmd/main.go
-
 package main
 
 import (
@@ -9,14 +7,13 @@ import (
 	"graphql-gateway/gqlgen/generated"
 	"graphql-gateway/gqlgen/resolvers"
 	"graphql-gateway/grpc/activitypb"
+	"graphql-gateway/grpc/authpb"
 	"graphql-gateway/grpc/contactpb"
-
-	// "graphql-gateway/grpc/authpb"
-	// "graphql-gateway/grpc/contactpb"
-	// "graphql-gateway/grpc/leadspb"
-	// "graphql-gateway/grpc/opportunitypb"
-	// "graphql-gateway/grpc/organizationpb"
-	// "graphql-gateway/grpc/userpb"
+	"graphql-gateway/grpc/leadspb"
+	"graphql-gateway/grpc/opportunitypb"
+	"graphql-gateway/grpc/organizationpb"
+	"graphql-gateway/grpc/userpb"
+	"graphql-gateway/grpc/vms_pb" // Import the VMS gRPC package
 	"log"
 	"net/http"
 	"os"
@@ -41,74 +38,74 @@ func main() {
 	// Step 2: Initialize gRPC Clients for all required services
 
 	// Initialize AuthService Client
-	// authConn, err := grpc.Dial(
-	// 	fmt.Sprintf("%s:%d", cfg.AuthServiceHost, cfg.AuthServicePort),
-	// 	grpc.WithTransportCredentials(insecure.NewCredentials()),
-	// 	grpc.WithBlock(),
-	// 	grpc.WithTimeout(5*time.Second),
-	// )
-	// if err != nil {
-	// 	log.Fatalf("Failed to connect to auth-service: %v", err)
-	// }
-	// defer authConn.Close()
-	// authClient := authpb.NewAuthServiceClient(authConn)
-	// log.Println("Connected to auth-service.")
+	authConn, err := grpc.Dial(
+		fmt.Sprintf("%s:%d", cfg.AuthServiceHost, cfg.AuthServicePort),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+		grpc.WithTimeout(5*time.Second),
+	)
+	if err != nil {
+		log.Fatalf("Failed to connect to auth-service: %v", err)
+	}
+	defer authConn.Close()
+	authClient := authpb.NewAuthServiceClient(authConn)
+	log.Println("Connected to auth-service.")
 
-	// // Initialize UserService Client
-	// userConn, err := grpc.Dial(
-	// 	fmt.Sprintf("%s:%d", cfg.UserServiceHost, cfg.UserServicePort),
-	// 	grpc.WithTransportCredentials(insecure.NewCredentials()),
-	// 	grpc.WithBlock(),
-	// 	grpc.WithTimeout(5*time.Second),
-	// )
-	// if err != nil {
-	// 	log.Fatalf("Failed to connect to user-service: %v", err)
-	// }
-	// defer userConn.Close()
-	// userClient := userpb.NewUserServiceClient(userConn)
-	// log.Println("Connected to user-service.")
+	// Initialize UserService Client
+	userConn, err := grpc.Dial(
+		fmt.Sprintf("%s:%d", cfg.UserServiceHost, cfg.UserServicePort),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+		grpc.WithTimeout(5*time.Second),
+	)
+	if err != nil {
+		log.Fatalf("Failed to connect to user-service: %v", err)
+	}
+	defer userConn.Close()
+	userClient := userpb.NewUserServiceClient(userConn)
+	log.Println("Connected to user-service.")
 
-	// // Initialize OrganizationService Client
-	// orgConn, err := grpc.Dial(
-	// 	fmt.Sprintf("%s:%d", cfg.OrganizationServiceHost, cfg.OrganizationServicePort),
-	// 	grpc.WithTransportCredentials(insecure.NewCredentials()),
-	// 	grpc.WithBlock(),
-	// 	grpc.WithTimeout(5*time.Second),
-	// )
-	// if err != nil {
-	// 	log.Fatalf("Failed to connect to organization-service: %v", err)
-	// }
-	// defer orgConn.Close()
-	// orgClient := organizationpb.NewOrganizationServiceClient(orgConn)
-	// log.Println("Connected to organization-service.")
+	// Initialize OrganizationService Client
+	orgConn, err := grpc.Dial(
+		fmt.Sprintf("%s:%d", cfg.OrganizationServiceHost, cfg.OrganizationServicePort),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+		grpc.WithTimeout(5*time.Second),
+	)
+	if err != nil {
+		log.Fatalf("Failed to connect to organization-service: %v", err)
+	}
+	defer orgConn.Close()
+	orgClient := organizationpb.NewOrganizationServiceClient(orgConn)
+	log.Println("Connected to organization-service.")
 
-	// // Initialize LeadService Client
-	// leadsConn, err := grpc.Dial(
-	// 	fmt.Sprintf("%s:%d", cfg.LeadServiceHost, cfg.LeadServicePort),
-	// 	grpc.WithTransportCredentials(insecure.NewCredentials()),
-	// 	grpc.WithBlock(),
-	// 	grpc.WithTimeout(5*time.Second),
-	// )
-	// if err != nil {
-	// 	log.Fatalf("Failed to connect to leads-service: %v", err)
-	// }
-	// defer leadsConn.Close()
-	// leadClient := leadspb.NewLeadServiceClient(leadsConn)
-	// log.Println("Connected to leads-service.")
+	// Initialize LeadService Client
+	leadsConn, err := grpc.Dial(
+		fmt.Sprintf("%s:%d", cfg.LeadServiceHost, cfg.LeadServicePort),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+		grpc.WithTimeout(5*time.Second),
+	)
+	if err != nil {
+		log.Fatalf("Failed to connect to leads-service: %v", err)
+	}
+	defer leadsConn.Close()
+	leadClient := leadspb.NewLeadServiceClient(leadsConn)
+	log.Println("Connected to leads-service.")
 
-	// // Initialize OpportunityService Client
-	// opportunityConn, err := grpc.Dial(
-	// 	fmt.Sprintf("%s:%d", cfg.OpportunityServiceHost, cfg.OpportunityServicePort),
-	// 	grpc.WithTransportCredentials(insecure.NewCredentials()),
-	// 	grpc.WithBlock(),
-	// 	grpc.WithTimeout(5*time.Second),
-	// )
-	// if err != nil {
-	// 	log.Fatalf("Failed to connect to opportunity-service: %v", err)
-	// }
-	// defer opportunityConn.Close()
-	// opportunityClient := opportunitypb.NewOpportunityServiceClient(opportunityConn)
-	// log.Println("Connected to opportunity-service.")
+	// Initialize OpportunityService Client
+	opportunityConn, err := grpc.Dial(
+		fmt.Sprintf("%s:%d", cfg.OpportunityServiceHost, cfg.OpportunityServicePort),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+		grpc.WithTimeout(5*time.Second),
+	)
+	if err != nil {
+		log.Fatalf("Failed to connect to opportunity-service: %v", err)
+	}
+	defer opportunityConn.Close()
+	opportunityClient := opportunitypb.NewOpportunityServiceClient(opportunityConn)
+	log.Println("Connected to opportunity-service.")
 
 	// Initialize ContactService Client
 	contactConn, err := grpc.Dial(
@@ -138,15 +135,30 @@ func main() {
 	activityClient := activitypb.NewActivityServiceClient(activityConn)
 	log.Println("Connected to activity-service.")
 
+	// Initialize VMS Client (New Code)
+	vmsConn, err := grpc.Dial(
+		fmt.Sprintf("%s:%d", cfg.VMSServiceHost, cfg.VMSServicePort),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+		grpc.WithTimeout(5*time.Second),
+	)
+	if err != nil {
+		log.Fatalf("Failed to connect to VMS service: %v", err)
+	}
+	defer vmsConn.Close()
+	vmsClient := vms_pb.NewVendorServiceClient(vmsConn) // This creates a new VMS client
+	log.Println("Connected to VMS service.")
+
 	// Step 3: Initialize Resolver with all gRPC Clients
 	resolver := &resolvers.Resolver{
-		// AuthClient:         authClient,
-		// UserClient:         userClient,
-		// OrganizationClient: orgClient,
-		// LeadClient:         leadClient,
-		// OpportunityClient:  opportunityClient,
-		ContactClient:  contactClient,
-		ActivityClient: activityClient,
+		AuthClient:         authClient,
+		UserClient:         userClient,
+		OrganizationClient: orgClient,
+		LeadClient:         leadClient,
+		OpportunityClient:  opportunityClient,
+		ContactClient:      contactClient,
+		ActivityClient:     activityClient,
+		VendorClient:       vmsClient, // Add VMS client to the resolver
 	}
 
 	// Step 4: Setup GraphQL Server

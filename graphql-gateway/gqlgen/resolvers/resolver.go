@@ -10,27 +10,38 @@ import (
 	"graphql-gateway/grpc/activitypb"
 	"graphql-gateway/grpc/authpb"
 	"graphql-gateway/grpc/contactpb"
+	"graphql-gateway/grpc/finance_pb"
 	"graphql-gateway/grpc/leadspb"
 	"graphql-gateway/grpc/opportunitypb"
 	"graphql-gateway/grpc/organizationpb"
 	"graphql-gateway/grpc/userpb"
+	"graphql-gateway/grpc/vms_pb"
 	"log"
 	"strconv"
 	"time"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type Resolver struct {
-	AuthClient         authpb.AuthServiceClient
-	UserClient         userpb.UserServiceClient
-	OrganizationClient organizationpb.OrganizationServiceClient
-	LeadClient         leadspb.LeadServiceClient
-	OpportunityClient  opportunitypb.OpportunityServiceClient
-	ContactClient      contactpb.ContactServiceClient
-	ActivityClient     activitypb.ActivityServiceClient
+	AuthClient            authpb.AuthServiceClient
+	UserClient            userpb.UserServiceClient
+	OrganizationClient    organizationpb.OrganizationServiceClient
+	LeadClient            leadspb.LeadServiceClient
+	OpportunityClient     opportunitypb.OpportunityServiceClient
+	ContactClient         contactpb.ContactServiceClient
+	ActivityClient        activitypb.ActivityServiceClient
+	VendorClient          vms_pb.VendorServiceClient
+	PerformanceClient     vms_pb.PerformanceServiceClient
+	PurchaseOrderClient   vms_pb.PurchaseOrderServiceClient
+	PaymentClient         vms_pb.PaymentServiceClient
+	InvoiceClient         finance_pb.InvoiceServiceClient
+	CreditDebitNoteClient finance_pb.CreditDebitNoteServiceClient
+	PaymentDueClient      finance_pb.PaymentServiceClient
+	LedgerClient          finance_pb.LedgerServiceClient
 }
 
 // Signup is the resolver for the signup field.
@@ -723,6 +734,46 @@ func (r *mutationResolver) DeleteTask(ctx context.Context, id string) (*bool, er
 	return &res.Success, nil
 }
 
+// CreateVendor is the resolver for the createVendor field.
+func (r *mutationResolver) CreateVendor(ctx context.Context, name string, category string, service string, industry string, gstin string, certifications *string, licenses *string) (*model.Vendor, error) {
+	panic("not implemented")
+}
+
+// UpdateVendor is the resolver for the updateVendor field.
+func (r *mutationResolver) UpdateVendor(ctx context.Context, id string, name string, category string, service string, industry string, gstin string, certifications *string, licenses *string) (*model.Vendor, error) {
+	panic("not implemented")
+}
+
+// DeleteVendor is the resolver for the deleteVendor field.
+func (r *mutationResolver) DeleteVendor(ctx context.Context, id string) (*string, error) {
+	panic("not implemented")
+}
+
+// CreatePurchaseOrder is the resolver for the createPurchaseOrder field.
+func (r *mutationResolver) CreatePurchaseOrder(ctx context.Context, vendorID string, orderDetails string, deliveryDate string) (*model.PurchaseOrder, error) {
+	panic("not implemented")
+}
+
+// UpdatePurchaseOrder is the resolver for the updatePurchaseOrder field.
+func (r *mutationResolver) UpdatePurchaseOrder(ctx context.Context, id string, orderDetails string, status string, deliveryDate *string, receivedDate *string) (*model.PurchaseOrder, error) {
+	panic("not implemented")
+}
+
+// DeletePurchaseOrder is the resolver for the deletePurchaseOrder field.
+func (r *mutationResolver) DeletePurchaseOrder(ctx context.Context, id string) (*string, error) {
+	panic("not implemented")
+}
+
+// RecordPerformance is the resolver for the recordPerformance field.
+func (r *mutationResolver) RecordPerformance(ctx context.Context, vendorID string, score float64, riskLevel string, evaluatedAt string) (*model.VendorPerformance, error) {
+	panic("not implemented")
+}
+
+// ProcessInvoice is the resolver for the processInvoice field.
+func (r *mutationResolver) ProcessInvoice(ctx context.Context, purchaseOrderID string, amount float64, paymentTerms string) (*model.Payment, error) {
+	panic("not implemented")
+}
+
 // GetUser is the resolver for the getUser field.
 func (r *queryResolver) GetUser(ctx context.Context, id string) (*model.User, error) {
 	userID, err := strconv.ParseUint(id, 10, 32)
@@ -954,14 +1005,8 @@ func (r *queryResolver) GetActivity(ctx context.Context, id string) (*model.Acti
 	return activity, nil
 }
 
-func (r *queryResolver) ListActivities(
-	ctx context.Context,
-	pageNumber *int,
-	pageSize *int,
-	sortBy model.ActivitySortField,
-	ascending bool,
-	contactID *string,
-) ([]*model.Activity, error) {
+// ListActivities is the resolver for the listActivities field.
+func (r *queryResolver) ListActivities(ctx context.Context, pageNumber *int, pageSize *int, sortBy model.ActivitySortField, ascending bool, contactID *string) ([]*model.Activity, error) {
 	log.Println("Resolver: ListActivities called")
 
 	// Defensive checks for clients
@@ -976,10 +1021,10 @@ func (r *queryResolver) ListActivities(
 
 	// Mapping GraphQL enums to repository sort fields
 	sortByMap := map[model.ActivitySortField]string{
-		model.ActivitySortFieldTITLE:     "title",
-		model.ActivitySortFieldCREATEDAT: "created_at",
-		model.ActivitySortFieldUPDATEDAT: "updated_at",
-		model.ActivitySortFieldDUEDATE:   "due_date",
+		model.ActivitySortFieldTitle:     "title",
+		model.ActivitySortFieldCreatedat: "created_at",
+		model.ActivitySortFieldUpdatedat: "updated_at",
+		model.ActivitySortFieldDuedate:   "due_date",
 	}
 
 	// Validate and map sortBy
@@ -1197,6 +1242,327 @@ func (r *queryResolver) ListTasks(ctx context.Context, pageNumber *int, pageSize
 	return tasks, nil
 }
 
+// GetVendorByID is the resolver for the getVendorByID field.
+func (r *queryResolver) GetVendorByID(ctx context.Context, id string) (*model.Vendor, error) {
+	vendorID := id
+	req := &vms_pb.GetVendorByIDRequest{Id: vendorID}
+	res, err := r.VendorClient.GetVendorByID(ctx, req)
+	if err != nil {
+		log.Printf("Error fetching vendor: %v", err)
+		return nil, err
+	}
+	return convertProtoToGraphQLVendor(res.Vendor), nil
+}
+
+// SearchVendors is the resolver for the searchVendors field.
+func (r *queryResolver) SearchVendors(ctx context.Context, query string) ([]*model.Vendor, error) {
+	req := &vms_pb.SearchVendorsRequest{Query: query}
+	res, err := r.VendorClient.SearchVendors(ctx, req)
+	if err != nil {
+		log.Printf("Error searching vendors: %v", err)
+		return nil, err
+	}
+
+	var vendors []*model.Vendor
+	for _, vendor := range res.Vendors {
+		vendors = append(vendors, convertProtoToGraphQLVendor(vendor))
+	}
+
+	return vendors, nil
+}
+
+// GetPurchaseOrderByID is the resolver for the getPurchaseOrderByID field.
+func (r *queryResolver) GetPurchaseOrderByID(ctx context.Context, id string) (*model.PurchaseOrder, error) {
+	// Prepare the gRPC request
+	req := &vms_pb.GetPurchaseOrderByIDRequest{Id: id}
+
+	// Call the gRPC service to get the purchase order by ID
+	res, err := r.PurchaseOrderClient.GetPurchaseOrderByID(ctx, req)
+	if err != nil {
+		log.Printf("Error fetching purchase order: %v", err)
+		return nil, err
+	}
+
+	// Convert the gRPC response to the GraphQL model
+	return &model.PurchaseOrder{
+		ID:           res.Id,
+		VendorID:     res.VendorId,
+		OrderDetails: res.OrderDetails,
+		Status:       res.Status,
+		DeliveryDate: &res.DeliveryDate, // Assuming this is a string in GraphQL
+		ReceivedDate: &res.ReceivedDate, // Assuming this is a string in GraphQL
+	}, nil
+}
+
+// GetPerformanceByID is the resolver for the getPerformanceByID field.
+func (r *queryResolver) GetPerformanceByID(ctx context.Context, id string) (*model.VendorPerformance, error) {
+	// Prepare the gRPC request
+	req := &vms_pb.GetPerformanceByIDRequest{Id: id}
+
+	// Call the gRPC service to get performance data by ID
+	res, err := r.PerformanceClient.GetPerformanceByID(ctx, req)
+	if err != nil {
+		log.Printf("Error fetching performance data: %v", err)
+		return nil, err
+	}
+
+	// Convert the gRPC response to the GraphQL model
+	return &model.VendorPerformance{
+		ID:          res.VendorId,
+		Score:       getPointerFloat64(float64(res.Score)),
+		RiskLevel:   &res.RiskLevel,
+		EvaluatedAt: &res.EvaluatedAt, // Assuming this is a string in GraphQL
+	}, nil
+}
+
+// GetPaymentByID is the resolver for the getPaymentByID field.
+func (r *queryResolver) GetPaymentByID(ctx context.Context, id string) (*model.Payment, error) {
+	// Prepare the gRPC request
+	req := &vms_pb.GetPaymentByIDRequest{Id: id}
+
+	// Call the gRPC service to get payment information by ID
+	res, err := r.PaymentClient.GetPaymentByID(ctx, req)
+	if err != nil {
+		log.Printf("Error fetching payment: %v", err)
+		return nil, err
+	}
+
+	// Convert the gRPC response to the GraphQL model
+	return &model.Payment{
+		ID:              res.Id,
+		PurchaseOrderID: res.PurchaseOrderId,
+		Amount:          float64(res.Amount),
+		Status:          res.Status,
+		PaymentTerms:    &res.PaymentTerms,
+		PaidAt:          &res.PaidAt, // Assuming this is a string in GraphQL
+	}, nil
+}
+
+// Invoice-related resolvers
+
+func (r *mutationResolver) CreateInvoice(ctx context.Context, input model.CreateInvoiceInput) (*model.Invoice, error) {
+	req := &finance_pb.CreateInvoiceRequest{
+		Invoice: &finance_pb.Invoice{
+			Type:        input.Type,
+			VendorId:    getValue(input.VendorID),
+			CustomerId:  getValue(input.CustomerID),
+			TotalAmount: input.TotalAmount,
+			Cgst:        input.CGST,
+			Sgst:        input.SGST,
+			Igst:        input.IGST,
+			InvoiceDate: timestamppb.Now(),
+			Items:       convertInvoiceItemsToProto(input.Items),
+		},
+	}
+
+	res, err := r.InvoiceClient.CreateInvoice(ctx, req)
+	if err != nil {
+		log.Printf("Error creating invoice: %v", err)
+		return nil, err
+	}
+
+	return convertProtoToGraphQLInvoice(res.Invoice), nil
+}
+
+func (r *mutationResolver) UpdateInvoice(ctx context.Context, input model.UpdateInvoiceInput) (*model.Invoice, error) {
+	req := &finance_pb.UpdateInvoiceRequest{
+		Invoice: &finance_pb.Invoice{
+			Id:          input.ID,
+			Type:        input.Type,
+			VendorId:    getValue(input.VendorID),
+			CustomerId:  getValue(input.CustomerID),
+			TotalAmount: input.TotalAmount,
+			Cgst:        input.CGST,
+			Sgst:        input.SGST,
+			Igst:        input.IGST,
+			InvoiceDate: timestamppb.Now(),
+			Items:       convertInvoiceItemsToProto(input.Items),
+		},
+	}
+
+	res, err := r.InvoiceClient.UpdateInvoice(ctx, req)
+	if err != nil {
+		log.Printf("Error updating invoice: %v", err)
+		return nil, err
+	}
+
+	return convertProtoToGraphQLInvoice(res.Invoice), nil
+}
+
+func (r *mutationResolver) DeleteInvoice(ctx context.Context, id string) (string, error) {
+	req := &finance_pb.DeleteInvoiceRequest{InvoiceId: id}
+	res, err := r.InvoiceClient.DeleteInvoice(ctx, req)
+	if err != nil {
+		log.Printf("Error deleting invoice: %v", err)
+		return "", err
+	}
+
+	return res.Message, nil
+}
+
+func (r *queryResolver) ListInvoices(ctx context.Context, page *int, pageSize *int) ([]*model.Invoice, error) {
+	req := &finance_pb.ListInvoicesRequest{
+		Page:     int32(*page),
+		PageSize: int32(*pageSize),
+	}
+	res, err := r.InvoiceClient.ListInvoices(ctx, req)
+	if err != nil {
+		log.Printf("Error listing invoices: %v", err)
+		return nil, err
+	}
+
+	var invoices []*model.Invoice
+	for _, protoInvoice := range res.Invoices {
+		invoices = append(invoices, convertProtoToGraphQLInvoice(protoInvoice))
+	}
+
+	return invoices, nil
+}
+
+// Credit/Debit Note-related resolvers
+
+func (r *mutationResolver) CreateCreditDebitNote(ctx context.Context, input model.CreateCreditDebitNoteInput) (*model.CreditDebitNote, error) {
+	req := &finance_pb.CreateCreditDebitNoteRequest{
+		Note: &finance_pb.CreditDebitNote{
+			Type:      input.Type,
+			InvoiceId: input.InvoiceID,
+			Amount:    input.Amount,
+			Reason:    input.Reason,
+			Date:      timestamppb.Now(),
+		},
+	}
+
+	res, err := r.CreditDebitNoteClient.CreateCreditDebitNote(ctx, req)
+	if err != nil {
+		log.Printf("Error creating credit/debit note: %v", err)
+		return nil, err
+	}
+
+	return convertProtoToGraphQLCreditDebitNote(res.CreditDebitNote), nil
+}
+
+func (r *mutationResolver) DeleteCreditDebitNote(ctx context.Context, id string) (string, error) {
+	req := &finance_pb.DeleteCreditDebitNoteRequest{Id: id}
+	res, err := r.CreditDebitNoteClient.DeleteCreditDebitNote(ctx, req)
+	if err != nil {
+		log.Printf("Error deleting credit/debit note: %v", err)
+		return "", err
+	}
+
+	return res.Message, nil
+}
+
+func (r *queryResolver) ListCreditDebitNotes(ctx context.Context) ([]*model.CreditDebitNote, error) {
+	res, err := r.CreditDebitNoteClient.ListCreditDebitNotes(ctx, &finance_pb.ListCreditDebitNotesRequest{})
+	if err != nil {
+		log.Printf("Error listing credit/debit notes: %v", err)
+		return nil, err
+	}
+
+	var notes []*model.CreditDebitNote
+	for _, protoNote := range res.Notes {
+		notes = append(notes, convertProtoToGraphQLCreditDebitNote(protoNote))
+	}
+
+	return notes, nil
+}
+
+// Ledger Entry-related resolvers
+
+func (r *mutationResolver) AddLedgerEntry(ctx context.Context, input model.CreateLedgerEntryInput) (*model.LedgerEntry, error) {
+	req := &finance_pb.AddLedgerEntryRequest{
+		Entry: &finance_pb.LedgerEntry{
+			TransactionId:   input.TransactionID,
+			Description:     input.Description,
+			Debit:           input.Debit,
+			Credit:          input.Credit,
+			Balance:         input.Balance,
+			TransactionDate: timestamppb.Now(),
+		},
+	}
+
+	res, err := r.LedgerClient.AddLedgerEntry(ctx, req)
+	if err != nil {
+		log.Printf("Error adding ledger entry: %v", err)
+		return nil, err
+	}
+
+	return convertProtoToGraphQLLedgerEntry(res.LedgerEntry), nil
+}
+
+func (r *mutationResolver) DeleteLedgerEntry(ctx context.Context, id string) (string, error) {
+	req := &finance_pb.DeleteLedgerEntryRequest{Id: id}
+	res, err := r.LedgerClient.DeleteLedgerEntry(ctx, req)
+	if err != nil {
+		log.Printf("Error deleting ledger entry: %v", err)
+		return "", err
+	}
+
+	return res.Message, nil
+}
+
+func (r *queryResolver) ListLedgerEntries(ctx context.Context) ([]*model.LedgerEntry, error) {
+	res, err := r.LedgerClient.ListLedgerEntries(ctx, &finance_pb.ListLedgerEntriesRequest{})
+	if err != nil {
+		log.Printf("Error listing ledger entries: %v", err)
+		return nil, err
+	}
+
+	var entries []*model.LedgerEntry
+	for _, protoEntry := range res.Entries {
+		entries = append(entries, convertProtoToGraphQLLedgerEntry(protoEntry))
+	}
+
+	return entries, nil
+}
+
+// Payment Due-related resolvers
+
+func (r *mutationResolver) AddPaymentDue(ctx context.Context, input model.AddPaymentDueInput) (*model.PaymentDue, error) {
+	req := &finance_pb.AddPaymentDueRequest{
+		Due: &finance_pb.PaymentDue{
+			InvoiceId: input.InvoiceID,
+			AmountDue: input.AmountDue,
+			DueDate:   timestamppb.Now(),
+			Status:    input.Status,
+		},
+	}
+
+	res, err := r.PaymentClient.AddPaymentDue(ctx, req)
+	if err != nil {
+		log.Printf("Error adding payment due: %v", err)
+		return nil, err
+	}
+
+	return convertProtoToGraphQLPaymentDue(res.PaymentDue), nil
+}
+
+func (r *mutationResolver) MarkPaymentAsPaid(ctx context.Context, id string) (*model.PaymentDue, error) {
+	req := &finance_pb.MarkPaymentAsPaidRequest{Id: id}
+	res, err := r.PaymentClient.MarkPaymentAsPaid(ctx, req)
+	if err != nil {
+		log.Printf("Error marking payment as paid: %v", err)
+		return nil, err
+	}
+
+	return convertProtoToGraphQLPaymentDue(res.PaymentDue), nil
+}
+
+func (r *queryResolver) ListPaymentDues(ctx context.Context) ([]*model.PaymentDue, error) {
+	res, err := r.PaymentClient.ListPaymentDues(ctx, &finance_pb.ListPaymentDuesRequest{})
+	if err != nil {
+		log.Printf("Error listing payment dues: %v", err)
+		return nil, err
+	}
+
+	var dues []*model.PaymentDue
+	for _, protoDue := range res.Dues {
+		dues = append(dues, convertProtoToGraphQLPaymentDue(protoDue))
+	}
+
+	return dues, nil
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
@@ -1206,12 +1572,36 @@ func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 
+func convertInvoiceItemsToProto(items []*model.InvoiceItemInput) []*finance_pb.InvoiceItem {
+	var protoItems []*finance_pb.InvoiceItem
+	for _, item := range items {
+		protoItems = append(protoItems, &finance_pb.InvoiceItem{
+			ItemId:   item.ItemID,
+			Name:     item.Name,
+			Price:    item.Price,
+			Quantity: int32(item.Quantity),
+			Total:    item.Total,
+		})
+	}
+	return protoItems
+}
+
 // !!! WARNING !!!
 // The code below was going to be deleted when updating resolvers. It has been copied here so you have
 // one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.
+func convertProtoToGraphQLPurchaseOrder(po *vms_pb.PurchaseOrder) *model.PurchaseOrder {
+	return &model.PurchaseOrder{
+		ID:           po.Id,
+		VendorID:     po.VendorId,
+		OrderDetails: po.OrderDetails,
+		Status:       po.Status,
+		DeliveryDate: getPointer(po.DeliveryDate.AsTime().String()),
+		ReceivedDate: getPointer(po.ReceivedDate.AsTime().String()),
+	}
+}
 
 func parseID(idStr string) uint {
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -1220,6 +1610,33 @@ func parseID(idStr string) uint {
 	}
 	return uint(id)
 }
+func convertProtoToGraphQLVendor(protoVendor *vms_pb.Vendor) *model.Vendor {
+	return &model.Vendor{
+		ID:             protoVendor.Id,
+		Name:           protoVendor.Name,
+		Category:       protoVendor.Category,
+		Service:        protoVendor.Service,
+		Industry:       protoVendor.Industry,
+		Gstin:          protoVendor.Gstin,
+		Certifications: &protoVendor.Certifications,
+		Licenses:       &protoVendor.Licenses,
+	}
+}
+
+func convertProtoToGraphQLPerformance(perf *vms_pb.VendorPerformance) *model.VendorPerformance {
+	return &model.VendorPerformance{
+		ID:          perf.Id,
+		VendorID:    perf.VendorId,
+		Score:       getPointerFloat64(float64(perf.Score)),
+		RiskLevel:   getPointer(perf.RiskLevel),
+		EvaluatedAt: getPointer(perf.EvaluatedAt.AsTime().String()),
+	}
+}
+
+func getPointerFloat64(f float64) *float64 {
+	return &f
+}
+
 func convertProtoToGraphQLActivity(protoActivity *activitypb.Activity) *model.Activity {
 	return &model.Activity{
 		Title:       protoActivity.Title,
@@ -1251,6 +1668,18 @@ func convertProtoToGraphQLTask(protoTask *activitypb.Task) *model.Task {
 		},
 	}
 }
+
+func convertProtoToGraphQLPayment(payment *vms_pb.Payment) *model.Payment {
+	return &model.Payment{
+		ID:              payment.Id,
+		PurchaseOrderID: payment.PurchaseOrderId,
+		Amount:          float64(payment.Amount),
+		Status:          payment.Status,
+		PaymentTerms:    &payment.PaymentTerms,
+		PaidAt:          getPointer(payment.PaidAt.AsTime().String()),
+	}
+}
+
 func convertProtoToGraphQLContact(protoContact *contactpb.Contact) *model.Contact {
 	return &model.Contact{
 		ID:                  strconv.Itoa(int(protoContact.Id)),
@@ -1291,14 +1720,6 @@ func convertProtoToGraphQLOpportunity(protoOpp *opportunitypb.Opportunity) *mode
 		},
 	}
 }
-
-//	func getUint32Pointer(value uint32) *string {
-//		if value != 0 {
-//			strValue := strconv.FormatUint(uint64(value), 10)
-//			return &strValue
-//		}
-//		return nil
-//	}
 func getProtoStringValue(sv *wrapperspb.StringValue) *string {
 	if sv != nil {
 		return &sv.Value
@@ -1345,10 +1766,71 @@ func getFloatValue(f *float64) float64 {
 func getPointer(str string) *string {
 	return &str
 }
-
 func nullableString(s string) *string {
 	if s == "" {
 		return nil
 	}
 	return &s
+}
+
+func convertProtoToGraphQLInvoice(protoInvoice *finance_pb.Invoice) *model.Invoice {
+	var items []*model.InvoiceItem
+	for _, protoItem := range protoInvoice.Items {
+		items = append(items, &model.InvoiceItem{
+			ID:       protoItem.Id,
+			ItemID:   protoItem.ItemId,
+			Name:     protoItem.Name,
+			Price:    protoItem.Price,
+			Quantity: int(protoItem.Quantity),
+			Total:    protoItem.Total,
+		})
+	}
+
+	return &model.Invoice{
+		ID:            protoInvoice.Id,
+		InvoiceNumber: protoInvoice.InvoiceNumber,
+		Type:          protoInvoice.Type,
+		VendorID:      protoInvoice.VendorId,
+		CustomerID:    protoInvoice.CustomerId,
+		TotalAmount:   protoInvoice.TotalAmount,
+		CGST:          protoInvoice.Cgst,
+		SGST:          protoInvoice.Sgst,
+		IGST:          protoInvoice.Igst,
+		Status:        protoInvoice.Status,
+		InvoiceDate:   protoInvoice.InvoiceDate.String(),
+		Items:         items,
+	}
+}
+
+func convertProtoToGraphQLCreditDebitNote(protoNote *finance_pb.CreditDebitNote) *model.CreditDebitNote {
+	return &model.CreditDebitNote{
+		ID:        protoNote.Id,
+		Type:      protoNote.Type,
+		InvoiceID: protoNote.InvoiceId,
+		Amount:    protoNote.Amount,
+		Reason:    protoNote.Reason,
+		Date:      protoNote.Date.String(),
+	}
+}
+
+func convertProtoToGraphQLLedgerEntry(protoEntry *finance_pb.LedgerEntry) *model.LedgerEntry {
+	return &model.LedgerEntry{
+		ID:              protoEntry.Id,
+		TransactionID:   protoEntry.TransactionId,
+		Description:     protoEntry.Description,
+		Debit:           protoEntry.Debit,
+		Credit:          protoEntry.Credit,
+		Balance:         protoEntry.Balance,
+		TransactionDate: protoEntry.TransactionDate.String(),
+	}
+}
+
+func convertProtoToGraphQLPaymentDue(protoDue *finance_pb.PaymentDue) *model.PaymentDue {
+	return &model.PaymentDue{
+		ID:        protoDue.Id,
+		InvoiceID: protoDue.InvoiceId,
+		AmountDue: protoDue.AmountDue,
+		DueDate:   protoDue.DueDate.String(),
+		Status:    protoDue.Status,
+	}
 }

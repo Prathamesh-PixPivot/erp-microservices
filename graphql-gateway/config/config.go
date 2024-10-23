@@ -24,6 +24,8 @@ type Config struct {
 	ContactServicePort      int
 	ActivityServiceHost     string
 	ActivityServicePort     int
+	VMSServiceHost                 string
+	VMSServicePort                 int
 }
 
 func LoadConfig() (*Config, error) {
@@ -83,6 +85,13 @@ func LoadConfig() (*Config, error) {
 	cfg.ActivityServicePort, err = getEnvAsInt("ACTIVITY_SERVICE_PORT", 50057)
 	if err != nil {
 		return nil, fmt.Errorf("invalid ACTIVITY_SERVICE_PORT: %v", err)
+	}
+
+	// VMS gRPC Configuration
+	cfg.VMSServiceHost = getEnv("VMS_HOST", "localhost")
+	cfg.VMSServicePort, err = getEnvAsInt("VMS_PORT", 50058)
+	if err != nil {
+		return nil, fmt.Errorf("invalid VMS_PORT: %v", err)
 	}
 
 	return &cfg, nil

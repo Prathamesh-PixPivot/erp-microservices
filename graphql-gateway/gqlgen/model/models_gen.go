@@ -21,6 +21,13 @@ type Activity struct {
 	Tasks       []*Task        `json:"tasks"`
 }
 
+type AddPaymentDueInput struct {
+	InvoiceID string  `json:"invoice_id"`
+	AmountDue float64 `json:"amount_due"`
+	DueDate   string  `json:"due_date"`
+	Status    string  `json:"status"`
+}
+
 type Contact struct {
 	ID                  string  `json:"id"`
 	FirstName           string  `json:"firstName"`
@@ -65,6 +72,22 @@ type CreateContactInput struct {
 	Notes               *string `json:"notes,omitempty"`
 }
 
+type CreateCreditDebitNoteInput struct {
+	Type      string  `json:"type"`
+	InvoiceID string  `json:"invoice_id"`
+	Amount    float64 `json:"amount"`
+	Reason    string  `json:"reason"`
+	Date      string  `json:"date"`
+}
+
+type CreateInvoiceInput struct {
+	Type        string              `json:"type"`
+	VendorID    *string             `json:"vendor_id,omitempty"`
+	CustomerID  *string             `json:"customer_id,omitempty"`
+	Items       []*InvoiceItemInput `json:"items"`
+	InvoiceDate string              `json:"invoice_date"`
+}
+
 type CreateLeadInput struct {
 	FirstName      string     `json:"firstName"`
 	LastName       string     `json:"lastName"`
@@ -73,6 +96,14 @@ type CreateLeadInput struct {
 	Status         LeadStatus `json:"status"`
 	AssignedTo     string     `json:"assignedTo"`
 	OrganizationID string     `json:"organizationId"`
+}
+
+type CreateLedgerEntryInput struct {
+	TransactionID   string   `json:"transaction_id"`
+	Description     string   `json:"description"`
+	Debit           *float64 `json:"debit,omitempty"`
+	Credit          *float64 `json:"credit,omitempty"`
+	TransactionDate string   `json:"transaction_date"`
 }
 
 type CreateOpportunityInput struct {
@@ -96,6 +127,46 @@ type CreateTaskInput struct {
 	ActivityID  string       `json:"activityId"`
 }
 
+type CreditDebitNote struct {
+	ID        string  `json:"id"`
+	Type      string  `json:"type"`
+	InvoiceID string  `json:"invoice_id"`
+	Amount    float64 `json:"amount"`
+	Reason    string  `json:"reason"`
+	Date      string  `json:"date"`
+}
+
+type Invoice struct {
+	ID            string         `json:"id"`
+	InvoiceNumber string         `json:"invoice_number"`
+	Type          string         `json:"type"`
+	VendorID      *string        `json:"vendor_id,omitempty"`
+	CustomerID    *string        `json:"customer_id,omitempty"`
+	TotalAmount   float64        `json:"total_amount"`
+	Cgst          float64        `json:"cgst"`
+	Sgst          float64        `json:"sgst"`
+	Igst          float64        `json:"igst"`
+	Status        string         `json:"status"`
+	InvoiceDate   string         `json:"invoice_date"`
+	Items         []*InvoiceItem `json:"items"`
+}
+
+type InvoiceItem struct {
+	ID       string  `json:"id"`
+	ItemID   string  `json:"item_id"`
+	Name     string  `json:"name"`
+	Price    float64 `json:"price"`
+	Quantity int     `json:"quantity"`
+	Total    float64 `json:"total"`
+}
+
+type InvoiceItemInput struct {
+	ItemID   string  `json:"item_id"`
+	Name     string  `json:"name"`
+	Price    float64 `json:"price"`
+	Quantity int     `json:"quantity"`
+}
+
 type Lead struct {
 	ID           string        `json:"id"`
 	FirstName    string        `json:"firstName"`
@@ -105,6 +176,16 @@ type Lead struct {
 	Status       LeadStatus    `json:"status"`
 	AssignedTo   string        `json:"assignedTo"`
 	Organization *Organization `json:"organization"`
+}
+
+type LedgerEntry struct {
+	ID              string   `json:"id"`
+	TransactionID   string   `json:"transaction_id"`
+	Description     string   `json:"description"`
+	Debit           *float64 `json:"debit,omitempty"`
+	Credit          *float64 `json:"credit,omitempty"`
+	Balance         *float64 `json:"balance,omitempty"`
+	TransactionDate string   `json:"transaction_date"`
 }
 
 type Mutation struct {
@@ -136,6 +217,32 @@ type Organization struct {
 	Zipcode  string `json:"zipcode"`
 	Website  string `json:"website"`
 	Industry string `json:"industry"`
+}
+
+type Payment struct {
+	ID              string  `json:"id"`
+	PurchaseOrderID string  `json:"purchaseOrderId"`
+	Amount          float64 `json:"amount"`
+	Status          string  `json:"status"`
+	PaymentTerms    *string `json:"paymentTerms,omitempty"`
+	PaidAt          *string `json:"paidAt,omitempty"`
+}
+
+type PaymentDue struct {
+	ID        string  `json:"id"`
+	InvoiceID string  `json:"invoice_id"`
+	AmountDue float64 `json:"amount_due"`
+	DueDate   string  `json:"due_date"`
+	Status    string  `json:"status"`
+}
+
+type PurchaseOrder struct {
+	ID           string  `json:"id"`
+	VendorID     string  `json:"vendorId"`
+	OrderDetails string  `json:"orderDetails"`
+	Status       string  `json:"status"`
+	DeliveryDate *string `json:"deliveryDate,omitempty"`
+	ReceivedDate *string `json:"receivedDate,omitempty"`
 }
 
 type Query struct {
@@ -191,6 +298,13 @@ type UpdateContactInput struct {
 	Notes               *string `json:"notes,omitempty"`
 }
 
+type UpdateInvoiceInput struct {
+	InvoiceID   string              `json:"invoice_id"`
+	Status      *string             `json:"status,omitempty"`
+	Items       []*InvoiceItemInput `json:"items,omitempty"`
+	InvoiceDate *string             `json:"invoice_date,omitempty"`
+}
+
 type UpdateLeadInput struct {
 	ID             string      `json:"id"`
 	FirstName      *string     `json:"firstName,omitempty"`
@@ -235,51 +349,67 @@ type User struct {
 	Organization *Organization `json:"organization"`
 }
 
-// ActivitySortField represents the sorting fields for activities
+type Vendor struct {
+	ID               string   `json:"id"`
+	Name             string   `json:"name"`
+	Category         string   `json:"category"`
+	Service          string   `json:"service"`
+	Industry         string   `json:"industry"`
+	Gstin            string   `json:"gstin"`
+	Certifications   *string  `json:"certifications,omitempty"`
+	Licenses         *string  `json:"licenses,omitempty"`
+	IsCompliant      *bool    `json:"isCompliant,omitempty"`
+	PerformanceScore *float64 `json:"performanceScore,omitempty"`
+	RiskAssessment   *string  `json:"riskAssessment,omitempty"`
+}
+
+type VendorPerformance struct {
+	ID          string   `json:"id"`
+	VendorID    string   `json:"vendorId"`
+	Score       *float64 `json:"score,omitempty"`
+	RiskLevel   *string  `json:"riskLevel,omitempty"`
+	EvaluatedAt *string  `json:"evaluatedAt,omitempty"`
+}
+
 type ActivitySortField string
 
 const (
-	ActivitySortFieldTITLE     ActivitySortField = "TITLE"
-	ActivitySortFieldDUEDATE   ActivitySortField = "DUEDATE"
-	ActivitySortFieldCREATEDAT ActivitySortField = "CREATEDAT"
-	ActivitySortFieldUPDATEDAT ActivitySortField = "UPDATEDAT"
+	ActivitySortFieldTitle     ActivitySortField = "TITLE"
+	ActivitySortFieldDuedate   ActivitySortField = "DUEDATE"
+	ActivitySortFieldCreatedat ActivitySortField = "CREATEDAT"
+	ActivitySortFieldUpdatedat ActivitySortField = "UPDATEDAT"
 )
 
-// AllActivitySortField contains all possible values of ActivitySortField
 var AllActivitySortField = []ActivitySortField{
-	ActivitySortFieldTITLE,
-	ActivitySortFieldDUEDATE,
-	ActivitySortFieldCREATEDAT,
-	ActivitySortFieldUPDATEDAT,
+	ActivitySortFieldTitle,
+	ActivitySortFieldDuedate,
+	ActivitySortFieldCreatedat,
+	ActivitySortFieldUpdatedat,
 }
 
-// IsValid checks if the ActivitySortField is valid
 func (e ActivitySortField) IsValid() bool {
 	switch e {
-	case ActivitySortFieldTITLE, ActivitySortFieldDUEDATE, ActivitySortFieldCREATEDAT, ActivitySortFieldUPDATEDAT:
+	case ActivitySortFieldTitle, ActivitySortFieldDuedate, ActivitySortFieldCreatedat, ActivitySortFieldUpdatedat:
 		return true
 	}
 	return false
 }
 
-// UnmarshalGQL implements the graphql.Unmarshaler interface for ActivitySortField
+func (e ActivitySortField) String() string {
+	return string(e)
+}
+
 func (e *ActivitySortField) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	enum := ActivitySortField(str)
-	if !enum.IsValid() {
+	*e = ActivitySortField(str)
+	if !e.IsValid() {
 		return fmt.Errorf("%s is not a valid ActivitySortField", str)
 	}
-
-	*e = enum
 	return nil
-}
-
-func (e ActivitySortField) String() string {
-	return string(e)
 }
 
 func (e ActivitySortField) MarshalGQL(w io.Writer) {

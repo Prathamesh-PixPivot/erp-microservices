@@ -1,0 +1,224 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package vms;
+
+option go_package = "/vms_pb";
+
+// Vendor related services
+service VendorService {
+    rpc CreateVendor(CreateVendorRequest) returns (VendorResponse);
+    rpc GetVendorByID(GetVendorByIDRequest) returns (VendorResponse);
+    rpc UpdateVendor(UpdateVendorRequest) returns (VendorResponse);
+    rpc DeleteVendor(DeleteVendorRequest) returns (DeleteVendorResponse);
+    rpc SearchVendors(SearchVendorsRequest) returns (SearchVendorsResponse);
+}
+
+// Purchase Order related services
+service PurchaseOrderService {
+    rpc CreatePurchaseOrder(CreatePurchaseOrderRequest) returns (PurchaseOrderResponse);
+    rpc GetPurchaseOrderByID(GetPurchaseOrderByIDRequest) returns (PurchaseOrderResponse);
+    rpc UpdatePurchaseOrder(UpdatePurchaseOrderRequest) returns (PurchaseOrderResponse);
+    rpc DeletePurchaseOrder(DeletePurchaseOrderRequest) returns (DeletePurchaseOrderResponse);
+    rpc TrackOrderStatus(TrackOrderStatusRequest) returns (PurchaseOrderResponse);
+    rpc ReceiveGoods(ReceiveGoodsRequest) returns (ReceiveGoodsResponse);
+}
+
+// Performance management related services
+service PerformanceService {
+    rpc RecordPerformance(RecordPerformanceRequest) returns (PerformanceResponse);
+    rpc GetPerformanceByID(GetPerformanceByIDRequest) returns (PerformanceResponse);
+    rpc UpdatePerformance(UpdatePerformanceRequest) returns (PerformanceResponse);
+    rpc DeletePerformance(DeletePerformanceRequest) returns (DeletePerformanceResponse);
+}
+
+// Payment related services
+service PaymentService {
+    rpc ProcessInvoice(ProcessInvoiceRequest) returns (PaymentResponse);
+    rpc UpdatePaymentStatus(UpdatePaymentStatusRequest) returns (PaymentResponse);
+    rpc GetPaymentByID(GetPaymentByIDRequest) returns (PaymentResponse);
+    rpc DeletePayment(DeletePaymentRequest) returns (DeletePaymentResponse);
+}
+
+// Vendor-related message types
+message Vendor {
+    string id = 1;
+    string name = 2;
+    string category = 3;
+    string service = 4;
+    string industry = 5;
+    string gstin = 6;
+    string certifications = 7;
+    string licenses = 8;
+    bool is_compliant = 9;
+    float performance_score = 10;
+    string risk_assessment = 11;
+}
+
+message CreateVendorRequest {
+    Vendor vendor = 1;
+}
+
+message GetVendorByIDRequest {
+    string id = 1;
+}
+
+message UpdateVendorRequest {
+    Vendor vendor = 1;
+}
+
+message DeleteVendorRequest {
+    string id = 1;
+}
+
+message DeleteVendorResponse {
+    string message = 1;
+}
+
+message VendorResponse {
+    Vendor vendor = 1;
+}
+
+message SearchVendorsRequest {
+    string query = 1;
+}
+
+message SearchVendorsResponse {
+    repeated Vendor vendors = 1;
+}
+
+// Purchase Order related message types
+message PurchaseOrder {
+    string id = 1;
+    string vendor_id = 2;
+    string order_details = 3;
+    string status = 4;
+    google.protobuf.Timestamp delivery_date = 5;
+    google.protobuf.Timestamp received_date = 6;
+}
+
+message CreatePurchaseOrderRequest {
+    string vendor_id = 1;
+    string order_details = 2;
+    google.protobuf.Timestamp delivery_date = 3;
+}
+
+message GetPurchaseOrderByIDRequest {
+    string id = 1;
+}
+
+message UpdatePurchaseOrderRequest {
+    PurchaseOrder purchase_order = 1;
+}
+
+message DeletePurchaseOrderRequest {
+    string id = 1;
+}
+
+message DeletePurchaseOrderResponse {
+    string message = 1;
+}
+
+message PurchaseOrderResponse {
+    string id = 1;
+    string vendor_id = 2;
+    string order_details = 3;
+    string status = 4;
+    string delivery_date = 5;
+    string received_date = 6;
+}
+
+message TrackOrderStatusRequest {
+    string id = 1;
+}
+
+message ReceiveGoodsRequest {
+    string id = 1;
+    google.protobuf.Timestamp received_date = 2;
+}
+
+message ReceiveGoodsResponse {
+    string message = 1;
+}
+
+// Performance-related message types
+message VendorPerformance {
+    string id = 1;
+    string vendor_id = 2;
+    float score = 3;
+    string risk_level = 4;
+    google.protobuf.Timestamp evaluated_at = 5;
+}
+
+message RecordPerformanceRequest {
+    string vendor_id = 1;
+    float score = 2;
+    string risk_level = 3;
+    google.protobuf.Timestamp evaluated_at = 4;
+}
+
+message GetPerformanceByIDRequest {
+    string id = 1;
+}
+
+message UpdatePerformanceRequest {
+    VendorPerformance performance = 1;
+}
+
+message DeletePerformanceRequest {
+    string id = 1;
+}
+
+message DeletePerformanceResponse {
+    string message = 1;
+}
+
+message PerformanceResponse {
+    string vendor_id = 1;
+    float score = 2;
+    string risk_level = 3;
+    string evaluated_at = 4;
+}
+
+// Payment-related message types
+message Payment {
+    string id = 1;
+    string purchase_order_id = 2;
+    float amount = 3;
+    string status = 4;
+    string payment_terms = 5;
+    google.protobuf.Timestamp paid_at = 6;
+}
+
+message ProcessInvoiceRequest {
+    string purchase_order_id = 1;
+    float amount = 2;
+    string payment_terms = 3;
+}
+
+message UpdatePaymentStatusRequest {
+    string id = 1;
+    string status = 2;
+}
+
+message GetPaymentByIDRequest {
+    string id = 1;
+}
+
+message DeletePaymentRequest {
+    string id = 1;
+}
+
+message DeletePaymentResponse {
+    string message = 1;
+}
+
+message PaymentResponse {
+    string id = 1;
+    string purchase_order_id = 2;
+    float amount = 3;
+    string status = 4;
+    string payment_terms = 5;
+    string paid_at = 6;
+}

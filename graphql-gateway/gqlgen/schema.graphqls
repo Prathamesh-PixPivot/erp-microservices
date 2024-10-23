@@ -177,6 +177,149 @@ type Task {
   activity: Activity!
 }
 
+type Vendor {
+    id: ID!
+    name: String!
+    category: String!
+    service: String!
+    industry: String!
+    gstin: String!
+    certifications: String
+    licenses: String
+    isCompliant: Boolean
+    performanceScore: Float
+    riskAssessment: String
+}
+
+type PurchaseOrder {
+    id: ID!
+    vendorId: ID!
+    orderDetails: String!
+    status: String!
+    deliveryDate: String  # ISO Date string in GraphQL
+    receivedDate: String  # ISO Date string in GraphQL
+}
+
+# Vendor Performance Type
+type VendorPerformance {
+    id: ID!
+    vendorId: ID!
+    score: Float
+    riskLevel: String
+    evaluatedAt: String
+}
+
+# Payment Type
+type Payment {
+    id: ID!
+    purchaseOrderId: ID!
+    amount: Float!
+    status: String!
+    paymentTerms: String
+    paidAt: String
+}
+
+type InvoiceItem {
+    id: ID!
+    item_id: String!
+    name: String!
+    price: Float!
+    quantity: Int!
+    total: Float!
+}
+
+type Invoice {
+    id: ID!
+    invoice_number: String!
+    type: String!          # "sales", "proforma", "challan", "purchase"
+    vendor_id: ID
+    customer_id: ID
+    total_amount: Float!
+    cgst: Float!
+    sgst: Float!
+    igst: Float!
+    status: String!
+    invoice_date: String!
+    items: [InvoiceItem!]!
+}
+
+type CreditDebitNote {
+    id: ID!
+    type: String!          # "credit" or "debit"
+    invoice_id: ID!        # Linked invoice ID
+    amount: Float!
+    reason: String!
+    date: String!
+}
+
+input CreateCreditDebitNoteInput {
+    type: String!
+    invoice_id: ID!
+    amount: Float!
+    reason: String!
+    date: String!
+}
+
+# Ledger Types and Inputs
+
+type LedgerEntry {
+    id: ID!
+    transaction_id: String!
+    description: String!
+    debit: Float
+    credit: Float
+    balance: Float
+    transaction_date: String!
+}
+
+input CreateLedgerEntryInput {
+    transaction_id: String!
+    description: String!
+    debit: Float
+    credit: Float
+    transaction_date: String!
+}
+
+# Payment Due Types and Inputs
+
+type PaymentDue {
+    id: ID!
+    invoice_id: ID!
+    amount_due: Float!
+    due_date: String!
+    status: String!
+}
+
+input AddPaymentDueInput {
+    invoice_id: ID!
+    amount_due: Float!
+    due_date: String!
+    status: String!
+}
+
+
+input InvoiceItemInput {
+    item_id: String!
+    name: String!
+    price: Float!
+    quantity: Int!
+}
+
+input CreateInvoiceInput {
+    type: String!
+    vendor_id: ID
+    customer_id: ID
+    items: [InvoiceItemInput!]!
+    invoice_date: String!
+}
+
+input UpdateInvoiceInput {
+    invoice_id: ID!
+    status: String
+    items: [InvoiceItemInput]
+    invoice_date: String
+}
+
 # Input types for creating and updating opportunities
 input CreateOpportunityInput {
   name: String!
@@ -339,6 +482,24 @@ type Query {
       ascending: Boolean!, 
       activityId: ID
     ): [Task!]!
+
+    getVendorByID(id: ID!): Vendor
+    searchVendors(query: String!): [Vendor]
+    getPurchaseOrderByID(id: ID!): PurchaseOrder
+    getPerformanceByID(id: ID!): VendorPerformance
+    getPaymentByID(id: ID!): Payment
+
+    getInvoiceById(id: ID!): Invoice!
+    listInvoices(page: Int, pageSize: Int): [Invoice!]!
+
+    getCreditDebitNoteById(id: ID!): CreditDebitNote!
+    listCreditDebitNotes: [CreditDebitNote!]!
+
+    getLedgerEntryById(id: ID!): LedgerEntry!
+    listLedgerEntries: [LedgerEntry!]!
+
+    getPaymentDueById(id: ID!): PaymentDue!
+    listPaymentDues: [PaymentDue!]!
 }
 
 # Combining all mutations into a single Mutation type
@@ -385,4 +546,26 @@ type Mutation {
     createTask(input: CreateTaskInput!): Task
     updateTask(input: UpdateTaskInput!): Task
     deleteTask(id: ID!): Boolean
+
+    createVendor(name: String!, category: String!, service: String!, industry: String!, gstin: String!, certifications: String, licenses: String): Vendor
+    updateVendor(id: ID!, name: String!, category: String!, service: String!, industry: String!, gstin: String!, certifications: String, licenses: String): Vendor
+    deleteVendor(id: ID!): String
+    createPurchaseOrder(vendorId: ID!, orderDetails: String!, deliveryDate: String!): PurchaseOrder
+    updatePurchaseOrder(id: ID!, orderDetails: String!, status: String!, deliveryDate: String, receivedDate: String): PurchaseOrder
+    deletePurchaseOrder(id: ID!): String
+    recordPerformance(vendorId: ID!, score: Float!, riskLevel: String!, evaluatedAt: String!): VendorPerformance
+    processInvoice(purchaseOrderId: ID!, amount: Float!, paymentTerms: String!): Payment
+
+    createInvoice(input: CreateInvoiceInput!): Invoice!
+    updateInvoice(input: UpdateInvoiceInput!): Invoice!
+    deleteInvoice(id: ID!): String!
+
+    createCreditDebitNote(input: CreateCreditDebitNoteInput!): CreditDebitNote!
+    deleteCreditDebitNote(id: ID!): String!
+
+    addLedgerEntry(input: CreateLedgerEntryInput!): LedgerEntry!
+    deleteLedgerEntry(id: ID!): String!
+
+    addPaymentDue(input: AddPaymentDueInput!): PaymentDue!
+    markPaymentAsPaid(id: ID!): PaymentDue!
 }

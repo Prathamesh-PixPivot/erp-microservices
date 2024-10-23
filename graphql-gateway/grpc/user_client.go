@@ -1,5 +1,4 @@
 package grpc
-
 import (
 	"context"
 	userpb "graphql-gateway/grpc/userpb"
