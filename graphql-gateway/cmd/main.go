@@ -9,6 +9,7 @@ import (
 	"graphql-gateway/grpc/activitypb"
 	"graphql-gateway/grpc/authpb"
 	"graphql-gateway/grpc/contactpb"
+	"graphql-gateway/grpc/finance_pb"
 	"graphql-gateway/grpc/leadspb"
 	"graphql-gateway/grpc/opportunitypb"
 	"graphql-gateway/grpc/organizationpb"
@@ -135,30 +136,128 @@ func main() {
 	activityClient := activitypb.NewActivityServiceClient(activityConn)
 	log.Println("Connected to activity-service.")
 
-	// Initialize VMS Client (New Code)
-	vmsConn, err := grpc.Dial(
-		fmt.Sprintf("%s:%d", cfg.VMSServiceHost, cfg.VMSServicePort),
+	// Initialize vendor Client (New Code)
+	vendorConn, err := grpc.Dial(
+		fmt.Sprintf("%s:%d", cfg.VendorServiceHost, cfg.VendorServicePort),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithBlock(),
 		grpc.WithTimeout(5*time.Second),
 	)
 	if err != nil {
-		log.Fatalf("Failed to connect to VMS service: %v", err)
+		log.Fatalf("Failed to connect to vendor service: %v", err)
 	}
-	defer vmsConn.Close()
-	vmsClient := vms_pb.NewVendorServiceClient(vmsConn) // This creates a new VMS client
+	defer vendorConn.Close()
+	vendorClient := vms_pb.NewVendorServiceClient(vendorConn) // This creates a new VMS client
 	log.Println("Connected to VMS service.")
+
+	// Initialize payment Client (New Code)
+	paymentConn, err := grpc.Dial(
+		fmt.Sprintf("%s:%d", cfg.PaymentServiceHost, cfg.PaymentServicePort),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+		grpc.WithTimeout(5*time.Second),
+	)
+	if err != nil {
+		log.Fatalf("Failed to connect to payment service: %v", err)
+	}
+	defer paymentConn.Close()
+	paymentClient := vms_pb.NewPaymentServiceClient(paymentConn) // This creates a new VMS client
+
+	// Initialize performance Client (New Code)
+	performanceConn, err := grpc.Dial(
+		fmt.Sprintf("%s:%d", cfg.PerformanceServiceHost, cfg.PerformanceServicePort),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+		grpc.WithTimeout(5*time.Second),
+	)
+	if err != nil {
+		log.Fatalf("Failed to connect to performance service: %v", err)
+	}
+	defer performanceConn.Close()
+	performanceClient := vms_pb.NewPerformanceServiceClient(performanceConn) // This creates a new VMS client
+
+	// Initialize purchase order Client (New Code)
+	purchaseOrderConn, err := grpc.Dial(
+		fmt.Sprintf("%s:%d", cfg.PurchaseOrderServiceHost, cfg.PurchaseOrderServicePort),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+		grpc.WithTimeout(5*time.Second),
+	)
+	if err != nil {
+		log.Fatalf("Failed to connect to purchase order service: %v", err)
+	}
+	defer purchaseOrderConn.Close()
+	purchaseOrderClient := vms_pb.NewPurchaseOrderServiceClient(purchaseOrderConn) // This creates a new VMS client
+
+	// Initialize Invoice Client (New Code)
+	invoiceConn, err := grpc.Dial(
+		fmt.Sprintf("%s:%d", cfg.InvoiceServiceHost, cfg.InvoiceServicePort),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+		grpc.WithTimeout(5*time.Second),
+	)
+	if err != nil {
+		log.Fatalf("Failed to connect to invoice service: %v", err)
+	}
+	defer invoiceConn.Close()
+	invoiceClient := finance_pb.NewInvoiceServiceClient(invoiceConn) // This creates a new VMS client
+
+	// Initialize CreditNote Client (New Code)
+	creditNoteConn, err := grpc.Dial(
+		fmt.Sprintf("%s:%d", cfg.CreditDebitNoteServiceHost, cfg.CreditDebitNoteServicePort),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+		grpc.WithTimeout(5*time.Second),
+	)
+	if err != nil {
+		log.Fatalf("Failed to connect to credit note service: %v", err)
+	}
+	defer creditNoteConn.Close()
+	creditDebitNoteClient := finance_pb.NewCreditDebitNoteServiceClient(creditNoteConn) // This creates a new VMS client
+
+	// Initialize PaymentDue Client (New Code)
+	paymentDueConn, err := grpc.Dial(
+		fmt.Sprintf("%s:%d", cfg.PaymentDueServiceHost, cfg.PaymentDueServicePort),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+		grpc.WithTimeout(5*time.Second),
+	)
+	if err != nil {
+		log.Fatalf("Failed to connect to payment due service: %v", err)
+	}
+	defer paymentDueConn.Close()
+	paymentDueClient := finance_pb.NewPaymentServiceClient(paymentDueConn) // This creates a new VMS client
+
+	// Initialize Ledger Client (New Code)
+	ledgerConn, err := grpc.Dial(
+		fmt.Sprintf("%s:%d", cfg.LedgerServiceHost, cfg.LedgerServicePort),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+		grpc.WithTimeout(5*time.Second),
+	)
+	if err != nil {
+		log.Fatalf("Failed to connect to ledger service: %v", err)
+	}
+	defer ledgerConn.Close()
+	ledgerClient := finance_pb.NewLedgerServiceClient(ledgerConn) // This creates a new VMS client
 
 	// Step 3: Initialize Resolver with all gRPC Clients
 	resolver := &resolvers.Resolver{
-		AuthClient:         authClient,
-		UserClient:         userClient,
-		OrganizationClient: orgClient,
-		LeadClient:         leadClient,
-		OpportunityClient:  opportunityClient,
-		ContactClient:      contactClient,
-		ActivityClient:     activityClient,
-		VendorClient:       vmsClient, // Add VMS client to the resolver
+		AuthClient:            authClient,
+		UserClient:            userClient,
+		OrganizationClient:    orgClient,
+		LeadClient:            leadClient,
+		OpportunityClient:     opportunityClient,
+		ContactClient:         contactClient,
+		ActivityClient:        activityClient,
+		VendorClient:          vendorClient,
+		PaymentClient:         paymentClient,
+		PerformanceClient:     performanceClient,
+		PurchaseOrderClient:   purchaseOrderClient,
+		InvoiceClient:         invoiceClient,
+		CreditDebitNoteClient: creditDebitNoteClient,
+		PaymentDueClient:      paymentDueClient,
+		LedgerClient:          ledgerClient,
 	}
 
 	// Step 4: Setup GraphQL Server

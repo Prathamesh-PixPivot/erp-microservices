@@ -1,0 +1,213 @@
+syntax = "proto3";
+
+package inventory;
+
+option go_package = "/inventory_pb";
+
+// Inventory Management Service
+service InventoryService {
+    
+    // CRUD for Inventory Items
+    rpc CreateInventoryItem (CreateInventoryItemRequest) returns (CreateInventoryItemResponse);
+    rpc GetInventoryItem (GetInventoryItemRequest) returns (GetInventoryItemResponse);
+    rpc UpdateInventoryItem (UpdateInventoryItemRequest) returns (UpdateInventoryItemResponse);
+    rpc DeleteInventoryItem (DeleteInventoryItemRequest) returns (DeleteInventoryItemResponse);
+    rpc ListInventoryItems (ListInventoryItemsRequest) returns (ListInventoryItemsResponse);
+    
+    // Stock Management Methods
+    rpc TrackInventory (TrackInventoryRequest) returns (TrackInventoryResponse);
+    rpc SetReorderPoint (SetReorderPointRequest) returns (SetReorderPointResponse);
+    rpc ManageWarehouses (ManageWarehousesRequest) returns (ManageWarehousesResponse);
+    rpc AddOrUpdateInventoryItem (AddOrUpdateInventoryItemRequest) returns (AddOrUpdateInventoryItemResponse);
+
+    // Order Fulfillment Methods
+    rpc ProcessOrder (ProcessOrderRequest) returns (ProcessOrderResponse);
+    rpc GeneratePickingList (GeneratePickingListRequest) returns (GeneratePickingListResponse);
+    rpc UpdateInventory (UpdateInventoryRequest) returns (UpdateInventoryResponse);
+    
+    // Integration with Vendor Management
+    rpc PlaceVendorOrder (PlaceVendorOrderRequest) returns (PlaceVendorOrderResponse);
+    
+    // Integration with Finance Service
+    rpc NotifyFinanceForOrder (NotifyFinanceRequest) returns (NotifyFinanceResponse);
+}
+
+// Inventory Item Details
+message InventoryItem {
+    string product_id = 1;
+    string product_name = 2;
+    string product_description = 3;
+    string sku = 4;
+    string supplier_id = 5; // Linking to Vendor Management Service
+    string category = 6;
+    float price = 7;
+    int32 available_quantity = 8;
+    int32 reorder_point = 9;
+    repeated WarehouseStock warehouse_stocks = 10;
+    string created_at = 11;
+    string updated_at = 12;
+}
+
+// Stock in specific warehouse
+message WarehouseStock {
+    string warehouse_id = 1;
+    int32 stock_level = 2;
+}
+
+// CRUD Request/Response for Inventory Items
+
+message CreateInventoryItemRequest {
+    InventoryItem item = 1;
+}
+
+message CreateInventoryItemResponse {
+    InventoryItem item = 1;
+    bool success = 2;
+}
+
+message GetInventoryItemRequest {
+    string product_id = 1;
+}
+
+message GetInventoryItemResponse {
+    InventoryItem item = 1;
+    bool found = 2;
+}
+
+message UpdateInventoryItemRequest {
+    InventoryItem item = 1;
+}
+
+message UpdateInventoryItemResponse {
+    InventoryItem item = 1;
+    bool success = 2;
+}
+
+message DeleteInventoryItemRequest {
+    string product_id = 1;
+}
+
+message DeleteInventoryItemResponse {
+    bool success = 1;
+}
+
+message ListInventoryItemsRequest {
+    int32 limit = 1;
+    int32 offset = 2;
+}
+
+message ListInventoryItemsResponse {
+    repeated InventoryItem items = 1;
+}
+
+// Stock Management Request/Response
+
+message TrackInventoryRequest {
+    string product_id = 1;
+}
+
+message TrackInventoryResponse {
+    InventoryItem item = 1;
+}
+
+message SetReorderPointRequest {
+    string product_id = 1;
+    int32 reorder_point = 2;
+}
+
+message SetReorderPointResponse {
+    string product_id = 1;
+    bool success = 2;
+}
+
+message ManageWarehousesRequest {
+    repeated Warehouse warehouses = 1;
+}
+
+message ManageWarehousesResponse {
+    bool success = 1;
+}
+
+message Warehouse {
+    string warehouse_id = 1;
+    string warehouse_name = 2;
+    string location = 3;
+}
+
+message AddOrUpdateInventoryItemRequest {
+    InventoryItem item = 1;
+}
+
+message AddOrUpdateInventoryItemResponse {
+    bool success = 1;
+    InventoryItem updated_item = 2;
+}
+
+// Order Fulfillment
+
+message ProcessOrderRequest {
+    string order_id = 1;
+    repeated OrderItem items = 2;
+}
+
+message ProcessOrderResponse {
+    string order_id = 1;
+    bool success = 2;
+}
+
+message OrderItem {
+    string product_id = 1;
+    int32 quantity = 2;
+}
+
+message GeneratePickingListRequest {
+    string order_id = 1;
+}
+
+message GeneratePickingListResponse {
+    string order_id = 1;
+    repeated PickingItem picking_list = 2;
+}
+
+message PickingItem {
+    string product_id = 1;
+    int32 quantity = 2;
+    string warehouse_id = 3;
+}
+
+message UpdateInventoryRequest {
+    string product_id = 1;
+    int32 quantity = 2;
+    string warehouse_id = 3;
+}
+
+message UpdateInventoryResponse {
+    bool success = 1;
+}
+
+// Vendor Management Integration
+
+message PlaceVendorOrderRequest {
+    string vendor_id = 1;
+    repeated VendorOrderItem items = 2;
+}
+
+message PlaceVendorOrderResponse {
+    bool success = 1;
+}
+
+message VendorOrderItem {
+    string product_id = 1;
+    int32 quantity = 2;
+}
+
+// Finance Service Integration
+
+message NotifyFinanceRequest {
+    string order_id = 1;
+    float total_amount = 2;
+}
+
+message NotifyFinanceResponse {
+    bool success = 1;
+}

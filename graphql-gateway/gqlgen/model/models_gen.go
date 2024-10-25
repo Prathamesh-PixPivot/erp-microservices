@@ -136,6 +136,19 @@ type CreditDebitNote struct {
 	Date      string  `json:"date"`
 }
 
+type InventoryItem struct {
+	ProductID          string            `json:"productID"`
+	ProductName        string            `json:"productName"`
+	ProductDescription *string           `json:"productDescription,omitempty"`
+	Sku                string            `json:"sku"`
+	SupplierID         string            `json:"supplierID"`
+	Category           *string           `json:"category,omitempty"`
+	Price              float64           `json:"price"`
+	AvailableQuantity  int               `json:"availableQuantity"`
+	ReorderPoint       int               `json:"reorderPoint"`
+	WarehouseStocks    []*WarehouseStock `json:"warehouseStocks"`
+}
+
 type Invoice struct {
 	ID            string         `json:"id"`
 	InvoiceNumber string         `json:"invoice_number"`
@@ -204,6 +217,11 @@ type Opportunity struct {
 	Owner       *User         `json:"owner"`
 }
 
+type OrderItemInput struct {
+	ProductID string `json:"productID"`
+	Quantity  int    `json:"quantity"`
+}
+
 type Organization struct {
 	ID       string `json:"id"`
 	GstIn    string `json:"gstIn"`
@@ -234,6 +252,15 @@ type PaymentDue struct {
 	AmountDue float64 `json:"amount_due"`
 	DueDate   string  `json:"due_date"`
 	Status    string  `json:"status"`
+}
+
+type PickingItem struct {
+	OrderID       string `json:"orderID"`
+	ProductID     string `json:"productID"`
+	ProductName   string `json:"productName"`
+	Quantity      int    `json:"quantity"`
+	WarehouseID   string `json:"warehouseID"`
+	WarehouseName string `json:"warehouseName"`
 }
 
 type PurchaseOrder struct {
@@ -369,6 +396,16 @@ type VendorPerformance struct {
 	Score       *float64 `json:"score,omitempty"`
 	RiskLevel   *string  `json:"riskLevel,omitempty"`
 	EvaluatedAt *string  `json:"evaluatedAt,omitempty"`
+}
+
+type WarehouseStock struct {
+	WarehouseID string `json:"warehouseID"`
+	StockLevel  int    `json:"stockLevel"`
+}
+
+type WarehouseStockInput struct {
+	WarehouseID string `json:"warehouseID"`
+	StockLevel  int    `json:"stockLevel"`
 }
 
 type ActivitySortField string

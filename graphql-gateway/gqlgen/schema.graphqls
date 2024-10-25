@@ -290,6 +290,42 @@ type PaymentDue {
     status: String!
 }
 
+# Define the core Inventory Item type
+type InventoryItem {
+    productID: String!
+    productName: String!
+    productDescription: String
+    sku: String!
+    supplierID: String!
+    category: String
+    price: Float!
+    availableQuantity: Int!
+    reorderPoint: Int!
+    warehouseStocks: [WarehouseStock!]!
+}
+
+# WarehouseStock type for inventory items in different warehouses
+type WarehouseStock {
+    warehouseID: String!
+    stockLevel: Int!
+}
+
+# PickingItem type used for generating picking lists
+type PickingItem {
+    orderID: String!
+    productID: String!
+    productName: String!
+    quantity: Int!
+    warehouseID: String!
+    warehouseName: String!
+}
+
+# OrderItem input type for order processing
+input OrderItemInput {
+    productID: String!
+    quantity: Int!
+}
+
 input AddPaymentDueInput {
     invoice_id: ID!
     amount_due: Float!
@@ -361,6 +397,12 @@ input CreateContactInput {
   position: String
   socialMediaProfiles: String
   notes: String
+}
+
+# Warehouse input type for managing warehouse information
+input WarehouseStockInput {
+    warehouseID: String!
+    stockLevel: Int!
 }
 
 input UpdateContactInput {
@@ -500,6 +542,13 @@ type Query {
 
     getPaymentDueById(id: ID!): PaymentDue!
     listPaymentDues: [PaymentDue!]!
+
+    # CRUD for Inventory Items
+    getInventoryItem(productID: String!): InventoryItem
+    listInventoryItems(limit: Int, offset: Int): [InventoryItem!]!
+
+    # Stock Management
+    trackInventory(productID: String!): InventoryItem
 }
 
 # Combining all mutations into a single Mutation type
@@ -568,4 +617,59 @@ type Mutation {
 
     addPaymentDue(input: AddPaymentDueInput!): PaymentDue!
     markPaymentAsPaid(id: ID!): PaymentDue!
+
+    # CRUD for Inventory Items
+    createInventoryItem(
+        productID: String!,
+        productName: String!,
+        productDescription: String,
+        sku: String!,
+        supplierID: String!,
+        category: String,
+        price: Float!,
+        availableQuantity: Int!,
+        reorderPoint: Int!
+    ): InventoryItem
+
+    updateInventoryItem(
+        productID: String!,
+        productName: String,
+        productDescription: String,
+        sku: String,
+        supplierID: String,
+        category: String,
+        price: Float,
+        availableQuantity: Int,
+        reorderPoint: Int
+    ): InventoryItem
+
+    deleteInventoryItem(productID: String!): Boolean
+
+    # Stock Management
+    setReorderPoint(productID: String!, reorderPoint: Int!): Boolean
+    addOrUpdateInventoryItem(
+        productID: String!,
+        productName: String!,
+        productDescription: String,
+        sku: String!,
+        supplierID: String!,
+        category: String,
+        price: Float!,
+        availableQuantity: Int!,
+        reorderPoint: Int!,
+        warehouseStocks: [WarehouseStockInput!]  # Optional input for stock levels in warehouses
+    ): InventoryItem
+
+    # Order Fulfillment
+    processOrder(orderItems: [OrderItemInput!]!): Boolean
+    generatePickingList(orderID: String!): [PickingItem!]!
+    updateInventoryStock(
+        productID: String!,
+        quantity: Int!,
+        warehouseID: String!
+    ): Boolean
+
+    # Vendor and Finance Integrations
+    placeVendorOrder(vendorID: String!, orderItems: [OrderItemInput!]!): Boolean
+    notifyFinanceForOrder(orderID: String!, totalAmount: Float!): Boolean
 }

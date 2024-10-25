@@ -9,23 +9,37 @@ import (
 )
 
 type Config struct {
-	GraphQLPort             int
-	AuthServiceHost         string
-	AuthServicePort         int
-	UserServiceHost         string
-	UserServicePort         int
-	OrganizationServiceHost string
-	OrganizationServicePort int
-	LeadServiceHost         string
-	LeadServicePort         int
-	OpportunityServiceHost  string
-	OpportunityServicePort  int
-	ContactServiceHost      string
-	ContactServicePort      int
-	ActivityServiceHost     string
-	ActivityServicePort     int
-	VMSServiceHost                 string
-	VMSServicePort                 int
+	GraphQLPort                int
+	AuthServiceHost            string
+	AuthServicePort            int
+	UserServiceHost            string
+	UserServicePort            int
+	OrganizationServiceHost    string
+	OrganizationServicePort    int
+	LeadServiceHost            string
+	LeadServicePort            int
+	OpportunityServiceHost     string
+	OpportunityServicePort     int
+	ContactServiceHost         string
+	ContactServicePort         int
+	ActivityServiceHost        string
+	ActivityServicePort        int
+	VendorServiceHost          string
+	VendorServicePort          int
+	PaymentServiceHost         string
+	PaymentServicePort         int
+	PerformanceServiceHost     string
+	PerformanceServicePort     int
+	PurchaseOrderServiceHost   string
+	PurchaseOrderServicePort   int
+	InvoiceServiceHost         string
+	InvoiceServicePort         int
+	CreditDebitNoteServiceHost string
+	CreditDebitNoteServicePort int
+	PaymentDueServiceHost      string
+	PaymentDueServicePort      int
+	LedgerServiceHost          string
+	LedgerServicePort          int
 }
 
 func LoadConfig() (*Config, error) {
@@ -87,11 +101,60 @@ func LoadConfig() (*Config, error) {
 		return nil, fmt.Errorf("invalid ACTIVITY_SERVICE_PORT: %v", err)
 	}
 
-	// VMS gRPC Configuration
-	cfg.VMSServiceHost = getEnv("VMS_HOST", "localhost")
-	cfg.VMSServicePort, err = getEnvAsInt("VMS_PORT", 50058)
+	// Vendor gRPC Configuration
+	cfg.VendorServiceHost = getEnv("Vendor_HOST", "localhost")
+	cfg.VendorServicePort, err = getEnvAsInt("Vendor_PORT", 50058)
 	if err != nil {
-		return nil, fmt.Errorf("invalid VMS_PORT: %v", err)
+		return nil, fmt.Errorf("invalid Vendor_PORT: %v", err)
+	}
+
+	// Invoice gRPC Configuration
+	cfg.InvoiceServiceHost = getEnv("Invoice_HOST", "localhost")
+	cfg.InvoiceServicePort, err = getEnvAsInt("Invoice_PORT", 50059)
+	if err != nil {
+		return nil, fmt.Errorf("invalid Invoice_PORT: %v", err)
+	}
+
+	// Payment gRPC Configuration
+	cfg.PaymentServiceHost = getEnv("Payment_HOST", "localhost")
+	cfg.PaymentServicePort, err = getEnvAsInt("Payment_PORT", 50055)
+	if err != nil {
+		return nil, fmt.Errorf("invalid Payment_PORT: %v", err)
+	}
+
+	// Performance gRPC Configuration
+	cfg.PerformanceServiceHost = getEnv("Performance_HOST", "localhost")
+	cfg.PerformanceServicePort, err = getEnvAsInt("Performance_PORT", 50058)
+	if err != nil {
+		return nil, fmt.Errorf("invalid Performance_PORT: %v", err)
+	}
+
+	// PurchaseOrder gRPC Configuration
+	cfg.PurchaseOrderServiceHost = getEnv("PurchaseOrder_HOST", "localhost")
+	cfg.PurchaseOrderServicePort, err = getEnvAsInt("PurchaseOrder_PORT", 50058)
+	if err != nil {
+		return nil, fmt.Errorf("invalid PurchaseOrder_PORT: %v", err)
+	}
+
+	// CreditNote gRPC Configuration
+	cfg.CreditDebitNoteServiceHost = getEnv("CreditNote_HOST", "localhost")
+	cfg.CreditDebitNoteServicePort, err = getEnvAsInt("CreditNote_PORT", 50059)
+	if err != nil {
+		return nil, fmt.Errorf("invalid CreditNote_PORT: %v", err)
+	}
+
+	// PaymentDue gRPC Configuration
+	cfg.PaymentDueServiceHost = getEnv("PaymentDue_HOST", "localhost")
+	cfg.PaymentDueServicePort, err = getEnvAsInt("PaymentDue_PORT", 50059)
+	if err != nil {
+		return nil, fmt.Errorf("invalid PaymentDue_PORT: %v", err)
+	}
+
+	// Ledger gRPC Configuration
+	cfg.LedgerServiceHost = getEnv("Ledger_HOST", "localhost")
+	cfg.LedgerServicePort, err = getEnvAsInt("Ledger_PORT", 50059)
+	if err != nil {
+		return nil, fmt.Errorf("invalid Ledger_PORT: %v", err)
 	}
 
 	return &cfg, nil
