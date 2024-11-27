@@ -21,21 +21,32 @@ func NewInvoiceHandler(service services.InvoiceService) *InvoiceHandler {
 }
 
 func (h *InvoiceHandler) CreateInvoice(ctx context.Context, req *finance_pb.CreateInvoiceRequest) (*finance_pb.InvoiceResponse, error) {
+	// Initialize invoice with required fields
 	invoice := &models.Invoice{
-		ID:          uuid.New(),
-		Type:        req.Invoice.Type,
-		VendorID:    func(id string) *uuid.UUID { u := uuid.MustParse(id); return &u }(req.Invoice.VendorId),
-		CustomerID:  func(id string) *uuid.UUID { u := uuid.MustParse(id); return &u }(req.Invoice.CustomerId),
-		TotalAmount: req.Invoice.TotalAmount,
-		CGST:        req.Invoice.Cgst,
-		SGST:        req.Invoice.Sgst,
-		IGST:        req.Invoice.Igst,
-		Status:      req.Invoice.Status,
-		InvoiceDate: req.Invoice.InvoiceDate.AsTime(),
+		ID:             uuid.New(),
+		Type:           req.Invoice.Type,
+		TotalAmount:    req.Invoice.TotalAmount,
+		CGST:           req.Invoice.Cgst,
+		SGST:           req.Invoice.Sgst,
+		IGST:           req.Invoice.Igst,
+		Status:         req.Invoice.Status,
+		InvoiceDate:    req.Invoice.InvoiceDate.AsTime(),
+		VendorID:       &req.Invoice.VendorId,
+		CustomerID:     &req.Invoice.CustomerId,
+		OrganizationID: req.Invoice.OrganizationId, // Ensure this field exists in the proto definition
 	}
 
-	// Handle items for invoice
+	// Check if TotalAmount is calculated correctly
+	if invoice.TotalAmount == 0 {
+		log.Println("Warning: TotalAmount is zero; ensure calculation is correct.")
+	}
+
+	// Handle items for the invoice and calculate TotalAmount if needed
+	var calculatedTotalAmount float64
 	for _, item := range req.Invoice.Items {
+		total := item.Price * float64(item.Quantity)
+		calculatedTotalAmount += total
+
 		invoice.Items = append(invoice.Items, models.InvoiceItem{
 			ID:        uuid.New(),
 			InvoiceID: invoice.ID,
@@ -43,8 +54,29 @@ func (h *InvoiceHandler) CreateInvoice(ctx context.Context, req *finance_pb.Crea
 			Name:      item.Name,
 			Price:     item.Price,
 			Quantity:  int(item.Quantity),
-			Total:     item.Total,
+			Total:     total,
 		})
+	}
+
+	// Set calculated total amount if it's supposed to be done here
+	if invoice.TotalAmount == 0 {
+		invoice.TotalAmount = calculatedTotalAmount
+	}
+
+	// Calculate taxes if not provided
+	if invoice.CGST == 0 && invoice.SGST == 0 && invoice.IGST == 0 {
+		invoice.CGST, invoice.SGST, invoice.IGST = h.service.CalculateTaxes(invoice.TotalAmount, invoice.Type)
+	}
+
+	// Generate invoice number if it's not provided
+	if invoice.InvoiceNumber == "" {
+		var err error
+		log.Println("Organization ID:", invoice.OrganizationID)
+		invoice.InvoiceNumber, err = h.service.GenerateInvoiceNumber(invoice.OrganizationID)
+		if err != nil {
+			log.Printf("Error generating invoice number: %v", err)
+			return nil, err
+		}
 	}
 
 	// Call service to create the invoice
@@ -54,6 +86,7 @@ func (h *InvoiceHandler) CreateInvoice(ctx context.Context, req *finance_pb.Crea
 		return nil, err
 	}
 
+	// Convert and return the response
 	return &finance_pb.InvoiceResponse{
 		Invoice: convertModelToProtoInvoice(invoice),
 	}, nil
@@ -119,6 +152,7 @@ func (h *InvoiceHandler) UpdateInvoice(ctx context.Context, req *finance_pb.Upda
 
 	// Generate invoice number if it's not provided
 	if invoice.InvoiceNumber == "" {
+		log.Println("Organization ID:", invoice.OrganizationID)
 		invoice.InvoiceNumber, err = h.service.GenerateInvoiceNumber(invoice.OrganizationID)
 		if err != nil {
 			log.Printf("Error generating invoice number: %v", err)
@@ -179,8 +213,8 @@ func convertModelToProtoInvoice(invoice *models.Invoice) *finance_pb.Invoice {
 	protoInvoice := &finance_pb.Invoice{
 		Id:          invoice.ID.String(),
 		Type:        invoice.Type,
-		VendorId:    invoice.VendorID.String(),
-		CustomerId:  invoice.CustomerID.String(),
+		VendorId:    *invoice.VendorID,
+		CustomerId:  *invoice.CustomerID,
 		TotalAmount: invoice.TotalAmount,
 		Cgst:        invoice.CGST,
 		Sgst:        invoice.SGST,

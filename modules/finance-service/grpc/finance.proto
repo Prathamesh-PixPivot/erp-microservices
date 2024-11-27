@@ -63,15 +63,16 @@ message Invoice {
     string type = 2; // "sales", "proforma", "challan", "purchase"
     string vendor_id = 3; // Vendor for purchase invoices
     string customer_id = 4;
-    repeated InvoiceItem items = 5;
-    double total_amount = 6;
-    double cgst = 7;
-    double sgst = 8;
-    double igst = 9;
-    string status = 10; // "pending", "paid", etc.
-    google.protobuf.Timestamp invoice_date = 11;
-    google.protobuf.Timestamp created_at = 12;
-    google.protobuf.Timestamp updated_at = 13;
+    string organization_id = 5;
+    repeated InvoiceItem items = 6;
+    double total_amount = 7;
+    double cgst = 8;
+    double sgst = 9;
+    double igst = 10;
+    string status = 11; // "pending", "paid", etc.
+    google.protobuf.Timestamp invoice_date = 12;
+    google.protobuf.Timestamp created_at = 13;
+    google.protobuf.Timestamp updated_at = 14;
 }
 
 message InvoiceItem {

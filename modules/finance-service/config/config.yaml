@@ -1,5 +1,0 @@
-server:
-  port: ":50059"
-
-database:
-  dsn: "host=localhost user=postgres password=root dbname=finance-service port=5432 sslmode=disable TimeZone=Asia/Kolkata"

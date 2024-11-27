@@ -1,3 +1,6 @@
-DB_URL: "postgres://postgres:root@localhost:5432/vms-service?sslmode=disable"
-GRPC_PORT: ":50058"
-SERVER_PORT: ":8080"
+database:
+  dsn: "postgres://postgres:root@localhost:5432/inventory-service?sslmode=disable"
+
+server:
+  grpc_port: "50001"
+  http_port: "8080"

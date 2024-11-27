@@ -81,11 +81,12 @@ type CreateCreditDebitNoteInput struct {
 }
 
 type CreateInvoiceInput struct {
-	Type        string              `json:"type"`
-	VendorID    *string             `json:"vendor_id,omitempty"`
-	CustomerID  *string             `json:"customer_id,omitempty"`
-	Items       []*InvoiceItemInput `json:"items"`
-	InvoiceDate string              `json:"invoice_date"`
+	Type           string              `json:"type"`
+	VendorID       *string             `json:"vendor_id,omitempty"`
+	CustomerID     *string             `json:"customer_id,omitempty"`
+	OrganizationID string              `json:"organization_id"`
+	Items          []*InvoiceItemInput `json:"items"`
+	InvoiceDate    string              `json:"invoice_date"`
 }
 
 type CreateLeadInput struct {

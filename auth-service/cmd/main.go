@@ -8,6 +8,7 @@ import (
 	"auth-service/internal/handler"
 	"auth-service/internal/repository"
 	"auth-service/internal/services"
+	"context"
 	"log"
 	"net"
 	"net/http"
@@ -44,8 +45,12 @@ func main() {
 
 	// Initialize the GoCloak client
 	goCloakClient := gocloak.NewClient(viper.GetString("KEYCLOAK_URL"))
-	clientID := viper.GetString("KEYCLOAK_CLIENT_ID")
 	realm := viper.GetString("KEYCLOAK_REALM")
+	token, err := goCloakClient.LoginAdmin(context.Background(), viper.GetString("KEYCLOAK_ADMIN_USER"), viper.GetString("KEYCLOAK_ADMIN_PASSWORD"), viper.GetString("KEYCLOAK_ADMIN_REALM"))
+	if err != nil {
+		log.Printf("Admin Username: %s\nAdmin Password: %s\nAdmin Realm: %s\n", viper.GetString("KEYCLOAK_ADMIN_USERNAME"), viper.GetString("KEYCLOAK_ADMIN_PASSWORD"), viper.GetString("KEYCLOAK_ADMIN_REALM"))
+		log.Fatalf("Failed to login to Keycloak: %v", err)
+	}
 
 	// Start Prometheus metrics server in a separate goroutine
 	go func() {
@@ -82,7 +87,7 @@ func main() {
 	app := fiber.New()
 	// Use CORS middleware
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:3000", 
+		AllowOrigins:     "http://localhost:3000",
 		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
 		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
 		AllowCredentials: true,
@@ -91,7 +96,7 @@ func main() {
 		log.Fatalf("Failed to initialize Keycloak repository: %v", err)
 	}
 
-	authHandler := handler.NewAuthHandler(userClient, organizationClient, goCloakClient, clientID, realm)
+	authHandler := handler.NewAuthHandler(userClient, organizationClient, goCloakClient, token.AccessToken, realm)
 
 	// Define REST routes
 	app.Post("/signup", authHandler.SignupUser)

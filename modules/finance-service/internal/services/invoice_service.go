@@ -4,6 +4,7 @@ import (
 	"finance-service/internal/models"
 	"finance-service/internal/repository"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -18,7 +19,7 @@ type InvoiceService interface {
 	DeleteInvoice(id uuid.UUID) error
 	CalculateTotalAmount(items []models.InvoiceItem) float64
 	CalculateTaxes(totalAmount float64, invoiceType string) (cgst, sgst, igst float64)
-	GenerateInvoiceNumber(organizationID uuid.UUID) (string, error)
+	GenerateInvoiceNumber(organizationID string) (string, error)
 }
 
 type invoiceService struct {
@@ -34,7 +35,7 @@ func (s *invoiceService) CreateInvoice(invoice *models.Invoice) error {
 }
 
 func (s *invoiceService) GetInvoiceByID(id uuid.UUID) (*models.Invoice, error) {
-	return s.repo.FindByID(id)
+	return s.repo.FindByID(id.String())
 }
 
 func (s *invoiceService) ListInvoices(page, pageSize int) ([]*models.Invoice, error) {
@@ -73,8 +74,9 @@ func (s *invoiceService) CalculateTaxes(totalAmount float64, invoiceType string)
 }
 
 // GenerateInvoiceNumber generates an invoice number based on a default pattern or custom pattern
-func (s *invoiceService) GenerateInvoiceNumber(organizationID uuid.UUID) (string, error) {
+func (s *invoiceService) GenerateInvoiceNumber(organizationID string) (string, error) {
 	// Fetch organization details (for org initials, etc.)
+	log.Println("[Service]Organization ID:", organizationID)
 	org, err := s.repo.GetOrganizationByID(organizationID)
 	if err != nil {
 		return "", err

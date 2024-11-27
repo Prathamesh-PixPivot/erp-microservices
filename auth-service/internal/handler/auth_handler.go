@@ -4,9 +4,12 @@ import (
 	"auth-service/grpc/authpb"
 	"auth-service/grpc/organizationpb"
 	"auth-service/grpc/userpb"
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/Nerzal/gocloak/v12"
@@ -51,6 +54,36 @@ func ProduceEvent(topic, message string) {
 	}
 }
 
+func createUserInKeycloak(accessToken, realm string, user map[string]interface{}) error {
+	url := fmt.Sprintf("http://localhost:8080/admin/realms/%s/users", realm)
+	userJSON, err := json.Marshal(user)
+	if err != nil {
+		return fmt.Errorf("failed to marshal user: %w", err)
+	}
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(userJSON))
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+
+	req.Header.Set("Authorization", "Bearer "+accessToken)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("request to Keycloak failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusCreated {
+		return fmt.Errorf("failed to create user in Keycloak, status code: %d", resp.StatusCode)
+	}
+
+	log.Println("User successfully created in Keycloak")
+	return nil
+}
+
 // SignupUser handles the user signup process
 func (h *AuthHandler) SignupUser(c *fiber.Ctx) error {
 	var req authpb.SignupRequest
@@ -70,7 +103,20 @@ func (h *AuthHandler) SignupUser(c *fiber.Ctx) error {
 		}},
 	}
 
-	_, err := h.keycloakClient.CreateUser(c.Context(), h.keycloakToken, h.realm, user)
+	userMap := map[string]interface{}{
+		"username": user.Username,
+		"email":    user.Email,
+		"enabled":  user.Enabled,
+		"credentials": []map[string]interface{}{
+			{
+				"type":      *(*user.Credentials)[0].Type,
+				"value":     *(*user.Credentials)[0].Value,
+				"temporary": *(*user.Credentials)[0].Temporary,
+			},
+		},
+	}
+	err := createUserInKeycloak(h.keycloakToken, h.realm, userMap)
+
 	if err != nil {
 		log.Printf("Failed to create user in Keycloak: %v", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to create user in Keycloak"})

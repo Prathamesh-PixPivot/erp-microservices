@@ -14,11 +14,12 @@ import (
 	"graphql-gateway/grpc/opportunitypb"
 	"graphql-gateway/grpc/organizationpb"
 	"graphql-gateway/grpc/userpb"
-	"graphql-gateway/grpc/vms_pb" // Import the VMS gRPC package
+	"graphql-gateway/grpc/vms_pb"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
@@ -26,255 +27,240 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gorilla/mux"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/connectivity"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+// ANSI color codes for green text and reset
+const (
+	greenColor = "\033[32m"
+	resetColor = "\033[0m"
+)
+
+func cors(next http.Handler) http.Handler {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        origin := r.Header.Get("Origin")
+        log.Println("CORS middleware triggered for:", r.URL.Path)
+        log.Println("Origin:", origin)
+
+        // Always set CORS headers for OPTIONS requests
+        if r.Method == http.MethodOptions {
+            if origin == "http://localhost:3000" {
+                w.Header().Set("Access-Control-Allow-Origin", origin)
+                w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+                w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
+                // Uncomment if credentials are required
+                // w.Header().Set("Access-Control-Allow-Credentials", "true")
+            }
+            log.Println("Handling preflight OPTIONS request")
+            w.WriteHeader(http.StatusOK)
+            return
+        }
+
+        // Set CORS headers on all other requests from allowed origins
+        if origin == "http://localhost:3000" {
+            w.Header().Set("Access-Control-Allow-Origin", origin)
+            w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+            w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
+            // Uncomment if credentials are required
+            // w.Header().Set("Access-Control-Allow-Credentials", "true")
+        }
+
+        next.ServeHTTP(w, r)
+    })
+}
+
+
+
+// attemptGrpcReconnect tries to establish a gRPC connection with retries and waits for READY state
+func attemptGrpcReconnect(ctx context.Context, serviceHost string, servicePort int, serviceName string, clientSetter func(conn *grpc.ClientConn, client interface{}), wg *sync.WaitGroup) {
+	defer wg.Done()
+
+	for {
+		select {
+		case <-ctx.Done():
+			log.Printf("Shutdown signal received. Stopping connection attempts to %s.", serviceName)
+			return
+		default:
+			conn, err := grpc.Dial(
+				fmt.Sprintf("%s:%d", serviceHost, servicePort),
+				grpc.WithTransportCredentials(insecure.NewCredentials()),
+				grpc.WithBlock(), // Waits for connection readiness
+				grpc.WithTimeout(5*time.Second),
+			)
+			if err != nil {
+				// log.Printf("Warning: Failed to connect to %s: %v. Retrying in 10 seconds...", serviceName, err)
+				time.Sleep(10 * time.Second) // Retry delay
+				continue
+			}
+
+			// Monitor connection state changes until it reaches READY
+			for {
+				state := conn.GetState()
+				if state == connectivity.Ready {
+					log.Printf("%sConnected to %s.%s", greenColor, serviceName, resetColor)
+					break
+				} else {
+					log.Printf("Waiting for %s to be ready. Current state: %s", serviceName, state.String())
+					conn.WaitForStateChange(ctx, state)
+				}
+			}
+
+			// Set up the appropriate client based on serviceName
+			var client interface{}
+			switch serviceName {
+			case "auth-service":
+				client = authpb.NewAuthServiceClient(conn)
+			case "user-service":
+				client = userpb.NewUserServiceClient(conn)
+			case "organization-service":
+				client = organizationpb.NewOrganizationServiceClient(conn)
+			case "leads-service":
+				client = leadspb.NewLeadServiceClient(conn)
+			case "opportunity-service":
+				client = opportunitypb.NewOpportunityServiceClient(conn)
+			case "contact-service":
+				client = contactpb.NewContactServiceClient(conn)
+			case "activity-service":
+				client = activitypb.NewActivityServiceClient(conn)
+			case "vendor-service":
+				client = vms_pb.NewVendorServiceClient(conn)
+			case "payment-service":
+				client = vms_pb.NewPaymentServiceClient(conn)
+			case "performance-service":
+				client = vms_pb.NewPerformanceServiceClient(conn)
+			case "purchase-order-service":
+				client = vms_pb.NewPurchaseOrderServiceClient(conn)
+			case "invoice-service":
+				client = finance_pb.NewInvoiceServiceClient(conn)
+			case "credit-debit-note-service":
+				client = finance_pb.NewCreditDebitNoteServiceClient(conn)
+			case "ledger-service":
+				client = finance_pb.NewLedgerServiceClient(conn)
+			default:
+				log.Printf("No client found for service: %s", serviceName)
+				conn.Close()
+				return
+			}
+
+			// Assign the client and return to break the retry loop
+			clientSetter(conn, client)
+			return
+		}
+	}
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Incoming request: %s %s from %s", r.Method, r.RequestURI, r.RemoteAddr)
+		next.ServeHTTP(w, r)
+	})
+}
+
 func main() {
-	// Step 1: Load Configuration
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
 	}
 
-	// Step 2: Initialize gRPC Clients for all required services
+	// Initialize the resolver with client fields set to nil initially
+	resolver := &resolvers.Resolver{}
+	var wg sync.WaitGroup
 
-	// Initialize AuthService Client
-	authConn, err := grpc.Dial(
-		fmt.Sprintf("%s:%d", cfg.AuthServiceHost, cfg.AuthServicePort),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
-		grpc.WithTimeout(5*time.Second),
-	)
-	if err != nil {
-		log.Fatalf("Failed to connect to auth-service: %v", err)
-	}
-	defer authConn.Close()
-	authClient := authpb.NewAuthServiceClient(authConn)
-	log.Println("Connected to auth-service.")
+	// Create a context to manage graceful shutdown of goroutines
+	ctx, cancel := context.WithCancel(context.Background())
 
-	// Initialize UserService Client
-	userConn, err := grpc.Dial(
-		fmt.Sprintf("%s:%d", cfg.UserServiceHost, cfg.UserServicePort),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
-		grpc.WithTimeout(5*time.Second),
-	)
-	if err != nil {
-		log.Fatalf("Failed to connect to user-service: %v", err)
-	}
-	defer userConn.Close()
-	userClient := userpb.NewUserServiceClient(userConn)
-	log.Println("Connected to user-service.")
+	// Start goroutines for each gRPC client with automatic reconnection logic
+	wg.Add(1)
+	go attemptGrpcReconnect(ctx, cfg.AuthServiceHost, cfg.AuthServicePort, "auth-service", func(conn *grpc.ClientConn, client interface{}) {
+		resolver.AuthClient = client.(authpb.AuthServiceClient)
+	}, &wg)
 
-	// Initialize OrganizationService Client
-	orgConn, err := grpc.Dial(
-		fmt.Sprintf("%s:%d", cfg.OrganizationServiceHost, cfg.OrganizationServicePort),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
-		grpc.WithTimeout(5*time.Second),
-	)
-	if err != nil {
-		log.Fatalf("Failed to connect to organization-service: %v", err)
-	}
-	defer orgConn.Close()
-	orgClient := organizationpb.NewOrganizationServiceClient(orgConn)
-	log.Println("Connected to organization-service.")
+	wg.Add(1)
+	go attemptGrpcReconnect(ctx, cfg.UserServiceHost, cfg.UserServicePort, "user-service", func(conn *grpc.ClientConn, client interface{}) {
+		resolver.UserClient = client.(userpb.UserServiceClient)
+	}, &wg)
 
-	// Initialize LeadService Client
-	leadsConn, err := grpc.Dial(
-		fmt.Sprintf("%s:%d", cfg.LeadServiceHost, cfg.LeadServicePort),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
-		grpc.WithTimeout(5*time.Second),
-	)
-	if err != nil {
-		log.Fatalf("Failed to connect to leads-service: %v", err)
-	}
-	defer leadsConn.Close()
-	leadClient := leadspb.NewLeadServiceClient(leadsConn)
-	log.Println("Connected to leads-service.")
+	wg.Add(1)
+	go attemptGrpcReconnect(ctx, cfg.OrganizationServiceHost, cfg.OrganizationServicePort, "organization-service", func(conn *grpc.ClientConn, client interface{}) {
+		resolver.OrganizationClient = client.(organizationpb.OrganizationServiceClient)
+	}, &wg)
 
-	// Initialize OpportunityService Client
-	opportunityConn, err := grpc.Dial(
-		fmt.Sprintf("%s:%d", cfg.OpportunityServiceHost, cfg.OpportunityServicePort),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
-		grpc.WithTimeout(5*time.Second),
-	)
-	if err != nil {
-		log.Fatalf("Failed to connect to opportunity-service: %v", err)
-	}
-	defer opportunityConn.Close()
-	opportunityClient := opportunitypb.NewOpportunityServiceClient(opportunityConn)
-	log.Println("Connected to opportunity-service.")
+	wg.Add(1)
+	go attemptGrpcReconnect(ctx, cfg.LeadServiceHost, cfg.LeadServicePort, "leads-service", func(conn *grpc.ClientConn, client interface{}) {
+		resolver.LeadClient = client.(leadspb.LeadServiceClient)
+	}, &wg)
 
-	// Initialize ContactService Client
-	contactConn, err := grpc.Dial(
-		fmt.Sprintf("%s:%d", cfg.ContactServiceHost, cfg.ContactServicePort),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
-		grpc.WithTimeout(5*time.Second),
-	)
-	if err != nil {
-		log.Fatalf("Failed to connect to contact-service: %v", err)
-	}
-	defer contactConn.Close()
-	contactClient := contactpb.NewContactServiceClient(contactConn)
-	log.Println("Connected to contact-service.")
+	wg.Add(1)
+	go attemptGrpcReconnect(ctx, cfg.OpportunityServiceHost, cfg.OpportunityServicePort, "opportunity-service", func(conn *grpc.ClientConn, client interface{}) {
+		resolver.OpportunityClient = client.(opportunitypb.OpportunityServiceClient)
+	}, &wg)
 
-	// Initialize ActivityService Client
-	activityConn, err := grpc.Dial(
-		fmt.Sprintf("%s:%d", cfg.ActivityServiceHost, cfg.ActivityServicePort),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
-		grpc.WithTimeout(5*time.Second),
-	)
-	if err != nil {
-		log.Fatalf("Failed to connect to activity-service: %v", err)
-	}
-	defer activityConn.Close()
-	activityClient := activitypb.NewActivityServiceClient(activityConn)
-	log.Println("Connected to activity-service.")
+	wg.Add(1)
+	go attemptGrpcReconnect(ctx, cfg.ContactServiceHost, cfg.ContactServicePort, "contact-service", func(conn *grpc.ClientConn, client interface{}) {
+		resolver.ContactClient = client.(contactpb.ContactServiceClient)
+	}, &wg)
 
-	// Initialize vendor Client (New Code)
-	vendorConn, err := grpc.Dial(
-		fmt.Sprintf("%s:%d", cfg.VendorServiceHost, cfg.VendorServicePort),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
-		grpc.WithTimeout(5*time.Second),
-	)
-	if err != nil {
-		log.Fatalf("Failed to connect to vendor service: %v", err)
-	}
-	defer vendorConn.Close()
-	vendorClient := vms_pb.NewVendorServiceClient(vendorConn) // This creates a new VMS client
-	log.Println("Connected to VMS service.")
+	wg.Add(1)
+	go attemptGrpcReconnect(ctx, cfg.ActivityServiceHost, cfg.ActivityServicePort, "activity-service", func(conn *grpc.ClientConn, client interface{}) {
+		resolver.ActivityClient = client.(activitypb.ActivityServiceClient)
+	}, &wg)
 
-	// Initialize payment Client (New Code)
-	paymentConn, err := grpc.Dial(
-		fmt.Sprintf("%s:%d", cfg.PaymentServiceHost, cfg.PaymentServicePort),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
-		grpc.WithTimeout(5*time.Second),
-	)
-	if err != nil {
-		log.Fatalf("Failed to connect to payment service: %v", err)
-	}
-	defer paymentConn.Close()
-	paymentClient := vms_pb.NewPaymentServiceClient(paymentConn) // This creates a new VMS client
+	wg.Add(1)
+	go attemptGrpcReconnect(ctx, cfg.VendorServiceHost, cfg.VendorServicePort, "vendor-service", func(conn *grpc.ClientConn, client interface{}) {
+		resolver.VendorClient = client.(vms_pb.VendorServiceClient)
+	}, &wg)
 
-	// Initialize performance Client (New Code)
-	performanceConn, err := grpc.Dial(
-		fmt.Sprintf("%s:%d", cfg.PerformanceServiceHost, cfg.PerformanceServicePort),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
-		grpc.WithTimeout(5*time.Second),
-	)
-	if err != nil {
-		log.Fatalf("Failed to connect to performance service: %v", err)
-	}
-	defer performanceConn.Close()
-	performanceClient := vms_pb.NewPerformanceServiceClient(performanceConn) // This creates a new VMS client
+	wg.Add(1)
+	go attemptGrpcReconnect(ctx, cfg.PaymentServiceHost, cfg.PaymentServicePort, "payment-service", func(conn *grpc.ClientConn, client interface{}) {
+		resolver.PaymentClient = client.(vms_pb.PaymentServiceClient)
+	}, &wg)
 
-	// Initialize purchase order Client (New Code)
-	purchaseOrderConn, err := grpc.Dial(
-		fmt.Sprintf("%s:%d", cfg.PurchaseOrderServiceHost, cfg.PurchaseOrderServicePort),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
-		grpc.WithTimeout(5*time.Second),
-	)
-	if err != nil {
-		log.Fatalf("Failed to connect to purchase order service: %v", err)
-	}
-	defer purchaseOrderConn.Close()
-	purchaseOrderClient := vms_pb.NewPurchaseOrderServiceClient(purchaseOrderConn) // This creates a new VMS client
+	wg.Add(1)
+	go attemptGrpcReconnect(ctx, cfg.PerformanceServiceHost, cfg.PerformanceServicePort, "performance-service", func(conn *grpc.ClientConn, client interface{}) {
+		resolver.PerformanceClient = client.(vms_pb.PerformanceServiceClient)
+	}, &wg)
 
-	// Initialize Invoice Client (New Code)
-	invoiceConn, err := grpc.Dial(
-		fmt.Sprintf("%s:%d", cfg.InvoiceServiceHost, cfg.InvoiceServicePort),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
-		grpc.WithTimeout(5*time.Second),
-	)
-	if err != nil {
-		log.Fatalf("Failed to connect to invoice service: %v", err)
-	}
-	defer invoiceConn.Close()
-	invoiceClient := finance_pb.NewInvoiceServiceClient(invoiceConn) // This creates a new VMS client
+	wg.Add(1)
+	go attemptGrpcReconnect(ctx, cfg.PurchaseOrderServiceHost, cfg.PurchaseOrderServicePort, "purchase-order-service", func(conn *grpc.ClientConn, client interface{}) {
+		resolver.PurchaseOrderClient = client.(vms_pb.PurchaseOrderServiceClient)
+	}, &wg)
 
-	// Initialize CreditNote Client (New Code)
-	creditNoteConn, err := grpc.Dial(
-		fmt.Sprintf("%s:%d", cfg.CreditDebitNoteServiceHost, cfg.CreditDebitNoteServicePort),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
-		grpc.WithTimeout(5*time.Second),
-	)
-	if err != nil {
-		log.Fatalf("Failed to connect to credit note service: %v", err)
-	}
-	defer creditNoteConn.Close()
-	creditDebitNoteClient := finance_pb.NewCreditDebitNoteServiceClient(creditNoteConn) // This creates a new VMS client
+	wg.Add(1)
+	go attemptGrpcReconnect(ctx, cfg.InvoiceServiceHost, cfg.InvoiceServicePort, "invoice-service", func(conn *grpc.ClientConn, client interface{}) {
+		resolver.InvoiceClient = client.(finance_pb.InvoiceServiceClient)
+	}, &wg)
 
-	// Initialize PaymentDue Client (New Code)
-	paymentDueConn, err := grpc.Dial(
-		fmt.Sprintf("%s:%d", cfg.PaymentDueServiceHost, cfg.PaymentDueServicePort),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
-		grpc.WithTimeout(5*time.Second),
-	)
-	if err != nil {
-		log.Fatalf("Failed to connect to payment due service: %v", err)
-	}
-	defer paymentDueConn.Close()
-	paymentDueClient := finance_pb.NewPaymentServiceClient(paymentDueConn) // This creates a new VMS client
+	wg.Add(1)
+	go attemptGrpcReconnect(ctx, cfg.CreditDebitNoteServiceHost, cfg.CreditDebitNoteServicePort, "credit-debit-note-service", func(conn *grpc.ClientConn, client interface{}) {
+		resolver.CreditDebitNoteClient = client.(finance_pb.CreditDebitNoteServiceClient)
+	}, &wg)
 
-	// Initialize Ledger Client (New Code)
-	ledgerConn, err := grpc.Dial(
-		fmt.Sprintf("%s:%d", cfg.LedgerServiceHost, cfg.LedgerServicePort),
-		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
-		grpc.WithTimeout(5*time.Second),
-	)
-	if err != nil {
-		log.Fatalf("Failed to connect to ledger service: %v", err)
-	}
-	defer ledgerConn.Close()
-	ledgerClient := finance_pb.NewLedgerServiceClient(ledgerConn) // This creates a new VMS client
+	wg.Add(1)
+	go attemptGrpcReconnect(ctx, cfg.LedgerServiceHost, cfg.LedgerServicePort, "ledger-service", func(conn *grpc.ClientConn, client interface{}) {
+		resolver.LedgerClient = client.(finance_pb.LedgerServiceClient)
+	}, &wg)
 
-	// Step 3: Initialize Resolver with all gRPC Clients
-	resolver := &resolvers.Resolver{
-		AuthClient:            authClient,
-		UserClient:            userClient,
-		OrganizationClient:    orgClient,
-		LeadClient:            leadClient,
-		OpportunityClient:     opportunityClient,
-		ContactClient:         contactClient,
-		ActivityClient:        activityClient,
-		VendorClient:          vendorClient,
-		PaymentClient:         paymentClient,
-		PerformanceClient:     performanceClient,
-		PurchaseOrderClient:   purchaseOrderClient,
-		InvoiceClient:         invoiceClient,
-		CreditDebitNoteClient: creditDebitNoteClient,
-		PaymentDueClient:      paymentDueClient,
-		LedgerClient:          ledgerClient,
-	}
-
-	// Step 4: Setup GraphQL Server
+	// Set up GraphQL Server with the resolver that will dynamically receive clients
 	gqlSrv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
 		Resolvers: resolver,
 	}))
 
-	// Step 5: Setup HTTP Router
 	router := mux.NewRouter()
+	log.Println("Applying CORS middleware...") // Confirm CORS middleware application
+	router.Use(loggingMiddleware)              // Log all incoming requests
+	router.Use(cors)
 
-	// Add GraphQL Playground handler
+	// Set up GraphQL and Playground routes with logging
+	log.Println("Setting up routes...")
+	// Set up GraphQL and Playground routes
 	router.Handle("/", playground.Handler("GraphQL Playground", "/graphql"))
-
-	// Add GraphQL endpoint handler
 	router.Handle("/graphql", gqlSrv)
-
-	// Step 6: Create the HTTP Server
+	router.Handle("/query", gqlSrv) // If "/query" is another endpoint being used
+	router.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Test endpoint accessed")
+		w.Write([]byte("CORS Middleware Test"))
+	}).Methods("GET")
 	httpServer := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.GraphQLPort),
 		Handler:      router,
@@ -283,7 +269,7 @@ func main() {
 		IdleTimeout:  120 * time.Second,
 	}
 
-	// Step 7: Start Listening on Specified Port
+	// Start HTTP server in a goroutine
 	go func() {
 		log.Printf("GraphQL Gateway running on :%d", cfg.GraphQLPort)
 		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
@@ -291,19 +277,24 @@ func main() {
 		}
 	}()
 
-	// Step 8: Graceful Shutdown
+	// Wait for any shutdown signal
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 	log.Println("Shutting down server...")
 
-	// Create a deadline to wait for current operations to complete
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
-	defer cancel()
+	// Trigger context cancellation to stop goroutines
+	cancel()
 
-	if err := httpServer.Shutdown(ctx); err != nil {
+	// Gracefully shut down the HTTP server with a timeout
+	ctxShutDown, cancelShutDown := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancelShutDown()
+
+	if err := httpServer.Shutdown(ctxShutDown); err != nil {
 		log.Fatalf("Server forced to shutdown: %v", err)
 	}
 
-	log.Println("Server exiting")
+	// Wait for all reconnection goroutines to finish
+	wg.Wait()
+	log.Println("Server exited gracefully")
 }

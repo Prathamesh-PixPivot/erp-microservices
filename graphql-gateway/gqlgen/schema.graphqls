@@ -345,6 +345,7 @@ input CreateInvoiceInput {
     type: String!
     vendor_id: ID
     customer_id: ID
+    organization_id: ID!  # required field
     items: [InvoiceItemInput!]!
     invoice_date: String!
 }

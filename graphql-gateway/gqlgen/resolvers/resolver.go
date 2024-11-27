@@ -946,13 +946,20 @@ func (r *mutationResolver) ProcessInvoice(ctx context.Context, purchaseOrderID s
 
 // CreateInvoice is the resolver for the createInvoice field.
 func (r *mutationResolver) CreateInvoice(ctx context.Context, input model.CreateInvoiceInput) (*model.Invoice, error) {
+	if input.OrganizationID == "" {
+		log.Println("OrganizationID is missing or empty")
+		return nil, errors.New("organization ID is required")
+	}
+	log.Printf("Creating invoice with input: %+v", input)
+
 	req := &finance_pb.CreateInvoiceRequest{
 		Invoice: &finance_pb.Invoice{
-			Type:        input.Type,
-			VendorId:    getValue(input.VendorID),
-			CustomerId:  getValue(input.CustomerID),
-			InvoiceDate: timestamppb.Now(),
-			Items:       convertInvoiceItemsToProto(input.Items),
+			Type:           input.Type,
+			VendorId:       getValue(input.VendorID),
+			CustomerId:     getValue(input.CustomerID),
+			OrganizationId: input.OrganizationID, // Dereference the pointer
+			InvoiceDate:    timestamppb.Now(),
+			Items:          convertInvoiceItemsToProto(input.Items),
 		},
 	}
 
@@ -1214,20 +1221,7 @@ func (r *mutationResolver) SetReorderPoint(ctx context.Context, productID string
 }
 
 // AddOrUpdateInventoryItem is the resolver for the addOrUpdateInventoryItem field.
-func (r *mutationResolver) AddOrUpdateInventoryItem(
-	ctx context.Context,
-	productID string,
-	productName string,
-	productDescription *string,
-	sku string,
-	supplierID string,
-	category *string,
-	price float64,
-	availableQuantity int,
-	reorderPoint int,
-	warehouseStocks []*model.WarehouseStockInput,
-) (*model.InventoryItem, error) {
-
+func (r *mutationResolver) AddOrUpdateInventoryItem(ctx context.Context, productID string, productName string, productDescription *string, sku string, supplierID string, category *string, price float64, availableQuantity int, reorderPoint int, warehouseStocks []*model.WarehouseStockInput) (*model.InventoryItem, error) {
 	// Prepare the gRPC request for AddOrUpdateInventoryItem
 	req := &inventory_pb.AddOrUpdateInventoryItemRequest{
 		Item: &inventory_pb.InventoryItem{
@@ -1285,10 +1279,6 @@ func (r *mutationResolver) AddOrUpdateInventoryItem(
 			return stocks
 		}(),
 	}, nil
-}
-
-func getStringValue(productDescription *string) {
-	panic("unimplemented")
 }
 
 // ProcessOrder is the resolver for the processOrder field.

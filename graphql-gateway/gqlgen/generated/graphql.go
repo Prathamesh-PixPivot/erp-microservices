@@ -2884,6 +2884,7 @@ input CreateInvoiceInput {
     type: String!
     vendor_id: ID
     customer_id: ID
+    organization_id: ID!  # required field
     items: [InvoiceItemInput!]!
     invoice_date: String!
 }
@@ -21943,7 +21944,7 @@ func (ec *executionContext) unmarshalInputCreateInvoiceInput(ctx context.Context
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"type", "vendor_id", "customer_id", "items", "invoice_date"}
+	fieldsInOrder := [...]string{"type", "vendor_id", "customer_id", "organization_id", "items", "invoice_date"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -21971,6 +21972,13 @@ func (ec *executionContext) unmarshalInputCreateInvoiceInput(ctx context.Context
 				return it, err
 			}
 			it.CustomerID = data
+		case "organization_id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("organization_id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.OrganizationID = data
 		case "items":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("items"))
 			data, err := ec.unmarshalNInvoiceItemInput2ᚕᚖgraphqlᚑgatewayᚋgqlgenᚋmodelᚐInvoiceItemInputᚄ(ctx, v)

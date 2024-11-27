@@ -11,9 +11,9 @@ type Invoice struct {
 	ID             uuid.UUID     `gorm:"type:uuid;primary_key;" json:"id"`
 	InvoiceNumber  string        `json:"invoice_number"`                    // Auto-generated or custom pattern
 	Type           string        `json:"type"`                              // "sales", "proforma", "challan", "purchase"
-	VendorID       *uuid.UUID    `json:"vendor_id"`                         // Vendor ID for purchase invoices
-	CustomerID     *uuid.UUID    `json:"customer_id"`                       // Customer ID for sales and other invoices
-	OrganizationID uuid.UUID     `json:"organization_id"`                   // Organization ID for generating invoice number
+	VendorID       *string       `json:"vendor_id"`                         // Vendor ID for purchase invoices
+	CustomerID     *string       `json:"customer_id"`                       // Customer ID for sales and other invoices
+	OrganizationID string        `json:"organization_id"`                   // Organization ID for generating invoice number
 	Items          []InvoiceItem `gorm:"foreignKey:InvoiceID" json:"items"` // Linked items
 	TotalAmount    float64       `json:"total_amount"`                      // Calculated automatically based on items
 	CGST           float64       `json:"cgst"`                              // Calculated automatically

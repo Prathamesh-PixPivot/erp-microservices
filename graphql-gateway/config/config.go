@@ -110,14 +110,14 @@ func LoadConfig() (*Config, error) {
 
 	// Invoice gRPC Configuration
 	cfg.InvoiceServiceHost = getEnv("Invoice_HOST", "localhost")
-	cfg.InvoiceServicePort, err = getEnvAsInt("Invoice_PORT", 50059)
+	cfg.InvoiceServicePort, err = getEnvAsInt("Invoice_PORT", 50002)
 	if err != nil {
 		return nil, fmt.Errorf("invalid Invoice_PORT: %v", err)
 	}
 
 	// Payment gRPC Configuration
 	cfg.PaymentServiceHost = getEnv("Payment_HOST", "localhost")
-	cfg.PaymentServicePort, err = getEnvAsInt("Payment_PORT", 50055)
+	cfg.PaymentServicePort, err = getEnvAsInt("Payment_PORT", 50058)
 	if err != nil {
 		return nil, fmt.Errorf("invalid Payment_PORT: %v", err)
 	}
@@ -138,21 +138,21 @@ func LoadConfig() (*Config, error) {
 
 	// CreditNote gRPC Configuration
 	cfg.CreditDebitNoteServiceHost = getEnv("CreditNote_HOST", "localhost")
-	cfg.CreditDebitNoteServicePort, err = getEnvAsInt("CreditNote_PORT", 50059)
+	cfg.CreditDebitNoteServicePort, err = getEnvAsInt("CreditNote_PORT", 50002)
 	if err != nil {
 		return nil, fmt.Errorf("invalid CreditNote_PORT: %v", err)
 	}
 
 	// PaymentDue gRPC Configuration
 	cfg.PaymentDueServiceHost = getEnv("PaymentDue_HOST", "localhost")
-	cfg.PaymentDueServicePort, err = getEnvAsInt("PaymentDue_PORT", 50059)
+	cfg.PaymentDueServicePort, err = getEnvAsInt("PaymentDue_PORT", 50002)
 	if err != nil {
 		return nil, fmt.Errorf("invalid PaymentDue_PORT: %v", err)
 	}
 
 	// Ledger gRPC Configuration
 	cfg.LedgerServiceHost = getEnv("Ledger_HOST", "localhost")
-	cfg.LedgerServicePort, err = getEnvAsInt("Ledger_PORT", 50059)
+	cfg.LedgerServicePort, err = getEnvAsInt("Ledger_PORT", 50002)
 	if err != nil {
 		return nil, fmt.Errorf("invalid Ledger_PORT: %v", err)
 	}
