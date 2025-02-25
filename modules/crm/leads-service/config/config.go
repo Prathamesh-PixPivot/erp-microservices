@@ -14,7 +14,7 @@ type Config struct {
 }
 
 func Load() *Config {
-	viper.SetConfigName("config")
+	viper.SetConfigName("cmd/config")
 	viper.AddConfigPath(".")
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatalf("Error reading config file: %s", err)

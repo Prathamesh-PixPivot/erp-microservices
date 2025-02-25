@@ -52,7 +52,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to listen on port %s: %v", cfg.GRPCPort, err)
 	}
-	log.Printf("Opportunity service is listening on port %s", cfg.GRPCPort)
 
 	// Graceful shutdown
 	go func() {

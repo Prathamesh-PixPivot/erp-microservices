@@ -29,8 +29,8 @@ func LoadConfig() (*Config, error) {
 		return nil, fmt.Errorf("invalid DB_PORT: %v", err)
 	}
 	cfg.DBUser = getEnv("DB_USER", "postgres")
-	cfg.DBPassword = getEnv("DB_PASSWORD", "root")
-	cfg.DBName = getEnv("DB_NAME", "activity-task-service")
+	cfg.DBPassword = getEnv("DB_PASSWORD", "Ehsaas@2718")
+	cfg.DBName = getEnv("DB_NAME", "pixerp")
 	cfg.DBSSLMode = getEnv("DB_SSLMODE", "disable")
 
 	// gRPC Server Configuration

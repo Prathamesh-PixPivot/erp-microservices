@@ -1,4 +1,15 @@
+version: "3.8"
+
 services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.5
+    environment:
+      KEYCLOAK_ADMIN: "admin"
+      KEYCLOAK_ADMIN_PASSWORD: "admin"
+    command: start-dev
+    ports:
+      - "8080:8080"
+
   graphql-gateway:
     build: ./graphql-gateway
     ports:
@@ -45,55 +56,101 @@ services:
     depends_on:
       - postgres
 
-  prometheus:
-    image: prom/prometheus
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+  activity-task-service:
+    build: ./modules/crm/activity-task-service
     ports:
-      - "9090:9090"
-
-  grafana:
-    image: grafana/grafana
-    ports:
-      - "3000:3000"
-    depends_on:
-      - prometheus
-
-  # elasticsearch:
-  #   image: docker.elastic.co/elasticsearch/elasticsearch:7.10.1
-  #   ports:
-  #     - "9200:9200"
-
-  # logstash:
-  #   image: docker.elastic.co/logstash/logstash:7.10.1
-  #   ports:
-  #     - "5000:5000"
-  #   volumes:
-  #     - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
-
-  # kibana:
-  #   image: docker.elastic.co/kibana/kibana:7.10.1
-  #   ports:
-  #     - "5601:5601"
-  #   depends_on:
-  #     - elasticsearch
-
-  zookeeper:
-    image: wurstmeister/zookeeper
-    ports:
-      - "2181:2181"
-
-  kafka:
-    image: wurstmeister/kafka
-    ports:
-      - "9092:9092"
+      - "50057:50057"
     environment:
-      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
-      KAFKA_LISTENERS: "PLAINTEXT://0.0.0.0:9092"
-      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://localhost:9092"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "root"
+      POSTGRES_DB: "pixerp"
     depends_on:
-      - zookeeper
+      - postgres
+      - graphql-gateway
+      - user-service
+      - contact-service
 
+  contact-service:
+    build: ./modules/crm/contact-service
+    ports:
+      - "50056:50056"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "root"
+      POSTGRES_DB: "pixerp"
+    depends_on:
+      - postgres
+      - graphql-gateway
+      - user-service
+
+  leads-service:
+    build: ./modules/crm/leads-service
+    ports:
+      - "50054:50054"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "root"
+      POSTGRES_DB: "pixerp"
+    depends_on:
+      - postgres
+      - graphql-gateway
+      - user-service
+
+  opportunity-service:
+    build: ./modules/crm/opportunity-service
+    ports:
+      - "50055:50055"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "root"
+      POSTGRES_DB: "pixerp"
+    depends_on:
+      - postgres
+      - graphql-gateway
+      - user-service
+      - contact-service
+
+  finance-service:
+    build: ./modules/finance-service
+    ports:
+      - "50002:50002"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "root"
+      POSTGRES_DB: "vms-service"
+    depends_on:
+      - postgres
+      - graphql-gateway
+      - user-service
+      - organization-service
+
+  inventory-service:
+    build: ./modules/inventory-service
+    ports:
+      - "50003:50003"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "root"
+      POSTGRES_DB: "inventory-service"
+    depends_on:
+      - postgres
+      - graphql-gateway
+      - user-service
+      - organization-service
+
+  vms-service:
+    build: ./modules/vms-service
+    ports:
+      - "50004:50004"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "root"
+      POSTGRES_DB: "vms-service"
+    depends_on:
+      - postgres
+      - graphql-gateway
+      - user-service
+      - organization-service
 
   postgres:
     image: postgres:13
@@ -105,14 +162,6 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
-  keycloak:
-    image: quay.io/keycloak/keycloak:25.0.5
-    environment:
-      KEYCLOAK_ADMIN: "admin"
-      KEYCLOAK_ADMIN_PASSWORD: "admin"
-    command: start-dev
-    ports:
-      - "8080:8080"
 volumes:
   pgdata:
     driver: local

@@ -166,7 +166,7 @@ func (s *AuthServiceServer) Signup(ctx context.Context, req *authpb.SignupReques
 // Signin handles user login and token generation via Keycloak via gRPC
 func (s *AuthServiceServer) Signin(ctx context.Context, req *authpb.SigninRequest) (*authpb.SigninResponse, error) {
 	// Authenticate user via Keycloak
-	token, err := s.keycloakClient.Login(ctx, viper.GetString("KEYCLOAK_CLIENT_ID"), viper.GetString("KEYCLOAK_CLIENT_SECRET"), viper.GetString("KEYCLOAK_REALM"), req.Email, req.Password, "openid")
+	token, err := s.keycloakClient.Login(ctx, viper.GetString("KEYCLOAK_CLIENT_ID"), viper.GetString("KEYCLOAK_CLIENT_SECRET"), viper.GetString("KEYCLOAK_REALM"), req.Email, req.Password)
 	if err != nil {
 		log.Printf("Failed to authenticate user: %v", err)
 		return nil, fmt.Errorf("invalid credentials")

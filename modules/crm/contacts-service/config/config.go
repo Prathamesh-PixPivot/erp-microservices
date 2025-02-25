@@ -36,8 +36,8 @@ func LoadConfig() (*Config, error) {
 	}
 
 	cfg.DBUser = getEnv("DB_USER", "postgres")
-	cfg.DBPassword = getEnv("DB_PASSWORD", "root")
-	cfg.DBName = getEnv("DB_NAME", "contacts-service")
+	cfg.DBPassword = getEnv("DB_PASSWORD", "Ehsaas@2718")
+	cfg.DBName = getEnv("DB_NAME", "pixerp")
 	cfg.DBSSLMode = getEnv("DB_SSLMODE", "disable")
 
 	// gRPC Server Configuration

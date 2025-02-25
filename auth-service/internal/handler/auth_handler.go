@@ -183,7 +183,7 @@ func (h *AuthHandler) SigninUser(c *fiber.Ctx) error {
 	}
 
 	// Authenticate user via Keycloak
-	token, err := h.keycloakClient.Login(c.Context(), viper.GetString("KEYCLOAK_CLIENT_ID"), viper.GetString("KEYCLOAK_CLIENT_SECRET"), h.realm, req.Email, req.Password, "openid")
+	token, err := h.keycloakClient.Login(c.Context(), viper.GetString("KEYCLOAK_CLIENT_ID"), viper.GetString("KEYCLOAK_CLIENT_SECRET"), h.realm, req.Email, req.Password)
 	if err != nil {
 		log.Printf("Realm: %s\nemail: %s\npassword: %s", h.realm, req.Email, req.Password)
 		log.Printf("Failed to authenticate user: %v", err)

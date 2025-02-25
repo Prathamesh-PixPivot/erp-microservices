@@ -1,5 +1,5 @@
 database:
-  dsn: "postgres://postgres:root@localhost:5432/vms-service?sslmode=disable"
+  dsn: "postgres://postgres:root@localhost:5432/finance-service?sslmode=disable"
 
 server:
   port: ":50002"

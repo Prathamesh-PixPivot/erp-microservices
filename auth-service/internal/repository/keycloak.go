@@ -86,7 +86,7 @@ func (r *KeycloakRepository) CreateUserInKeycloak(email, password, firstName, la
 
 // AuthenticateUser authenticates a user with Keycloak and returns access/refresh tokens
 func (r *KeycloakRepository) AuthenticateUser(email, password string) (*gocloak.JWT, error) {
-	token, err := r.client.Login(context.Background(), r.clientID, viper.GetString("KEYCLOAK_CLIENT_SECRET"), r.realm, email, password, "openid")
+	token, err := r.client.Login(context.Background(), r.clientID, viper.GetString("KEYCLOAK_CLIENT_SECRET"), r.realm, email, password)
 	if err != nil {
 		return nil, errors.New("failed to authenticate user with Keycloak")
 	}
