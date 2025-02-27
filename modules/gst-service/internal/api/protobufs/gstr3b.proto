@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+// Specify the Go package location and import path
+option go_package = "/internal/api/protobufs/gst-service;protobufs";
+
+service GSTR3BService {
+    rpc SaveGSTR3B (GSTR3BRequest) returns (GSTR3BResponse);
+    rpc SubmitGSTR3B (GSTR3BSubmitRequest) returns (GSTR3BSubmitResponse);
+    rpc FileGSTR3B (GSTR3BFileRequest) returns (GSTR3BFileResponse);
+    rpc GetGSTR3BStatus (GSTR3BStatusRequest) returns (GSTR3BStatusResponse);
+}
+
+message GSTR3BRequest {
+    string gstin = 1;
+    string return_period = 2;
+    string taxable_value = 3;
+    string tax_liability = 4;
+    string itc_claimed = 5;
+}
+
+message GSTR3BResponse {
+    string ref_id = 1;
+    string status = 2;
+}
+
+message GSTR3BSubmitRequest {
+    string gstin = 1;
+    string return_period = 2;
+}
+
+message GSTR3BSubmitResponse {
+    string arn = 1;
+    string status = 2;
+}
+
+message GSTR3BFileRequest {
+    string gstin = 1;
+    string return_period = 2;
+    string arn = 3;
+}
+
+message GSTR3BFileResponse {
+    string filing_status = 1;
+    string message = 2;
+}
+
+message GSTR3BStatusRequest {
+    string gstin = 1;
+    string return_period = 2;
+    string arn = 3;
+}
+
+message GSTR3BStatusResponse {
+    string status = 1;
+    string message = 2;
+}

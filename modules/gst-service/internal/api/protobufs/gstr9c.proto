@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+// Specify the Go package location and import path
+option go_package = "/internal/api/protobufs/gst-service;protobufs";
+
+service GSTR9CService {
+    rpc SaveGSTR9C (GSTR9CRequest) returns (GSTR9CResponse);
+    rpc SubmitGSTR9C (GSTR9CSubmitRequest) returns (GSTR9CSubmitResponse);
+    rpc FileGSTR9C (GSTR9CFileRequest) returns (GSTR9CFileResponse);
+    rpc GetGSTR9CStatus (GSTR9CStatusRequest) returns (GSTR9CStatusResponse);
+}
+
+message GSTR9CRequest {
+    string gstin = 1;
+    string return_period = 2;
+    string audit_details = 3;
+    string reconciliation_statement = 4;
+}
+
+message GSTR9CResponse {
+    string ref_id = 1;
+    string status = 2;
+}
+
+message GSTR9CSubmitRequest {
+    string gstin = 1;
+    string return_period = 2;
+}
+
+message GSTR9CSubmitResponse {
+    string arn = 1;
+    string status = 2;
+}
+
+message GSTR9CFileRequest {
+    string gstin = 1;
+    string return_period = 2;
+    string arn = 3;
+}
+
+message GSTR9CFileResponse {
+    string filing_status = 1;
+    string message = 2;
+}
+
+message GSTR9CStatusRequest {
+    string gstin = 1;
+    string return_period = 2;
+    string arn = 3;
+}
+
+message GSTR9CStatusResponse {
+    string status = 1;
+    string message = 2;
+}

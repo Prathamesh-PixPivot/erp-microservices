@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package reconciliation;
+
+// Specify the Go package location and import path
+option go_package = "/internal/api/protobufs/gst-service;protobufs";
+
+// Define the Reconciliation gRPC Service
+service GSTRReconciliationService {
+    rpc ReconcileGSTR1WithGSTR2A (GSTR1ReconcileRequest) returns (GSTR1ReconcileResponse);
+}
+
+// Request structure for GSTR1 vs GSTR2A reconciliation
+message GSTR1ReconcileRequest {
+    string gstin = 1;
+    string return_period = 2;
+}
+
+// Response structure for reconciliation results
+message GSTR1ReconcileResponse {
+    string status = 1;
+    repeated Invoice reconciliation_details = 2;
+}
+
+// Invoice structure used in reconciliation
+message Invoice {
+    string invoice_number = 1;
+    string invoice_date = 2;
+    string taxable_value = 3;
+    string tax_amount = 4;
+}

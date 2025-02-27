@@ -1,0 +1,26 @@
+server:
+  grpc_port: 50051  # gRPC server port
+
+database:
+  host: "localhost"
+  port: 5432
+  user: "postgres"
+  password: "Ehsaas@2718"
+  dbname: "gst_db"
+  sslmode: "disable"
+  max_connections: 50
+  max_idle_connections: 10
+
+logging:
+  level: "info"  # Log level: debug, info, warn, error
+  file: "logs/gst-service.log"
+
+external_api:
+  gst_portal_base_url: "https://api.gst.gov.in"
+  api_key: "your-secret-api-key"
+
+cache:
+  redis_host: "localhost"
+  redis_port: 6379
+  redis_password: ""
+  redis_db: 0
