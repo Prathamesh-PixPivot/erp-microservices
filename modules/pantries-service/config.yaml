@@ -1,0 +1,6 @@
+database:
+  dsn: "postgres://postgres:root@localhost:5432/pantry_service?sslmode=disable"
+
+server:
+  grpc_port: "50001"
+  http_port: "8080"

@@ -1,0 +1,197 @@
+syntax = "proto3";
+
+package pantry;
+
+option go_package = "/pantry_pb";
+
+// Inventory Management Service
+service PantryService {
+    
+    // CRUD for pantry items
+    rpc CreatePantryItem (CreatePantryItemRequest) returns (CreatePantryItemResponse);
+    rpc GetPantryItem (GetPantryItemRequest) returns (GetPantryItemResponse);
+    rpc UpdatePantryItem (UpdatePantryItemRequest) returns (UpdatePantryItemResponse);
+    rpc DeletePantryItem (DeletePantryItemRequest) returns (DeletePantryItemResponse);
+    rpc ListPantryItems (ListPantryItemsRequest) returns (ListPantryItemsResponse);
+
+	// CRUD for pantry items
+    rpc CreateBucketItem (CreateBucketItemRequest) returns (CreateBucketItemResponse);
+    rpc GetBucketItem (GetBucketItemRequest) returns (GetBucketItemResponse);
+    rpc UpdateBucketItem (UpdateBucketItemRequest) returns (UpdateBucketItemResponse);
+    rpc DeleteBucketItem (DeleteBucketItemRequest) returns (DeleteBucketItemResponse);
+    rpc ListBucketItems (ListBucketItemsRequest) returns (ListBucketItemsResponse);
+
+	// 	// CRUD for pantry items
+    rpc CreateExpenseLog (CreateExpenseLogRequest) returns (CreateExpenseLogResponse);
+    rpc GetExpenseLog (GetExpenseLogRequest) returns (GetExpenseLogResponse);
+    rpc UpdateExpenseLog (UpdateExpenseLogRequest) returns (UpdateExpenseLogResponse);
+    rpc DeleteExpenseLog (DeleteExpenseLogRequest) returns (DeleteExpenseLogResponse);
+    rpc ListExpenseLogs (ListExpenseLogsRequest) returns (ListExpenseLogsResponse);
+
+}
+
+// pantry items
+message PantryItem {
+	string  product_name=1;
+	float 	price=2;
+	string  category=3;
+	string created_at=4;
+	string updated_at=5;
+}
+
+// pantry bucket items
+message BucketItem {
+    string    product_id=1;
+	float   qty=2;
+	float   price=3;
+	float   total=4;
+	string    paid_by=5;
+	string created_at=6;
+	string updated_at=7;
+}
+// pantry expense logs
+message ExpenseLog {
+    float   amt_received=1;
+	float   amt_spend=2;
+	string created_at=3;
+	string updated_at=4;
+}
+
+// messages for pantry items
+message CreatePantryItemRequest{
+    PantryItem item=1;
+}
+
+message CreatePantryItemResponse{
+    PantryItem item=1;
+	bool success=2;
+}
+
+message GetPantryItemRequest{
+	string product_id=1;
+}
+
+message GetPantryItemResponse{
+	PantryItem item=1;
+	bool success=2;
+}
+
+message UpdatePantryItemRequest{
+	PantryItem item=1;
+}
+
+message UpdatePantryItemResponse{
+	PantryItem item=1;
+	bool success=2;
+}
+
+message DeletePantryItemRequest{
+	string product_id=1;
+}
+
+message DeletePantryItemResponse{
+	bool success=1;
+}
+
+message ListPantryItemsRequest{
+	int32 limit=1;
+	int32 offset=2;
+}
+
+message ListPantryItemsResponse{
+	repeated PantryItem items=1;
+	bool success=2;
+}
+
+//messages for Pantry bucket items
+message CreateBucketItemRequest{
+	BucketItem item=1;
+}
+
+message CreateBucketItemResponse{
+	BucketItem item=1;
+	bool success=2;
+}
+
+message GetBucketItemRequest{
+	string product_id=1;
+}
+
+message GetBucketItemResponse{
+	BucketItem item=1;
+	bool success=2;
+}
+
+message UpdateBucketItemRequest{
+	BucketItem item=1;
+}
+
+message UpdateBucketItemResponse{
+	BucketItem item=1;
+	bool success=2;
+}
+
+message DeleteBucketItemRequest{
+	string product_id=1;
+}
+
+message DeleteBucketItemResponse{
+	bool success=1;
+}
+
+message ListBucketItemsRequest{
+	int32 limit=1;
+	int32 offset=2;
+}
+
+message ListBucketItemsResponse{
+	repeated BucketItem items=1;
+	bool success=2;
+}
+
+
+//messages for Pantry bucket items
+message CreateExpenseLogRequest{
+	ExpenseLog log=1;
+}
+
+message CreateExpenseLogResponse{
+	ExpenseLog log=1;
+	bool success=2;
+}
+
+message GetExpenseLogRequest{
+	string logID=1;
+}
+
+message GetExpenseLogResponse{
+	ExpenseLog log=1;
+	bool success=2;
+}
+
+message UpdateExpenseLogRequest{
+	ExpenseLog log=1;
+}
+
+message UpdateExpenseLogResponse{
+	ExpenseLog log=1;
+	bool success=2;
+}
+
+message DeleteExpenseLogRequest{
+	string logID=1;
+}
+
+message DeleteExpenseLogResponse{
+	bool success=1;
+}
+
+message ListExpenseLogsRequest{
+	int32 limit=1;
+	int32 offset=2;
+}
+
+message ListExpenseLogsResponse{
+	repeated ExpenseLog logs=1;
+	bool success=2;
+}
