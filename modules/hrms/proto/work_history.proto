@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package hrms;
+
+option go_package = "hrms/proto;hrmspb";
+
+import "google/protobuf/wrappers.proto";
+
+// WorkHistoryService defines operations for managing work history records.
+service WorkHistoryService {
+  // Creates a new work history record.
+  rpc CreateWorkHistory(CreateWorkHistoryRequest) returns (WorkHistoryResponse);
+
+  // Fetches a specific work history record by ID.
+  rpc GetWorkHistoryByID(GetWorkHistoryByIDRequest) returns (WorkHistoryResponse);
+
+  // Retrieves work history records for a specific employee.
+  rpc GetWorkHistoryByEmployee(GetWorkHistoryByEmployeeRequest) returns (GetWorkHistoryByEmployeeResponse);
+
+  // Updates an existing work history record.
+  rpc UpdateWorkHistory(UpdateWorkHistoryRequest) returns (UpdateWorkHistoryResponse);
+
+  // Deletes a work history record.
+  rpc DeleteWorkHistory(DeleteWorkHistoryRequest) returns (DeleteWorkHistoryResponse);
+}
+
+// WorkHistory message structure.
+message WorkHistory {
+  uint64 id = 1;
+  uint64 employee_id = 2;
+  string company = 3;
+  string designation = 4;
+  string start_date = 5;
+  string end_date = 6;
+  string reason_for_exit = 7;
+}
+
+// Request & Response messages.
+message CreateWorkHistoryRequest {
+  uint64 employee_id = 1;
+  string company = 2;
+  string designation = 3;
+  string start_date = 4;
+  string end_date = 5;
+  string reason_for_exit = 6;
+}
+
+message WorkHistoryResponse {
+  WorkHistory work_history = 1;
+}
+
+message GetWorkHistoryByIDRequest {
+  uint64 work_history_id = 1;
+}
+
+message GetWorkHistoryByEmployeeRequest {
+  uint64 employee_id = 1;
+}
+
+message GetWorkHistoryByEmployeeResponse {
+  repeated WorkHistory work_histories = 1;
+}
+
+message UpdateWorkHistoryRequest {
+  uint64 work_history_id = 1;
+  map<string, string> updates = 2; // Dynamic field updates
+}
+
+message UpdateWorkHistoryResponse {
+  bool success = 1;
+}
+
+message DeleteWorkHistoryRequest {
+  uint64 work_history_id = 1;
+}
+
+message DeleteWorkHistoryResponse {
+  bool success = 1;
+}

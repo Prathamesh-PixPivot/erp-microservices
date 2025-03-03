@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package hrms;
+option go_package = "hrms/proto";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// Employee Exit message
+message EmployeeExit {
+  uint64 id = 1;
+  uint64 employee_id = 2;
+  string exit_type = 3;
+  google.protobuf.Timestamp exit_date = 4;
+  string clearance_status = 5;
+}
+
+// Request for creating an employee exit record
+message CreateEmployeeExitRequest {
+  uint64 employee_id = 1;
+  string exit_type = 2;
+  google.protobuf.Timestamp exit_date = 3;
+  string clearance_status = 4;
+}
+
+// Response with employee exit details
+message EmployeeExitResponse {
+  EmployeeExit exit = 1;
+}
+
+// Request for fetching exit records by employee ID
+message GetExitRecordsByEmployeeRequest {
+  uint64 employee_id = 1;
+}
+
+// Response for listing multiple exit records
+message ListEmployeeExitsResponse {
+  repeated EmployeeExit exits = 1;
+}
+
+// Request for fetching an exit record by ID
+message GetEmployeeExitByIDRequest {
+  uint64 exit_id = 1;
+}
+
+// Request for updating clearance status
+message UpdateClearanceStatusRequest {
+  uint64 exit_id = 1;
+  string clearance_status = 2;
+}
+
+// Request for deleting an exit record by ID
+message DeleteEmployeeExitRequest {
+  uint64 exit_id = 1;
+}
+
+// gRPC Service for Employee Exits
+service EmployeeExitService {
+  rpc CreateEmployeeExit(CreateEmployeeExitRequest) returns (EmployeeExitResponse);
+  rpc GetEmployeeExitByID(GetEmployeeExitByIDRequest) returns (EmployeeExitResponse);
+  rpc GetExitRecordsByEmployee(GetExitRecordsByEmployeeRequest) returns (ListEmployeeExitsResponse);
+  rpc GetPendingClearances(google.protobuf.Empty) returns (ListEmployeeExitsResponse);
+  rpc UpdateClearanceStatus(UpdateClearanceStatusRequest) returns (google.protobuf.Empty);
+  rpc DeleteEmployeeExit(DeleteEmployeeExitRequest) returns (google.protobuf.Empty);
+}

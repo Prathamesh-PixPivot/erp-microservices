@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package hrms;
+option go_package = "hrms/proto";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// Enum for loan/advance status
+enum LoanStatus {
+  PENDING = 0;
+  APPROVED = 1;
+  REJECTED = 2;
+}
+
+// LoanAdvance request message
+message LoanAdvance {
+  uint64 id = 1;
+  uint64 employee_id = 2;
+  double amount = 3;
+  string purpose = 4;
+  LoanStatus status = 5;
+  optional uint64 approved_by = 6;
+  optional google.protobuf.Timestamp approval_date = 7;
+  optional google.protobuf.Timestamp repayment_start = 8;
+  int32 repayment_months = 9;
+  google.protobuf.Timestamp created_at = 10;
+}
+
+// Request to submit a new loan/advance request
+message RequestLoanAdvance {
+  uint64 employee_id = 1;
+  double amount = 2;
+  string purpose = 3;
+  int32 repayment_months = 4;
+}
+
+// Response containing loan details
+message LoanAdvanceResponse {
+  LoanAdvance loan = 1;
+}
+
+// Request to approve a loan/advance request
+message ApproveLoanAdvanceRequest {
+  uint64 loan_id = 1;
+  uint64 approver_id = 2;
+  google.protobuf.Timestamp approval_date = 3;
+  google.protobuf.Timestamp repayment_start = 4;
+}
+
+// Request to reject a loan/advance request
+message RejectLoanAdvanceRequest {
+  uint64 loan_id = 1;
+  uint64 approver_id = 2;
+}
+
+// Request to fetch a loan request by ID
+message GetLoanAdvanceRequest {
+  uint64 loan_id = 1;
+}
+
+// Request to list loan/advance requests with optional filters
+message ListLoanAdvancesRequest {
+  optional LoanStatus status = 1;
+  optional uint64 employee_id = 2;
+}
+
+// Response containing a list of loan/advance requests
+message ListLoanAdvancesResponse {
+  repeated LoanAdvance loans = 1;
+}
+
+// Request to delete a loan/advance request
+message DeleteLoanAdvanceRequest {
+  uint64 loan_id = 1;
+}
+
+// gRPC Service for Loan Advance Management
+service LoanAdvanceService {
+  rpc RequestLoanAdvance(RequestLoanAdvance) returns (LoanAdvanceResponse);
+  rpc ApproveLoanAdvance(ApproveLoanAdvanceRequest) returns (google.protobuf.Empty);
+  rpc RejectLoanAdvance(RejectLoanAdvanceRequest) returns (google.protobuf.Empty);
+  rpc GetLoanAdvance(GetLoanAdvanceRequest) returns (LoanAdvanceResponse);
+  rpc ListLoanAdvances(ListLoanAdvancesRequest) returns (ListLoanAdvancesResponse);
+  rpc DeleteLoanAdvance(DeleteLoanAdvanceRequest) returns (google.protobuf.Empty);
+}

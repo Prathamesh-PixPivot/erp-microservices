@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package hrms;
+option go_package = "hrms/proto";
+
+import "google/protobuf/empty.proto";
+
+// Employee Perk message
+message EmployeePerk {
+  uint64 id = 1;
+  uint64 employee_id = 2;
+  string perk = 3;
+}
+
+// Request for creating an employee perk
+message CreateEmployeePerkRequest {
+  uint64 employee_id = 1;
+  string perk = 2;
+}
+
+// Response with employee perk details
+message EmployeePerkResponse {
+  EmployeePerk perk = 1;
+}
+
+// Request for fetching perks by employee ID
+message GetEmployeePerksRequest {
+  uint64 employee_id = 1;
+}
+
+// Response for listing multiple perks
+message ListEmployeePerksResponse {
+  repeated EmployeePerk perks = 1;
+}
+
+// Request for updating an employee perk
+message UpdateEmployeePerkRequest {
+  uint64 perk_id = 1;
+  string perk = 2;
+}
+
+// Request for deleting an employee perk by ID
+message DeleteEmployeePerkRequest {
+  uint64 perk_id = 1;
+}
+
+// gRPC Service for Employee Perks
+service EmployeePerkService {
+  rpc CreateEmployeePerk(CreateEmployeePerkRequest) returns (EmployeePerkResponse);
+  rpc GetEmployeePerks(GetEmployeePerksRequest) returns (ListEmployeePerksResponse);
+  rpc UpdateEmployeePerk(UpdateEmployeePerkRequest) returns (google.protobuf.Empty);
+  rpc DeleteEmployeePerk(DeleteEmployeePerkRequest) returns (google.protobuf.Empty);
+}

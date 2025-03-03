@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+package hrms;
+option go_package = "hrms/proto";
+
+import "google/protobuf/empty.proto";
+
+// Performance KPI message
+message PerformanceKPI {
+  uint64 id = 1;
+  uint64 review_id = 2;
+  string kpi_name = 3;
+  double score = 4;
+  string comments = 5;
+}
+
+// Request to create a KPI entry
+message CreatePerformanceKPIRequest {
+  uint64 review_id = 1;
+  string kpi_name = 2;
+  double score = 3;
+  string comments = 4;
+}
+
+// Response containing the created KPI details
+message PerformanceKPIResponse {
+  PerformanceKPI kpi = 1;
+}
+
+// Request to get a KPI by ID
+message GetPerformanceKPIRequest {
+  uint64 kpi_id = 1;
+}
+
+// Request to list KPIs for a specific review
+message ListPerformanceKPIsRequest {
+  uint64 review_id = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+// Response containing a paginated list of KPIs
+message ListPerformanceKPIsResponse {
+  int32 total = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+  repeated PerformanceKPI kpis = 4;
+}
+
+// Request to update a KPI
+message UpdatePerformanceKPIRequest {
+  uint64 kpi_id = 1;
+  optional string kpi_name = 2;
+  optional double score = 3;
+  optional string comments = 4;
+}
+
+// Request to delete a KPI
+message DeletePerformanceKPIRequest {
+  uint64 kpi_id = 1;
+}
+
+// gRPC Service for Performance KPI Management
+service PerformanceKPIService {
+  rpc CreatePerformanceKPI(CreatePerformanceKPIRequest) returns (PerformanceKPIResponse);
+  rpc GetPerformanceKPI(GetPerformanceKPIRequest) returns (PerformanceKPIResponse);
+  rpc ListPerformanceKPIs(ListPerformanceKPIsRequest) returns (ListPerformanceKPIsResponse);
+  rpc UpdatePerformanceKPI(UpdatePerformanceKPIRequest) returns (google.protobuf.Empty);
+  rpc DeletePerformanceKPI(DeletePerformanceKPIRequest) returns (google.protobuf.Empty);
+}

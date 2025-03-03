@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package hrms;
+option go_package = "hrms/proto";
+
+import "google/protobuf/empty.proto";
+
+// Enum for leave types
+enum LeaveType {
+  UNDEFINED = 0;
+  SICK_LEAVE = 1;
+  CASUAL_LEAVE = 2;
+  ANNUAL_LEAVE = 3;
+  MATERNITY_LEAVE = 4;
+  PATERNITY_LEAVE = 5;
+}
+
+// Leave policy message
+message LeavePolicy {
+  uint64 id = 1;
+  uint64 organization_id = 2;
+  LeaveType leave_type = 3;
+  int32 max_days = 4;
+  bool carry_forward = 5;
+}
+
+// Request for creating a leave policy
+message CreateLeavePolicyRequest {
+  uint64 organization_id = 1;
+  LeaveType leave_type = 2;
+  int32 max_days = 3;
+  bool carry_forward = 4;
+}
+
+// Response containing leave policy details
+message LeavePolicyResponse {
+  LeavePolicy policy = 1;
+}
+
+// Request to fetch a leave policy by ID
+message GetLeavePolicyRequest {
+  uint64 policy_id = 1;
+}
+
+// Request to list leave policies for an organization
+message ListLeavePoliciesRequest {
+  uint64 organization_id = 1;
+}
+
+// Response containing a list of leave policies
+message ListLeavePoliciesResponse {
+  repeated LeavePolicy policies = 1;
+}
+
+// Request to update leave policy fields
+message UpdateLeavePolicyRequest {
+  uint64 policy_id = 1;
+  optional int32 max_days = 2;
+  optional bool carry_forward = 3;
+}
+
+// Request to delete a leave policy
+message DeleteLeavePolicyRequest {
+  uint64 policy_id = 1;
+}
+
+// gRPC Service for Leave Policy Management
+service LeavePolicyService {
+  rpc CreateLeavePolicy(CreateLeavePolicyRequest) returns (LeavePolicyResponse);
+  rpc GetLeavePolicy(GetLeavePolicyRequest) returns (LeavePolicyResponse);
+  rpc ListLeavePolicies(ListLeavePoliciesRequest) returns (ListLeavePoliciesResponse);
+  rpc UpdateLeavePolicy(UpdateLeavePolicyRequest) returns (google.protobuf.Empty);
+  rpc DeleteLeavePolicy(DeleteLeavePolicyRequest) returns (google.protobuf.Empty);
+}

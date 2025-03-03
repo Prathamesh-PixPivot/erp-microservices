@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package hrms;
+option go_package = "hrms/proto";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+// Expense message
+message Expense {
+  uint64 id = 1;
+  uint64 employee_id = 2;
+  string expense_type = 3;
+  double amount = 4;
+  string status = 5;
+  google.protobuf.Timestamp date = 6;
+  optional uint64 approver_id = 7;
+}
+
+// Request for creating an expense
+message CreateExpenseRequest {
+  uint64 employee_id = 1;
+  string expense_type = 2;
+  double amount = 3;
+}
+
+// Response containing an expense
+message ExpenseResponse {
+  Expense expense = 1;
+}
+
+// Request to fetch a specific expense
+message GetExpenseRequest {
+  uint64 expense_id = 1;
+}
+
+// Request to fetch all expenses of an employee
+message GetEmployeeExpensesRequest {
+  uint64 employee_id = 1;
+}
+
+// Response containing a list of expenses
+message EmployeeExpensesResponse {
+  repeated Expense expenses = 1;
+}
+
+// Request to update an expense's status
+message UpdateExpenseStatusRequest {
+  uint64 expense_id = 1;
+  uint64 approver_id = 2;
+  string new_status = 3;
+}
+
+// Request to delete an expense
+message DeleteExpenseRequest {
+  uint64 expense_id = 1;
+  uint64 employee_id = 2;
+}
+
+// gRPC Service for Expense Management
+service ExpenseService {
+  rpc CreateExpense(CreateExpenseRequest) returns (ExpenseResponse);
+  rpc GetExpense(GetExpenseRequest) returns (ExpenseResponse);
+  rpc GetEmployeeExpenses(GetEmployeeExpensesRequest) returns (EmployeeExpensesResponse);
+  rpc UpdateExpenseStatus(UpdateExpenseStatusRequest) returns (google.protobuf.Empty);
+  rpc DeleteExpense(DeleteExpenseRequest) returns (google.protobuf.Empty);
+}

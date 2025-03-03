@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package department;
+
+option go_package = "hrms/proto/department";
+
+service DepartmentService {
+  rpc CreateDepartment (CreateDepartmentRequest) returns (DepartmentResponse);
+  rpc GetDepartmentByID (GetDepartmentByIDRequest) returns (DepartmentResponse);
+  rpc UpdateDepartment (UpdateDepartmentRequest) returns (UpdateDepartmentResponse);
+  rpc DeleteDepartment (DeleteDepartmentRequest) returns (DeleteDepartmentResponse);
+  rpc ListDepartments (ListDepartmentsRequest) returns (ListDepartmentsResponse);
+}
+
+message Department {
+  uint64 id = 1;
+  string name = 2;
+  uint64 organization_id = 3;
+}
+
+message CreateDepartmentRequest {
+  string name = 1;
+  uint64 organization_id = 2;
+}
+
+message CreateDepartmentResponse {
+  Department department = 1;
+}
+
+message GetDepartmentByIDRequest {
+  uint64 id = 1;
+}
+
+message GetDepartmentByIDResponse {
+  Department department = 1;
+}
+
+message UpdateDepartmentRequest {
+  uint64 id = 1;
+  string name = 2;
+}
+
+message UpdateDepartmentResponse {
+  bool success = 1;
+}
+
+message DeleteDepartmentRequest {
+  uint64 id = 1;
+}
+
+message DeleteDepartmentResponse {
+  bool success = 1;
+}
+
+message ListDepartmentsRequest {
+  uint64 organization_id = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+  string search = 4;
+}
+
+message ListDepartmentsResponse {
+  repeated Department departments = 1;
+  int64 total_count = 2;
+}

@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package hrms;
+option go_package = "hrms/proto";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// Organization model
+message Organization {
+  uint64 id = 1;
+  string name = 2;
+  string address = 3;
+  string phone = 4;
+  string email = 5;
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+// Request for creating an organization
+message CreateOrganizationRequest {
+  string name = 1;
+  string address = 2;
+  string phone = 3;
+  string email = 4;
+}
+
+// Response containing organization details
+message OrganizationResponse {
+  Organization organization = 1;
+}
+
+// Request for fetching an organization by ID
+message GetOrganizationRequest {
+  uint64 org_id = 1;
+}
+
+// Request for updating an organization
+message UpdateOrganizationRequest {
+  uint64 org_id = 1;
+  optional string name = 2;
+  optional string address = 3;
+  optional string phone = 4;
+  optional string email = 5;
+}
+
+// Request for deleting an organization
+message DeleteOrganizationRequest {
+  uint64 org_id = 1;
+}
+
+// Request for listing organizations with pagination and search filter
+message ListOrganizationsRequest {
+  int32 limit = 1;
+  int32 offset = 2;
+  optional string search = 3;
+}
+
+// Response containing a paginated list of organizations
+message ListOrganizationsResponse {
+  int32 total = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+  repeated Organization organizations = 4;
+}
+
+// gRPC Service for Organization Management
+service OrganizationService {
+  rpc CreateOrganization(CreateOrganizationRequest) returns (OrganizationResponse);
+  rpc GetOrganization(GetOrganizationRequest) returns (OrganizationResponse);
+  rpc UpdateOrganization(UpdateOrganizationRequest) returns (google.protobuf.Empty);
+  rpc DeleteOrganization(DeleteOrganizationRequest) returns (google.protobuf.Empty);
+  rpc ListOrganizations(ListOrganizationsRequest) returns (ListOrganizationsResponse);
+}

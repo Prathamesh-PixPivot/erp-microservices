@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package hrms;
+
+option go_package = "hrms/proto;hrmspb";
+
+import "google/protobuf/wrappers.proto";
+
+// Shift service definition.
+service ShiftService {
+  // Creates a new shift.
+  rpc CreateShift(CreateShiftRequest) returns (ShiftResponse);
+
+  // Fetches a specific shift by ID.
+  rpc GetShiftByID(GetShiftByIDRequest) returns (ShiftResponse);
+
+  // Retrieves all shifts with optional search & pagination.
+  rpc ListShifts(ListShiftsRequest) returns (ListShiftsResponse);
+
+  // Updates an existing shift.
+  rpc UpdateShift(UpdateShiftRequest) returns (UpdateShiftResponse);
+
+  // Deletes a shift.
+  rpc DeleteShift(DeleteShiftRequest) returns (DeleteShiftResponse);
+}
+
+// Shift message structure.
+message Shift {
+  uint64 id = 1;
+  string name = 2;
+  string shift_type = 3; // Enum or string representation
+  string start_time = 4;
+  string end_time = 5;
+  repeated string days_of_week = 6;
+}
+
+// Request & Response messages.
+message CreateShiftRequest {
+  string name = 1;
+  string shift_type = 2;
+  string start_time = 3;
+  string end_time = 4;
+  repeated string days_of_week = 5;
+}
+
+message ShiftResponse {
+  Shift shift = 1;
+}
+
+message GetShiftByIDRequest {
+  uint64 shift_id = 1;
+}
+
+message ListShiftsRequest {
+  google.protobuf.Int32Value limit = 1;
+  google.protobuf.Int32Value offset = 2;
+  google.protobuf.StringValue search = 3; // Optional search filter
+}
+
+message ListShiftsResponse {
+  repeated Shift shifts = 1;
+  int64 total_count = 2;
+}
+
+message UpdateShiftRequest {
+  uint64 shift_id = 1;
+  map<string, string> updates = 2; // Dynamic field updates
+}
+
+message UpdateShiftResponse {
+  bool success = 1;
+}
+
+message DeleteShiftRequest {
+  uint64 shift_id = 1;
+}
+
+message DeleteShiftResponse {
+  bool success = 1;
+}

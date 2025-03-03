@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package hrms;
+
+option go_package = "hrms/proto;hrmspb";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+// PublicHoliday service definition.
+service PublicHolidayService {
+  // Creates a new public holiday.
+  rpc CreatePublicHoliday(CreatePublicHolidayRequest) returns (PublicHolidayResponse);
+  
+  // Fetches a specific public holiday by ID.
+  rpc GetPublicHoliday(GetPublicHolidayRequest) returns (PublicHolidayResponse);
+  
+  // Retrieves all public holidays for an organization, with an optional year filter.
+  rpc ListPublicHolidays(ListPublicHolidaysRequest) returns (ListPublicHolidaysResponse);
+  
+  // Updates an existing public holiday.
+  rpc UpdatePublicHoliday(UpdatePublicHolidayRequest) returns (UpdatePublicHolidayResponse);
+  
+  // Deletes a public holiday.
+  rpc DeletePublicHoliday(DeletePublicHolidayRequest) returns (DeletePublicHolidayResponse);
+}
+
+// Public Holiday message structure.
+message PublicHoliday {
+  uint64 id = 1;
+  uint64 organization_id = 2;
+  string name = 3;
+  google.protobuf.Timestamp date = 4;
+}
+
+// Request & Response messages.
+message CreatePublicHolidayRequest {
+  uint64 organization_id = 1;
+  string name = 2;
+  google.protobuf.Timestamp date = 3;
+}
+
+message PublicHolidayResponse {
+  PublicHoliday holiday = 1;
+}
+
+message GetPublicHolidayRequest {
+  uint64 holiday_id = 1;
+}
+
+message ListPublicHolidaysRequest {
+  uint64 organization_id = 1;
+  google.protobuf.Int32Value year = 2; // Optional year filter
+}
+
+message ListPublicHolidaysResponse {
+  repeated PublicHoliday holidays = 1;
+}
+
+message UpdatePublicHolidayRequest {
+  uint64 holiday_id = 1;
+  map<string, string> updates = 2; // Dynamic field updates
+}
+
+message UpdatePublicHolidayResponse {
+  bool success = 1;
+}
+
+message DeletePublicHolidayRequest {
+  uint64 holiday_id = 1;
+}
+
+message DeletePublicHolidayResponse {
+  bool success = 1;
+}

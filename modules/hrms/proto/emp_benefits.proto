@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package employee;
+
+option go_package = "hrms/proto/employee";
+
+service EmployeeService {
+  rpc CreateEmployeeBenefits(CreateEmployeeBenefitsRequest) returns (EmployeeBenefitsDTO);
+  rpc GetEmployeeBenefits(GetEmployeeBenefitsRequest) returns (EmployeeBenefitsDTO);
+  rpc UpdateEmployeeBenefits(UpdateEmployeeBenefitsRequest) returns (EmptyResponse);
+  rpc DeleteEmployeeBenefits(DeleteEmployeeBenefitsRequest) returns (EmptyResponse);
+  rpc ListEmployeeBenefits(ListEmployeeBenefitsRequest) returns (ListEmployeeBenefitsResponse);
+}
+
+message EmployeeBenefitsDTO {
+  uint64 id = 1;
+  uint64 employee_id = 2;
+  string health_plan = 3;
+  string retirement_plan = 4;
+}
+
+message CreateEmployeeBenefitsRequest {
+  uint64 employee_id = 1;
+  string health_plan = 2;
+  string retirement_plan = 3;
+}
+
+message GetEmployeeBenefitsRequest {
+  uint64 employee_id = 1;
+}
+
+message UpdateEmployeeBenefitsRequest {
+  uint64 employee_id = 1;
+  string health_plan = 2;
+  string retirement_plan = 3;
+}
+
+message DeleteEmployeeBenefitsRequest {
+  uint64 employee_id = 1;
+}
+
+message ListEmployeeBenefitsRequest {
+  string health_plan = 1;
+  string retirement_plan = 2;
+}
+
+message ListEmployeeBenefitsResponse {
+  repeated EmployeeBenefitsDTO benefits = 1;
+}
+
+message EmptyResponse {}

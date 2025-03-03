@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+package hrms;
+option go_package = "hrms/proto";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// Enum for leave status
+enum LeaveStatus {
+  PENDING = 0;
+  APPROVED = 1;
+  REJECTED = 2;
+}
+
+// Enum for leave types
+enum LeaveType {
+  UNDEFINED = 0;
+  SICK_LEAVE = 1;
+  CASUAL_LEAVE = 2;
+  ANNUAL_LEAVE = 3;
+  MATERNITY_LEAVE = 4;
+  PATERNITY_LEAVE = 5;
+}
+
+// Leave request message
+message Leave {
+  uint64 id = 1;
+  uint64 employee_id = 2;
+  LeaveType leave_type = 3;
+  google.protobuf.Timestamp start_date = 4;
+  google.protobuf.Timestamp end_date = 5;
+  LeaveStatus status = 6;
+  optional uint64 approver_id = 7;
+  optional string comments = 8;
+}
+
+// Request for creating a leave request
+message CreateLeaveRequest {
+  uint64 employee_id = 1;
+  LeaveType leave_type = 2;
+  google.protobuf.Timestamp start_date = 3;
+  google.protobuf.Timestamp end_date = 4;
+}
+
+// Response containing leave details
+message LeaveResponse {
+  Leave leave = 1;
+}
+
+// Request to fetch a leave request by ID
+message GetLeaveRequest {
+  uint64 leave_id = 1;
+}
+
+// Request to update the status of a leave request
+message UpdateLeaveStatusRequest {
+  uint64 leave_id = 1;
+  uint64 approver_id = 2;
+  LeaveStatus status = 3;
+  optional string comments = 4;
+}
+
+// Request to list leave requests with filters
+message ListLeavesRequest {
+  optional uint64 employee_id = 1;
+  optional LeaveStatus status = 2;
+  optional google.protobuf.Timestamp start_date = 3;
+  optional google.protobuf.Timestamp end_date = 4;
+  int32 limit = 5;
+  int32 offset = 6;
+}
+
+// Response containing a list of leave requests
+message ListLeavesResponse {
+  repeated Leave leaves = 1;
+}
+
+// Request to delete a leave request
+message DeleteLeaveRequest {
+  uint64 leave_id = 1;
+}
+
+// gRPC Service for Leave Management
+service LeaveService {
+  rpc CreateLeave(CreateLeaveRequest) returns (LeaveResponse);
+  rpc GetLeave(GetLeaveRequest) returns (LeaveResponse);
+  rpc UpdateLeaveStatus(UpdateLeaveStatusRequest) returns (google.protobuf.Empty);
+  rpc ListLeaves(ListLeavesRequest) returns (ListLeavesResponse);
+  rpc DeleteLeave(DeleteLeaveRequest) returns (google.protobuf.Empty);
+}

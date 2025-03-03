@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package hrms;
+
+option go_package = "hrms/proto";
+
+service DesignationService {
+  rpc CreateDesignation(CreateDesignationRequest) returns (DesignationResponse);
+  rpc GetDesignationByID(GetDesignationRequest) returns (DesignationResponse);
+  rpc UpdateDesignation(UpdateDesignationRequest) returns (EmptyResponse);
+  rpc DeleteDesignation(DeleteDesignationRequest) returns (EmptyResponse);
+  rpc ListDesignations(ListDesignationsRequest) returns (ListDesignationsResponse);
+}
+
+message Designation {
+  uint64 id = 1;
+  string title = 2;
+  string level = 3;
+  uint32 hierarchy_level = 4;
+  uint64 department_id = 5;
+}
+
+message CreateDesignationRequest {
+  string title = 1;
+  string level = 2;
+  uint32 hierarchy_level = 3;
+  uint64 department_id = 4;
+}
+
+message GetDesignationRequest {
+  uint64 id = 1;
+}
+
+message UpdateDesignationRequest {
+  uint64 id = 1;
+  optional string title = 2;
+  optional string level = 3;
+  optional uint32 hierarchy_level = 4;
+}
+
+message DeleteDesignationRequest {
+  uint64 id = 1;
+}
+
+message ListDesignationsRequest {
+  uint64 department_id = 1;
+  uint32 limit = 2;
+  uint32 offset = 3;
+  optional string search = 4;
+}
+
+message DesignationResponse {
+  Designation designation = 1;
+}
+
+message ListDesignationsResponse {
+  repeated Designation designations = 1;
+  int64 total_count = 2;
+}
+
+message EmptyResponse {}

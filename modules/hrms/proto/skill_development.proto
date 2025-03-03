@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package hrms;
+
+option go_package = "hrms/proto;hrmspb";
+
+import "google/protobuf/wrappers.proto";
+
+// SkillDevelopmentService defines operations for managing skill development entries.
+service SkillDevelopmentService {
+  // Creates a new skill development entry.
+  rpc CreateSkillDevelopment(CreateSkillDevelopmentRequest) returns (SkillDevelopmentResponse);
+
+  // Fetches a specific skill development entry by ID.
+  rpc GetSkillDevelopmentByID(GetSkillDevelopmentByIDRequest) returns (SkillDevelopmentResponse);
+
+  // Retrieves skill development records for a given review.
+  rpc ListSkillDevelopments(ListSkillDevelopmentsRequest) returns (ListSkillDevelopmentsResponse);
+
+  // Updates an existing skill development entry.
+  rpc UpdateSkillDevelopment(UpdateSkillDevelopmentRequest) returns (UpdateSkillDevelopmentResponse);
+
+  // Deletes a skill development entry.
+  rpc DeleteSkillDevelopment(DeleteSkillDevelopmentRequest) returns (DeleteSkillDevelopmentResponse);
+}
+
+// SkillDevelopment message structure.
+message SkillDevelopment {
+  uint64 id = 1;
+  uint64 review_id = 2;
+  string skill = 3;
+  string progress = 4;
+}
+
+// Request & Response messages.
+message CreateSkillDevelopmentRequest {
+  uint64 review_id = 1;
+  string skill = 2;
+  string progress = 3;
+}
+
+message SkillDevelopmentResponse {
+  SkillDevelopment skill_development = 1;
+}
+
+message GetSkillDevelopmentByIDRequest {
+  uint64 skill_id = 1;
+}
+
+message ListSkillDevelopmentsRequest {
+  uint64 review_id = 1;
+  google.protobuf.Int32Value limit = 2;
+  google.protobuf.Int32Value offset = 3;
+}
+
+message ListSkillDevelopmentsResponse {
+  repeated SkillDevelopment skill_developments = 1;
+  int64 total_count = 2;
+}
+
+message UpdateSkillDevelopmentRequest {
+  uint64 skill_id = 1;
+  map<string, string> updates = 2; // Dynamic field updates
+}
+
+message UpdateSkillDevelopmentResponse {
+  bool success = 1;
+}
+
+message DeleteSkillDevelopmentRequest {
+  uint64 skill_id = 1;
+}
+
+message DeleteSkillDevelopmentResponse {
+  bool success = 1;
+}
