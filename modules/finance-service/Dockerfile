@@ -7,8 +7,8 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o contacts-service ./cmd/main.go
+RUN go build -o finance-service ./cmd/main.go
 
 EXPOSE 3001
 
-CMD ["./contacts-service"]
+CMD ["./finance-service"]

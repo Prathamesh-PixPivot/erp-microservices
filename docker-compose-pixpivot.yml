@@ -71,7 +71,7 @@ services:
       - contact-service
 
   contact-service:
-    build: ./modules/crm/contacts-service
+    build: ./modules/crm/contact-service
     ports:
       - "50056:50056"
     environment:
@@ -136,7 +136,7 @@ services:
       - postgres
       - graphql-gateway
       - user-service
-      - organization-service
+      - organization-service  
 
   vms-service:
     build: ./modules/vms-service
@@ -146,6 +146,20 @@ services:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "root"
       POSTGRES_DB: "vms-service"
+    depends_on:
+      - postgres
+      - graphql-gateway
+      - user-service
+      - organization-service
+
+  pantry-service:
+    build: ./modules/pantry-service
+    ports:
+      -"50005:50005"
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "root"
+      POSTGRES_DB: "pantry-service"
     depends_on:
       - postgres
       - graphql-gateway
