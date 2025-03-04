@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package hrms;
+option go_package = "hrms/proto;hrms";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// Employee Document message
+message EmployeeDocument {
+  uint64 id = 1;
+  uint64 employee_id = 2;
+  string document_name = 3;
+  string document_url = 4;
+  google.protobuf.Timestamp expiry_date = 5;
+}
+
+// Request for creating an employee document
+message CreateEmployeeDocumentRequest {
+  uint64 employee_id = 1;
+  string document_name = 2;
+  string document_url = 3;
+  google.protobuf.Timestamp expiry_date = 4;
+}
+
+// Response with employee document details
+message EmployeeDocumentResponse {
+  EmployeeDocument document = 1;
+}
+
+// Request for updating an employee document
+message UpdateEmployeeDocumentRequest {
+  uint64 id = 1;
+  string document_name = 2;
+  string document_url = 3;
+  google.protobuf.Timestamp expiry_date = 4;
+}
+
+// Request for fetching documents by employee ID
+message GetDocumentsByEmployeeRequest {
+  uint64 employee_id = 1;
+}
+
+// Response for listing multiple documents
+message ListEmployeeDocumentsResponse {
+  repeated EmployeeDocument documents = 1;
+}
+
+// Request for fetching a document by ID
+message GetEmployeeDocumentByIDRequest {
+  uint64 document_id = 1;
+}
+
+// Request for deleting a document by ID
+message DeleteEmployeeDocumentRequest {
+  uint64 document_id = 1;
+}
+
+// gRPC Service for Employee Documents
+service EmployeeDocumentService {
+  rpc CreateEmployeeDocument(CreateEmployeeDocumentRequest) returns (EmployeeDocumentResponse);
+  rpc GetEmployeeDocumentByID(GetEmployeeDocumentByIDRequest) returns (EmployeeDocumentResponse);
+  rpc GetDocumentsByEmployee(GetDocumentsByEmployeeRequest) returns (ListEmployeeDocumentsResponse);
+  rpc GetExpiredDocuments(google.protobuf.Empty) returns (ListEmployeeDocumentsResponse);
+  rpc UpdateEmployeeDocument(UpdateEmployeeDocumentRequest) returns (google.protobuf.Empty);
+  rpc DeleteEmployeeDocument(DeleteEmployeeDocumentRequest) returns (google.protobuf.Empty);
+}

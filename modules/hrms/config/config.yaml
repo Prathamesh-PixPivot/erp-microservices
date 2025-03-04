@@ -1,0 +1,22 @@
+server:
+  mode: production
+  grpc_port: 50051
+  read_timeout: 5s
+  write_timeout: 5s
+
+database:
+  driver: postgres
+  port: 5432 # Static default, overridden by .env if provided
+
+logging:
+  level: "info"   # Options: debug, info, warn, error
+  format: "console"  # Options: json, console (text-based)
+  output: "logs"  # Options: stdout, file
+
+tracing:
+  enabled: true
+  exporter: "otlp"
+
+kafka:
+  enabled: true
+  brokers: ["kafka1:9092", "kafka2:9092", "kafka3:9092"]

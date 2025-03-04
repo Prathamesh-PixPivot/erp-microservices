@@ -1,0 +1,14 @@
+# Define paths
+PROTO_DIR=proto
+OUT_DIR=internal/transport/grpc/proto
+
+# Generate gRPC and protobuf code
+gen:
+	protoc --go_out=$(OUT_DIR) --go-grpc_out=$(OUT_DIR) \
+	  --go_opt=paths=source_relative \
+	  --go-grpc_opt=paths=source_relative \
+	  $(PROTO_DIR)/*.proto
+
+# Clean generated files
+clean:
+	rm -f $(OUT_DIR)/*.pb.go

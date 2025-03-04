@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package hrms;
+option go_package = "hrms/proto;hrms";
+
+import "google/protobuf/timestamp.proto";
+
+service AttendanceService {
+  rpc CreateAttendance (CreateAttendanceRequest) returns (AttendanceResponse);
+  rpc CheckOutAttendance (CheckOutAttendanceRequest) returns (CheckOutResponse);
+  rpc GetAttendanceByID (GetAttendanceByIDRequest) returns (AttendanceResponse);
+  rpc ListAttendances (ListAttendancesRequest) returns (ListAttendancesResponse);
+  rpc DeleteAttendance (DeleteAttendanceRequest) returns (DeleteAttendanceResponse);
+}
+
+message Attendance {
+  uint64 id = 1;
+  uint64 employee_id = 2;
+  google.protobuf.Timestamp date = 3;
+  google.protobuf.Timestamp check_in = 4;
+  google.protobuf.Timestamp check_out = 5;
+  double work_hours = 6;
+  double overtime = 7;
+  double break_time = 8;
+  string location = 9;
+  bool is_remote = 10;
+  string punch_method = 11;
+  google.protobuf.Timestamp created_at = 12;
+  google.protobuf.Timestamp updated_at = 13;
+} 
+
+message CreateAttendanceRequest {
+  uint64 employee_id = 1;
+  google.protobuf.Timestamp date = 2;
+  google.protobuf.Timestamp check_in = 3;
+  string location = 4;
+  bool is_remote = 5;
+  string punch_method = 6;
+}
+
+message CheckOutAttendanceRequest {
+  uint64 employee_id = 1;
+  google.protobuf.Timestamp check_out = 2;
+}
+
+message GetAttendanceByIDRequest {
+  uint64 id = 1;
+}
+
+message ListAttendancesRequest {
+  uint64 employee_id = 1;
+  google.protobuf.Timestamp start_date = 2;
+  google.protobuf.Timestamp end_date = 3;
+  optional bool is_remote = 4;
+  int32 limit = 5;
+  int32 offset = 6;
+}
+
+message DeleteAttendanceRequest {
+  uint64 id = 1;
+}
+
+message AttendanceResponse {
+  Attendance attendance = 1;
+}
+
+message CheckOutResponse {
+  string message = 1;
+}
+
+message ListAttendancesResponse {
+  repeated Attendance attendances = 1;
+  int64 total = 2;
+}
+
+message DeleteAttendanceResponse {
+  string message = 1;
+}

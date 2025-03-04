@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package hrms;
+option go_package = "hrms/proto;hrms";
+
+import "google/protobuf/empty.proto";
+import "proto/leave.proto";  // ✅ Importing leave.proto to use LeaveType
+
+// Leave balance message
+message LeaveBalance {
+  uint64 employee_id = 1;
+  hrms.LeaveType leave_type = 2;  // ✅ Use hrms.LeaveType
+  int32 total_leaves = 3;
+  int32 used_leaves = 4;
+  int32 remaining = 5;
+}
+
+// Request for creating a leave balance
+message CreateLeaveBalanceRequest {
+  uint64 employee_id = 1;
+  hrms.LeaveType leave_type = 2;
+  int32 total_leaves = 3;
+}
+
+// Response containing leave balance details
+message LeaveBalanceResponse {
+  LeaveBalance balance = 1;
+}
+
+// Request to deduct leave balance
+message DeductLeaveBalanceRequest {
+  uint64 employee_id = 1;
+  hrms.LeaveType leave_type = 2;
+  int32 leave_days = 3;
+}
+
+// Request to restore leave balance
+message RestoreLeaveBalanceRequest {
+  uint64 employee_id = 1;
+  hrms.LeaveType leave_type = 2;
+  int32 leave_days = 3;
+}
+
+// Request to fetch leave balance for an employee
+message GetLeaveBalanceRequest {
+  uint64 employee_id = 1;
+  hrms.LeaveType leave_type = 2;
+}
+
+// Request to list leave balances with filters
+message ListLeaveBalancesRequest {
+  optional uint64 employee_id = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+// Response containing a list of leave balances
+message ListLeaveBalancesResponse {
+  repeated LeaveBalance balances = 1;
+  int64 total = 2;
+}
+
+// Request to delete a leave balance
+message DeleteLeaveBalanceRequest {
+  uint64 employee_id = 1;
+  hrms.LeaveType leave_type = 2;
+}
+
+// gRPC Service for Leave Balance Management
+service LeaveBalanceService {  // ✅ Changed from LeaveService to avoid duplication
+  rpc CreateLeaveBalance(CreateLeaveBalanceRequest) returns (LeaveBalanceResponse);
+  rpc DeductLeaveBalance(DeductLeaveBalanceRequest) returns (google.protobuf.Empty);
+  rpc RestoreLeaveBalance(RestoreLeaveBalanceRequest) returns (google.protobuf.Empty);
+  rpc GetLeaveBalance(GetLeaveBalanceRequest) returns (LeaveBalanceResponse);
+  rpc ListLeaveBalances(ListLeaveBalancesRequest) returns (ListLeaveBalancesResponse);
+  rpc DeleteLeaveBalance(DeleteLeaveBalanceRequest) returns (google.protobuf.Empty);
+}

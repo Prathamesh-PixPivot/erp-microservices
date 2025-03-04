@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package hrms;
+option go_package = "hrms/proto;hrms";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// Payroll model
+message Payroll {
+  uint64 id = 1;
+  uint64 employee_id = 2;
+  double salary = 3;
+  double tax = 4;
+  double allowances = 5;
+  double deductions = 6;
+  double net_salary = 7;
+  google.protobuf.Timestamp payment_date = 8;
+  string status = 9;
+  string payslip_url = 10;
+  string bank_name = 11;
+  string bank_account_number = 12;
+  string branch_code = 13;
+  google.protobuf.Timestamp created_at = 14;
+  google.protobuf.Timestamp updated_at = 15;
+}
+
+// Request for creating a payroll entry
+message CreatePayrollRequest {
+  uint64 employee_id = 1;
+  double salary = 2;
+  double tax = 3;
+  double allowances = 4;
+  double deductions = 5;
+  double net_salary = 6;
+  google.protobuf.Timestamp payment_date = 7;
+  string status = 8;
+  string payslip_url = 9;
+  string bank_name = 10;
+  string bank_account_number = 11;
+  string branch_code = 12;
+}
+
+// Response containing payroll details
+message PayrollResponse {
+  Payroll payroll = 1;
+}
+
+// Request for fetching a payroll record by ID
+message GetPayrollRequest {
+  uint64 payroll_id = 1;
+}
+
+// Request for listing payroll records with optional filters
+message ListPayrollsRequest {
+  uint64 employee_id = 1;
+  google.protobuf.Timestamp month = 2;
+  int32 limit = 3;
+  int32 offset = 4;
+}
+
+// Response containing a paginated list of payrolls
+message ListPayrollsResponse {
+  int32 total = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+  repeated Payroll payrolls = 4;
+}
+
+// Request for updating a payroll entry
+message UpdatePayrollRequest {
+  uint64 payroll_id = 1;
+  optional string status = 2;
+  optional string payslip_url = 3;
+}
+
+// Request for deleting a payroll record
+message DeletePayrollRequest {
+  uint64 payroll_id = 1;
+}
+
+// gRPC Service for Payroll Management
+service PayrollService {
+  rpc CreatePayroll(CreatePayrollRequest) returns (PayrollResponse);
+  rpc GetPayroll(GetPayrollRequest) returns (PayrollResponse);
+  rpc ListPayrolls(ListPayrollsRequest) returns (ListPayrollsResponse);
+  rpc UpdatePayroll(UpdatePayrollRequest) returns (google.protobuf.Empty);
+  rpc DeletePayroll(DeletePayrollRequest) returns (google.protobuf.Empty);
+}

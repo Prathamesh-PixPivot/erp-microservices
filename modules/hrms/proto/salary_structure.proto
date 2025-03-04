@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package hrms;
+option go_package = "hrms/proto;hrms";
+
+import "google/protobuf/wrappers.proto";
+
+// Salary Structure service definition.
+service SalaryStructureService {
+  // Creates a new salary structure.
+  rpc CreateSalaryStructure(CreateSalaryStructureRequest) returns (SalaryStructureResponse);
+  
+  // Fetches a specific salary structure by ID.
+  rpc GetSalaryStructure(GetSalaryStructureRequest) returns (SalaryStructureResponse);
+  
+  // Retrieves all salary structures with optional organization or designation filters.
+  rpc ListSalaryStructures(ListSalaryStructuresRequest) returns (ListSalaryStructuresResponse);
+  
+  // Updates an existing salary structure.
+  rpc UpdateSalaryStructure(UpdateSalaryStructureRequest) returns (UpdateSalaryStructureResponse);
+  
+  // Deletes a salary structure.
+  rpc DeleteSalaryStructure(DeleteSalaryStructureRequest) returns (DeleteSalaryStructureResponse);
+}
+
+// Salary Structure message structure.
+message SalaryStructure {
+  uint64 id = 1;
+  uint64 organization_id = 2;
+  uint64 designation_id = 3;
+  double base_salary = 4;
+  double allowances = 5;
+  double tax_percentage = 6;
+  double deductions = 7;
+}
+
+// Request & Response messages.
+message CreateSalaryStructureRequest {
+  uint64 organization_id = 1;
+  uint64 designation_id = 2;
+  double base_salary = 3;
+  double allowances = 4;
+  double tax_percentage = 5;
+  double deductions = 6;
+}
+
+message SalaryStructureResponse {
+  SalaryStructure salary_structure = 1;
+}
+
+message GetSalaryStructureRequest {
+  uint64 salary_id = 1;
+}
+
+message ListSalaryStructuresRequest {
+  google.protobuf.UInt64Value organization_id = 1; // Optional filter
+  google.protobuf.UInt64Value designation_id = 2; // Optional filter
+}
+
+message ListSalaryStructuresResponse {
+  repeated SalaryStructure salary_structures = 1;
+}
+
+message UpdateSalaryStructureRequest {
+  uint64 salary_id = 1;
+  map<string, string> updates = 2; // Dynamic field updates
+}
+
+message UpdateSalaryStructureResponse {
+  bool success = 1;
+}
+
+message DeleteSalaryStructureRequest {
+  uint64 salary_id = 1;
+}
+
+message DeleteSalaryStructureResponse {
+  bool success = 1;
+}

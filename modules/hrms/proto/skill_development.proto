@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package hrms;
+option go_package = "hrms/proto;hrms";
+
+import "google/protobuf/empty.proto";
+
+// ✅ SkillDevelopment now lives here
+message SkillDevelopment {
+  uint64 id = 1;
+  uint64 review_id = 2;
+  string skill = 3;
+  string progress = 4;
+}
+
+// Request to create a Skill Development entry
+message CreateSkillDevelopmentRequest {
+  uint64 review_id = 1;
+  string skill = 2;
+  string progress = 3;
+}
+
+// Response containing Skill Development details
+message SkillDevelopmentResponse {
+  SkillDevelopment skill_dev = 1;
+}
+
+// Request to get a Skill Development entry by ID
+message GetSkillDevelopmentRequest {
+  uint64 skill_dev_id = 1;
+}
+
+// Request to list Skill Development entries for a specific review
+message ListSkillDevelopmentsRequest {
+  uint64 review_id = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+}
+
+// Response containing a paginated list of Skill Development entries
+message ListSkillDevelopmentsResponse {
+  int32 total = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+  repeated SkillDevelopment skill_devs = 4;
+}
+
+// Request to update a Skill Development entry
+message UpdateSkillDevelopmentRequest {
+  uint64 skill_dev_id = 1;
+  optional string skill = 2;
+  optional string progress = 3;
+}
+
+// Request to delete a Skill Development entry
+message DeleteSkillDevelopmentRequest {
+  uint64 skill_dev_id = 1;
+}
+
+// gRPC Service for Skill Development Management
+service SkillDevelopmentService {
+  rpc CreateSkillDevelopment(CreateSkillDevelopmentRequest) returns (SkillDevelopmentResponse);
+  rpc GetSkillDevelopment(GetSkillDevelopmentRequest) returns (SkillDevelopmentResponse);
+  rpc ListSkillDevelopments(ListSkillDevelopmentsRequest) returns (ListSkillDevelopmentsResponse);
+  rpc UpdateSkillDevelopment(UpdateSkillDevelopmentRequest) returns (google.protobuf.Empty);
+  rpc DeleteSkillDevelopment(DeleteSkillDevelopmentRequest) returns (google.protobuf.Empty);
+}

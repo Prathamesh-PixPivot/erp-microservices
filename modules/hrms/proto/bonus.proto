@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package hrms;
+option go_package = "hrms/proto;hrms";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+service BonusService {
+  rpc CreateBonus(CreateBonusRequest) returns (BonusResponse);
+  rpc GetBonusByID(GetBonusRequest) returns (BonusResponse);
+  rpc ListBonuses(ListBonusesRequest) returns (ListBonusesResponse);
+  rpc UpdateBonus(UpdateBonusRequest) returns (google.protobuf.Empty);
+  rpc DeleteBonus(DeleteBonusRequest) returns (google.protobuf.Empty);
+}
+
+message Bonus {
+  uint64 id = 1;
+  uint64 employee_id = 2;
+  double amount = 3;
+  string bonus_type = 4;
+  string description = 5;
+  uint64 approved_by = 6;
+  google.protobuf.Timestamp approval_date = 7;
+  google.protobuf.Timestamp issue_date = 8;
+  string status = 9;
+  google.protobuf.Timestamp created_at = 10;
+  google.protobuf.Timestamp updated_at = 11;
+}
+
+message CreateBonusRequest {
+  uint64 employee_id = 1;
+  double amount = 2;
+  string bonus_type = 3;
+  string description = 4;
+  uint64 approved_by = 5;
+  google.protobuf.Timestamp approval_date = 6;
+  google.protobuf.Timestamp issue_date = 7;
+  string status = 8;
+}
+
+message GetBonusRequest {
+  uint64 id = 1;
+}
+
+message ListBonusesRequest {
+  optional uint64 employee_id = 1;
+  optional string status = 2;
+}
+
+message ListBonusesResponse {
+  repeated Bonus bonuses = 1;
+}
+
+message BonusResponse {
+  Bonus bonus = 1;
+}
+
+message UpdateBonusRequest {
+  uint64 id = 1;
+  optional string status = 2;
+  optional google.protobuf.Timestamp approval_date = 3;
+  optional string description = 4;
+}
+
+message DeleteBonusRequest {
+  uint64 id = 1;
+}
