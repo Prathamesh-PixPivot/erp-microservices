@@ -1,12 +1,14 @@
 syntax = "proto3";
 
 package hrms;
+option go_package = "hrms/proto;hrms";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
-import "google/protobuf/wrappers.proto";
+import "google/protobuf/struct.proto";  // ✅ Fixed missing import for `google.protobuf.Value`
+import "proto/performance_kpi.proto";   // ✅ Importing `PerformanceKPI` instead of redefining it
+import "proto/skill_development.proto"; // ✅ Importing `SkillDevelopment` instead of redefining it
 
-option go_package = "hrms/proto";
 
 // PerformanceReviewService defines the gRPC methods for managing performance reviews.
 service PerformanceReviewService {
@@ -27,25 +29,13 @@ message PerformanceReview {
   int32 overall_rating = 6;
   string feedback = 7;
   bool promotion = 8;
-  repeated PerformanceKPI kpis = 9;
-  repeated SkillDevelopment skills = 10;
+  repeated PerformanceKPI kpis = 9;  // ✅ Using imported PerformanceKPI
+  repeated SkillDevelopment skills = 10; // ✅ Using imported SkillDevelopment
 }
 
-message PerformanceKPI {
-  uint64 id = 1;
-  uint64 review_id = 2;
-  string kpi_name = 3;
-  float score = 4;
-  string comments = 5;
-}
+// ✅ Removed duplicate SkillDevelopment definition (moved to skill_development.proto)
 
-message SkillDevelopment {
-  uint64 id = 1;
-  uint64 review_id = 2;
-  string skill = 3;
-  string progress = 4;
-}
-
+// Requests and Responses
 message CreatePerformanceReviewRequest {
   uint64 employee_id = 1;
   uint64 reviewer_id = 2;
@@ -54,8 +44,8 @@ message CreatePerformanceReviewRequest {
   int32 overall_rating = 5;
   string feedback = 6;
   bool promotion = 7;
-  repeated PerformanceKPI kpis = 8;
-  repeated SkillDevelopment skills = 9;
+  repeated PerformanceKPI kpis = 8;  // ✅ Using imported PerformanceKPI
+  repeated SkillDevelopment skills = 9; // ✅ Using imported SkillDevelopment
 }
 
 message PerformanceReviewResponse {
@@ -79,7 +69,7 @@ message ListPerformanceReviewsResponse {
 
 message UpdatePerformanceReviewRequest {
   uint64 review_id = 1;
-  map<string, google.protobuf.Value> updates = 2;
+  map<string, google.protobuf.Value> updates = 2; // ✅ Now correctly imported
 }
 
 message DeletePerformanceReviewRequest {

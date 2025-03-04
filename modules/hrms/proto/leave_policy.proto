@@ -1,25 +1,16 @@
 syntax = "proto3";
 
 package hrms;
-option go_package = "hrms/proto";
+option go_package = "hrms/proto;hrms";
 
 import "google/protobuf/empty.proto";
-
-// Enum for leave types
-enum LeaveType {
-  UNDEFINED = 0;
-  SICK_LEAVE = 1;
-  CASUAL_LEAVE = 2;
-  ANNUAL_LEAVE = 3;
-  MATERNITY_LEAVE = 4;
-  PATERNITY_LEAVE = 5;
-}
+import "proto/leave.proto";  // ✅ Import leave.proto to use hrms.LeaveType
 
 // Leave policy message
 message LeavePolicy {
   uint64 id = 1;
   uint64 organization_id = 2;
-  LeaveType leave_type = 3;
+  hrms.LeaveType leave_type = 3;  // ✅ Use hrms.LeaveType
   int32 max_days = 4;
   bool carry_forward = 5;
 }
@@ -27,7 +18,7 @@ message LeavePolicy {
 // Request for creating a leave policy
 message CreateLeavePolicyRequest {
   uint64 organization_id = 1;
-  LeaveType leave_type = 2;
+  hrms.LeaveType leave_type = 2;  // ✅ Use hrms.LeaveType
   int32 max_days = 3;
   bool carry_forward = 4;
 }

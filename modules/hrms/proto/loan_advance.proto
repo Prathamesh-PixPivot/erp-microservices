@@ -1,16 +1,16 @@
 syntax = "proto3";
 
 package hrms;
-option go_package = "hrms/proto";
+option go_package = "hrms/proto;hrms";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
 
-// Enum for loan/advance status
+// Enum for loan/advance status (renamed to prevent conflicts)
 enum LoanStatus {
-  PENDING = 0;
-  APPROVED = 1;
-  REJECTED = 2;
+  LOAN_PENDING = 0;
+  LOAN_APPROVED = 1;
+  LOAN_REJECTED = 2;
 }
 
 // LoanAdvance request message
@@ -28,7 +28,7 @@ message LoanAdvance {
 }
 
 // Request to submit a new loan/advance request
-message RequestLoanAdvance {
+message RequestLoanAdvanceRequest {  // ✅ Renamed to avoid confusion
   uint64 employee_id = 1;
   double amount = 2;
   string purpose = 3;
@@ -77,7 +77,7 @@ message DeleteLoanAdvanceRequest {
 
 // gRPC Service for Loan Advance Management
 service LoanAdvanceService {
-  rpc RequestLoanAdvance(RequestLoanAdvance) returns (LoanAdvanceResponse);
+  rpc RequestLoanAdvance(RequestLoanAdvanceRequest) returns (LoanAdvanceResponse);  // ✅ Fixed incorrect message reference
   rpc ApproveLoanAdvance(ApproveLoanAdvanceRequest) returns (google.protobuf.Empty);
   rpc RejectLoanAdvance(RejectLoanAdvanceRequest) returns (google.protobuf.Empty);
   rpc GetLoanAdvance(GetLoanAdvanceRequest) returns (LoanAdvanceResponse);

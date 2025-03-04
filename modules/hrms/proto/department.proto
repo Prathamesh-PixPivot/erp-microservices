@@ -1,12 +1,11 @@
 syntax = "proto3";
 
-package department;
-
-option go_package = "hrms/proto/department";
+package hrms;
+option go_package = "hrms/proto;hrms";
 
 service DepartmentService {
-  rpc CreateDepartment (CreateDepartmentRequest) returns (DepartmentResponse);
-  rpc GetDepartmentByID (GetDepartmentByIDRequest) returns (DepartmentResponse);
+  rpc CreateDepartment (CreateDepartmentRequest) returns (CreateDepartmentResponse);
+  rpc GetDepartmentByID (GetDepartmentByIDRequest) returns (GetDepartmentByIDResponse);
   rpc UpdateDepartment (UpdateDepartmentRequest) returns (UpdateDepartmentResponse);
   rpc DeleteDepartment (DeleteDepartmentRequest) returns (DeleteDepartmentResponse);
   rpc ListDepartments (ListDepartmentsRequest) returns (ListDepartmentsResponse);

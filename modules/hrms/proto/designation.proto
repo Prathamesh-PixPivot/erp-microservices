@@ -1,8 +1,8 @@
 syntax = "proto3";
 
 package hrms;
+option go_package = "hrms/proto;hrms";
 
-option go_package = "hrms/proto";
 
 service DesignationService {
   rpc CreateDesignation(CreateDesignationRequest) returns (DesignationResponse);

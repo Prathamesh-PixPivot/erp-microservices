@@ -1,6 +1,7 @@
 syntax = "proto3";
 
-package attendance;
+package hrms;
+option go_package = "hrms/proto;hrms";
 
 import "google/protobuf/timestamp.proto";
 
@@ -26,7 +27,7 @@ message Attendance {
   string punch_method = 11;
   google.protobuf.Timestamp created_at = 12;
   google.protobuf.Timestamp updated_at = 13;
-}
+} 
 
 message CreateAttendanceRequest {
   uint64 employee_id = 1;

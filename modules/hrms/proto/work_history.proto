@@ -1,10 +1,7 @@
 syntax = "proto3";
 
 package hrms;
-
-option go_package = "hrms/proto;hrmspb";
-
-import "google/protobuf/wrappers.proto";
+option go_package = "hrms/proto;hrms";
 
 // WorkHistoryService defines operations for managing work history records.
 service WorkHistoryService {

@@ -1,14 +1,15 @@
 syntax = "proto3";
 
-package employee;
+package hrms;
+option go_package = "hrms/proto;hrms";
 
-option go_package = "hrms/proto/employee";
+import "proto/designation.proto";
 
-service EmployeeService {
+service EmployeeBenefitService {
   rpc CreateEmployeeBenefits(CreateEmployeeBenefitsRequest) returns (EmployeeBenefitsDTO);
   rpc GetEmployeeBenefits(GetEmployeeBenefitsRequest) returns (EmployeeBenefitsDTO);
-  rpc UpdateEmployeeBenefits(UpdateEmployeeBenefitsRequest) returns (EmptyResponse);
-  rpc DeleteEmployeeBenefits(DeleteEmployeeBenefitsRequest) returns (EmptyResponse);
+  rpc UpdateEmployeeBenefits(UpdateEmployeeBenefitsRequest) returns (hrms.EmptyResponse);
+  rpc DeleteEmployeeBenefits(DeleteEmployeeBenefitsRequest) returns (hrms.EmptyResponse);
   rpc ListEmployeeBenefits(ListEmployeeBenefitsRequest) returns (ListEmployeeBenefitsResponse);
 }
 
@@ -48,4 +49,3 @@ message ListEmployeeBenefitsResponse {
   repeated EmployeeBenefitsDTO benefits = 1;
 }
 
-message EmptyResponse {}

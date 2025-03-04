@@ -1,8 +1,7 @@
 syntax = "proto3";
 
 package hrms;
-
-option go_package = "hrms/proto;hrmspb";
+option go_package = "hrms/proto;hrms";
 
 import "google/protobuf/wrappers.proto";
 

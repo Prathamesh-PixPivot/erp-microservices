@@ -1,6 +1,7 @@
 syntax = "proto3";
 
-package bonus;
+package hrms;
+option go_package = "hrms/proto;hrms";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/empty.proto";
