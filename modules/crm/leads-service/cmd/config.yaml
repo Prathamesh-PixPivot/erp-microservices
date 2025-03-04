@@ -5,7 +5,7 @@ websocket:
   addr: ":8000"
 
 database:
-  url: "postgres://postgres:Ehsaas@2718@localhost:5432/pixerp?sslmode=disable"
+  url: "postgres://postgres:root@host.docker.internal:5432/leads-service?sslmode=disable"
 
 keycloak:
-  url: "http://localhost:8080"
+  url: "http://host.docker.internal:8080"

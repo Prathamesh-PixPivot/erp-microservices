@@ -37,40 +37,24 @@ const (
 	resetColor = "\033[0m"
 )
 
-func cors(next http.Handler) http.Handler {
-    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        origin := r.Header.Get("Origin")
-        log.Println("CORS middleware triggered for:", r.URL.Path)
-        log.Println("Origin:", origin)
+// CORS middleware to allow all origins, headers, and methods
+var cors = func(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Set headers to allow all origins, headers, and methods
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
-        // Always set CORS headers for OPTIONS requests
-        if r.Method == http.MethodOptions {
-            if origin == "http://localhost:3000" {
-                w.Header().Set("Access-Control-Allow-Origin", origin)
-                w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-                w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
-                // Uncomment if credentials are required
-                // w.Header().Set("Access-Control-Allow-Credentials", "true")
-            }
-            log.Println("Handling preflight OPTIONS request")
-            w.WriteHeader(http.StatusOK)
-            return
-        }
+		// If the request is an OPTIONS preflight request, return immediately
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
 
-        // Set CORS headers on all other requests from allowed origins
-        if origin == "http://localhost:3000" {
-            w.Header().Set("Access-Control-Allow-Origin", origin)
-            w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-            w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
-            // Uncomment if credentials are required
-            // w.Header().Set("Access-Control-Allow-Credentials", "true")
-        }
-
-        next.ServeHTTP(w, r)
-    })
+		// Continue processing the request
+		next.ServeHTTP(w, r)
+	})
 }
-
-
 
 // attemptGrpcReconnect tries to establish a gRPC connection with retries and waits for READY state
 func attemptGrpcReconnect(ctx context.Context, serviceHost string, servicePort int, serviceName string, clientSetter func(conn *grpc.ClientConn, client interface{}), wg *sync.WaitGroup) {

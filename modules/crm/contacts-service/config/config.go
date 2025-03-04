@@ -29,15 +29,15 @@ func LoadConfig() (*Config, error) {
 	var err error
 
 	// Database Configuration
-	cfg.DBHost = getEnv("DB_HOST", "localhost")
+	cfg.DBHost = getEnv("DB_HOST", "host.docker.internal")
 	cfg.DBPort, err = getEnvAsInt("DB_PORT", 5432)
 	if err != nil {
 		return nil, fmt.Errorf("invalid DB_PORT: %v", err)
 	}
 
 	cfg.DBUser = getEnv("DB_USER", "postgres")
-	cfg.DBPassword = getEnv("DB_PASSWORD", "Ehsaas@2718")
-	cfg.DBName = getEnv("DB_NAME", "pixerp")
+	cfg.DBPassword = getEnv("DB_PASSWORD", "root")
+	cfg.DBName = getEnv("DB_NAME", "contact-service")
 	cfg.DBSSLMode = getEnv("DB_SSLMODE", "disable")
 
 	// gRPC Server Configuration

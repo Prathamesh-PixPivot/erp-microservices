@@ -1,6 +1,29 @@
 version: "3.8"
 
+networks:
+  pixerp-network:
+    driver: bridge
+
 services:
+  # --------------------------------------------------
+  # Postgres Container
+  # --------------------------------------------------
+  # postgres:
+  #   image: postgres:latest
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: root
+  #     POSTGRES_DB: pixerp
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - pgdata:/var/lib/postgresql/data
+  #   networks:
+  #     - pixerp-network
+
+  # --------------------------------------------------
+  # Keycloak
+  # --------------------------------------------------
   keycloak:
     image: quay.io/keycloak/keycloak:25.0.5
     environment:
@@ -10,6 +33,9 @@ services:
     ports:
       - "8080:8080"
 
+  # --------------------------------------------------
+  # GraphQL Gateway
+  # --------------------------------------------------
   graphql-gateway:
     build: ./graphql-gateway
     ports:
@@ -23,144 +49,169 @@ services:
       USER_SERVICE_URL: "user-service:50052"
       ORG_SERVICE_URL: "organization-service:50053"
 
+  # --------------------------------------------------
+  # Auth Service
+  # --------------------------------------------------
   auth-service:
     build: ./auth-service
     ports:
       - "50051:50051"
-    environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "root"
-      POSTGRES_DB: "auth-service"
     depends_on:
-      - postgres
+      - keycloak
+    environment:
+      DB_HOST: "host.docker.internal"
+      DB_PORT: "5432"
+      DB_USER: "postgres"
+      DB_PASSWORD: "root"
+      DB_NAME: "auth-service"    
 
+  # --------------------------------------------------
+  # User Service
+  # --------------------------------------------------
   user-service:
     build: ./user-service
     ports:
       - "50052:50052"
-    environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "root"
-      POSTGRES_DB: "user-service"
     depends_on:
-      - postgres
+      - auth-service
+    environment:
+      DB_HOST: "host.docker.internal"
+      DB_PORT: "5432"
+      DB_USER: "postgres"
+      DB_PASSWORD: "root"
+      DB_NAME: "user-service"
 
+  # --------------------------------------------------
+  # Organization Service
+  # --------------------------------------------------
   organization-service:
     build: ./organization-service
     ports:
       - "50053:50053"
-    environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "root"
-      POSTGRES_DB: "organization-service"
     depends_on:
-      - postgres
+      - auth-service
+    environment:
+      DB_HOST: "host.docker.internal"
+      DB_PORT: "5432"
+      DB_USER: "postgres"
+      DB_PASSWORD: "root"
+      DB_NAME: "organization-service"
 
+  # --------------------------------------------------
+  # CRM Services
+  # --------------------------------------------------
   activity-task-service:
     build: ./modules/crm/activity-task-service
     ports:
       - "50057:50057"
-    environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "root"
-      POSTGRES_DB: "pixerp"
     depends_on:
-      - postgres
+      - organization-service
       - graphql-gateway
       - user-service
       - contact-service
+    environment:
+      DB_HOST: "host.docker.internal"
+      DB_PORT: "5432"
+      DB_USER: "postgres"
+      DB_PASSWORD: "root"
+      DB_NAME: "activity-task-service"
 
   contact-service:
     build: ./modules/crm/contacts-service
     ports:
       - "50056:50056"
-    environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "root"
-      POSTGRES_DB: "pixerp"
     depends_on:
-      - postgres
       - graphql-gateway
       - user-service
+    environment:
+      DB_HOST: "host.docker.internal"
+      DB_PORT: "5432"
+      DB_USER: "postgres"
+      DB_PASSWORD: "root"
+      DB_NAME: "contact-service"
 
   leads-service:
     build: ./modules/crm/leads-service
     ports:
       - "50054:50054"
-    environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "root"
-      POSTGRES_DB: "pixerp"
     depends_on:
-      - postgres
       - graphql-gateway
       - user-service
+    environment:
+      DB_HOST: "host.docker.internal"
+      DB_PORT: "5432"
+      DB_USER: "postgres"
+      DB_PASSWORD: "root"
+      DB_NAME: "leads-service"
 
   opportunity-service:
     build: ./modules/crm/opportunity-service
     ports:
       - "50055:50055"
-    environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "root"
-      POSTGRES_DB: "pixerp"
     depends_on:
-      - postgres
       - graphql-gateway
       - user-service
       - contact-service
+    environment:
+      DB_HOST: "host.docker.internal"
+      DB_PORT: "5432"
+      DB_USER: "postgres"
+      DB_PASSWORD: "root"
+      DB_NAME: "opportunity-service"
 
+  # --------------------------------------------------
+  # Finance Service
+  # --------------------------------------------------
   finance-service:
     build: ./modules/finance-service
     ports:
       - "50002:50002"
-    environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "root"
-      POSTGRES_DB: "vms-service"
     depends_on:
-      - postgres
       - graphql-gateway
       - user-service
       - organization-service
+    environment:
+      DB_HOST: "host.docker.internal"
+      DB_PORT: "5432"
+      DB_USER: "postgres"
+      DB_PASSWORD: "root"
+      DB_NAME: "finance-service"
 
+  # --------------------------------------------------
+  # Inventory Service
+  # --------------------------------------------------
   inventory-service:
     build: ./modules/inventory-service
     ports:
       - "50003:50003"
-    environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "root"
-      POSTGRES_DB: "inventory-service"
     depends_on:
-      - postgres
       - graphql-gateway
       - user-service
       - organization-service
+    environment:
+      DB_HOST: "host.docker.internal"
+      DB_PORT: "5432"
+      DB_USER: "postgres"
+      DB_PASSWORD: "root"
+      DB_NAME: "inventory-service"
 
+  # --------------------------------------------------
+  # VMS Service
+  # --------------------------------------------------
   vms-service:
     build: ./modules/vms-service
     ports:
       - "50004:50004"
-    environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "root"
-      POSTGRES_DB: "vms-service"
     depends_on:
-      - postgres
       - graphql-gateway
       - user-service
       - organization-service
-
-  postgres:
-    image: postgres:13
     environment:
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "root"
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
+      DB_HOST: "host.docker.internal"
+      DB_PORT: "5432"
+      DB_USER: "postgres"
+      DB_PASSWORD: "root"
+      DB_NAME: "vms-service"
 
 volumes:
   pgdata:

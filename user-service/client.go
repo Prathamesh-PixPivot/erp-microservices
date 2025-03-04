@@ -11,7 +11,7 @@ import (
 
 func main() {
 	// Connect to the gRPC server
-	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
+	conn, err := grpc.Dial("host.docker.internal:50051", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Could not connect to server: %v", err)
 	}

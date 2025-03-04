@@ -55,7 +55,7 @@ func ProduceEvent(topic, message string) {
 }
 
 func createUserInKeycloak(accessToken, realm string, user map[string]interface{}) error {
-	url := fmt.Sprintf("http://localhost:8080/admin/realms/%s/users", realm)
+	url := fmt.Sprintf("http://host.docker.internal:8080/admin/realms/%s/users", realm)
 	userJSON, err := json.Marshal(user)
 	if err != nil {
 		return fmt.Errorf("failed to marshal user: %w", err)
