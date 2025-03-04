@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "authorization-service/internal/transport/grpc/proto/auth";
+
+// ✅ Authentication Service
+service AuthService {
+    rpc RegisterUser(RegisterRequest) returns (RegisterResponse);
+    rpc LoginUser(LoginRequest) returns (LoginResponse);
+    rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+}
+
+// ✅ Authentication Messages
+message RegisterRequest {
+    string email = 1;
+    string password = 2;
+}
+message RegisterResponse {
+    string user_id = 1;
+}
+
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+}
+message LoginResponse {
+    string token = 1;
+}
+
+message ValidateTokenRequest {
+    string token = 1;
+}
+message ValidateTokenResponse {
+    string user_id = 1;
+    repeated string roles = 2;
+}

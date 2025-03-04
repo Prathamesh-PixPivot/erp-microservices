@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "authorization-service/internal/transport/grpc/proto/role";
+
+// ✅ Import `role.proto` Instead of Duplicating Definitions
+import "role.proto"; 
+
+// ✅ Policy Service (RBAC + ABAC + Field-Level Control)
+service PolicyService {
+    rpc AddPolicy(AddPolicyRequest) returns (PolicyResponse);
+    rpc UpdatePolicy(UpdatePolicyRequest) returns (PolicyResponse);
+    rpc RemovePolicy(RemovePolicyRequest) returns (role.DeleteResponse);
+    rpc ListPolicies(role.Empty) returns (ListPoliciesResponse);
+}
+
+// ✅ Enforcement Service (Permission Checks)
+service EnforcementService {
+    rpc HasPermission(HasPermissionRequest) returns (HasPermissionResponse);
+    rpc GetAllowedFields(GetAllowedFieldsRequest) returns (AllowedFieldsResponse);
+}
+
+// ✅ Policy Messages (RBAC + ABAC + Field-Level)
+message AddPolicyRequest {
+    string subject = 1; // User, Role, or Group
+    string resource = 2;
+    string action = 3;
+    string conditions = 4; // ABAC Condition (e.g., "department == 'HR'")
+    repeated string allowed_fields = 5; // Field-level access
+    string metadata = 6; // Extra metadata (e.g., expiration time)
+}
+message UpdatePolicyRequest {
+    string policy_id = 1;
+    string subject = 2;
+    string resource = 3;
+    string action = 4;
+    string conditions = 5;
+    repeated string allowed_fields = 6;
+    string metadata = 7;
+}
+message RemovePolicyRequest {
+    string policy_id = 1;
+}
+message PolicyResponse {
+    string policy_id = 1;
+    string subject = 2;
+    string resource = 3;
+    string action = 4;
+    string conditions = 5;
+    repeated string allowed_fields = 6;
+    string metadata = 7;
+}
+message ListPoliciesResponse {
+    repeated PolicyResponse policies = 1;
+}
+
+// ✅ Enforcement Messages (Permission Checks)
+message HasPermissionRequest {
+    string user_id = 1;
+    string resource = 2;
+    string action = 3;
+    map<string, string> attributes = 4; // For ABAC evaluation
+}
+message HasPermissionResponse {
+    bool allowed = 1;
+}
+
+message GetAllowedFieldsRequest {
+    string user_id = 1;
+    string resource = 2;
+}
+message AllowedFieldsResponse {
+    repeated string fields = 1;
+}

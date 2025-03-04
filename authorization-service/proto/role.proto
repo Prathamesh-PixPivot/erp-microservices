@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "authorization-service/internal/transport/grpc/proto/policy";
+
+// ✅ Role & Role Group Service
+service RoleService {
+    rpc CreateRole(CreateRoleRequest) returns (RoleResponse);
+    rpc UpdateRole(UpdateRoleRequest) returns (RoleResponse);
+    rpc DeleteRole(DeleteRoleRequest) returns (DeleteResponse); // 🛠️ Fixed
+    rpc ListRoles(Empty) returns (ListRolesResponse);
+
+    rpc CreateRoleGroup(CreateRoleGroupRequest) returns (RoleGroupResponse);
+    rpc UpdateRoleGroup(UpdateRoleGroupRequest) returns (RoleGroupResponse);
+    rpc DeleteRoleGroup(DeleteRoleGroupRequest) returns (DeleteResponse); // 🛠️ Fixed
+    rpc AssignRoleToGroup(AssignRoleToGroupRequest) returns (AssignResponse);
+    rpc RemoveRoleFromGroup(RemoveRoleFromGroupRequest) returns (RemoveResponse);
+}
+
+// ✅ Role Messages
+message CreateRoleRequest {
+    string role_name = 1;
+}
+message UpdateRoleRequest {
+    string role_id = 1;
+    string role_name = 2;
+}
+message DeleteRoleRequest {
+    string role_id = 1;
+}
+message RoleResponse {
+    string role_id = 1;
+    string role_name = 2;
+}
+message ListRolesResponse {
+    repeated RoleResponse roles = 1;
+}
+
+// ✅ Role Group Messages
+message CreateRoleGroupRequest {
+    string group_name = 1;
+}
+message UpdateRoleGroupRequest {
+    string group_id = 1;
+    string group_name = 2;
+}
+message DeleteRoleGroupRequest {
+    string group_id = 1;
+}
+message RoleGroupResponse {
+    string group_id = 1;
+    string group_name = 2;
+}
+message AssignRoleToGroupRequest {
+    string group_id = 1;
+    string role_id = 2;
+}
+message RemoveRoleFromGroupRequest {
+    string group_id = 1;
+    string role_id = 2;
+}
+
+// ✅ Common Messages
+message AssignResponse {
+    string message = 1;
+}
+message RemoveResponse {
+    string message = 1;
+}
+message DeleteResponse { // 🛠️ Added Definition
+    string message = 1;
+}
+message Empty {}
