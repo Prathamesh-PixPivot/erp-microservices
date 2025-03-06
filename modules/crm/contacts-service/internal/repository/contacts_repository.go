@@ -13,6 +13,7 @@ var (
 	ErrContactNotFound = errors.New("contact not found")
 )
 
+// ContactRepository defines the contract for contact CRUD operations.
 type ContactRepository interface {
 	Create(contact *models.Contact) (*models.Contact, error)
 	GetByID(id uint) (*models.Contact, error)
@@ -25,11 +26,12 @@ type contactRepository struct {
 	db *gorm.DB
 }
 
+// NewContactRepository creates a new instance of contactRepository.
 func NewContactRepository(db *gorm.DB) ContactRepository {
 	return &contactRepository{db: db}
 }
 
-// Create inserts a new contact into the database.
+// Create inserts a new unified contact (individual or company) into the database.
 func (r *contactRepository) Create(contact *models.Contact) (*models.Contact, error) {
 	if err := r.db.Create(contact).Error; err != nil {
 		if isUniqueConstraintError(err, "contacts_email_key") {
@@ -40,7 +42,7 @@ func (r *contactRepository) Create(contact *models.Contact) (*models.Contact, er
 	return contact, nil
 }
 
-// GetByID retrieves a contact by its ID.
+// GetByID retrieves a unified contact by its ID.
 func (r *contactRepository) GetByID(id uint) (*models.Contact, error) {
 	var contact models.Contact
 	if err := r.db.First(&contact, id).Error; err != nil {
@@ -52,7 +54,7 @@ func (r *contactRepository) GetByID(id uint) (*models.Contact, error) {
 	return &contact, nil
 }
 
-// Update modifies an existing contact.
+// Update modifies an existing unified contact.
 func (r *contactRepository) Update(contact *models.Contact) (*models.Contact, error) {
 	result := r.db.Model(&models.Contact{}).Where("id = ?", contact.ID).Updates(contact)
 	if result.Error != nil {
@@ -67,7 +69,7 @@ func (r *contactRepository) Update(contact *models.Contact) (*models.Contact, er
 	return contact, nil
 }
 
-// Delete removes a contact by its ID.
+// Delete removes a unified contact by its ID.
 func (r *contactRepository) Delete(id uint) error {
 	result := r.db.Delete(&models.Contact{}, id)
 	if result.Error != nil {
@@ -80,12 +82,14 @@ func (r *contactRepository) Delete(id uint) error {
 }
 
 // List retrieves contacts with pagination and sorting.
+// This function works with the unified contact model that may include additional fields
+// like ContactType, CompanyName, and TaxationDetailID.
 func (r *contactRepository) List(pageNumber uint, pageSize uint, sortBy string, ascending bool) ([]models.Contact, error) {
 	var contacts []models.Contact
 
 	query := r.db.Model(&models.Contact{})
 
-	// Apply sorting
+	// Apply sorting if provided.
 	if sortBy != "" {
 		order := sortBy
 		if ascending {
@@ -96,7 +100,7 @@ func (r *contactRepository) List(pageNumber uint, pageSize uint, sortBy string, 
 		query = query.Order(order)
 	}
 
-	// Apply pagination
+	// Apply pagination.
 	offset := (pageNumber - 1) * pageSize
 	query = query.Offset(int(offset)).Limit(int(pageSize))
 
@@ -107,7 +111,7 @@ func (r *contactRepository) List(pageNumber uint, pageSize uint, sortBy string, 
 	return contacts, nil
 }
 
-// Helper function to check for unique constraint violations.
+// isUniqueConstraintError checks for PostgreSQL unique constraint violations.
 func isUniqueConstraintError(err error, constraintName string) bool {
 	var pgErr *pgconn.PgError
 	if errors.As(err, &pgErr) {

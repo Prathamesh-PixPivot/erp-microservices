@@ -1,12 +1,12 @@
 package main
 
 import (
-	"log"
 	"hrms/infrastructure/migrations"
+	"log"
 )
 
 func main() {
-	
+
 	// Initialize dependencies using Wire
 	deps, err := InitializeDependencies()
 	if err != nil {

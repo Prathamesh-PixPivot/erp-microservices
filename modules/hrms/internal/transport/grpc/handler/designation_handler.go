@@ -68,7 +68,7 @@ func (h *HrmsHandler) DeleteDesignation(ctx context.Context, req *proto.DeleteDe
 }
 
 func (h *HrmsHandler) ListDesignations(ctx context.Context, req *proto.ListDesignationsRequest) (*proto.ListDesignationsResponse, error) {
-	designations, totalCount, err := h.HrmsUsecase.ListDesignations(ctx, uint(req.DepartmentId), int(req.Limit), int(req.Offset), req.Search)
+	designations, totalCount, err := h.HrmsUsecase.ListDesignations(ctx, uint(req.DepartmentId), int(req.Limit), int(req.Offset), *req.Search)
 	if err != nil {
 		h.Logger.Error("Failed to list designations", zap.Error(err))
 		return nil, err

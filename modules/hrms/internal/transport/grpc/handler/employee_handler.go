@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // CreateEmployee handles gRPC request to create an employee
@@ -23,7 +24,13 @@ func (h *HrmsHandler) CreateEmployee(ctx context.Context, req *proto.CreateEmplo
 		OrganizationID: uint(req.OrganizationId),
 		DepartmentID:   uint(req.DepartmentId),
 		DesignationID:  uint(req.DesignationId),
-		ReportsTo:      (*uint)(req.ReportsTo),
+		ReportsTo:      func(r uint64) *uint {
+			if r == 0 {
+				return nil
+			}
+			u := uint(r)
+			return &u
+		}(req.ReportsTo),
 	}
 
 	employee, err := h.HrmsUsecase.CreateEmployee(ctx, employeeReq)
@@ -76,11 +83,9 @@ func mapToProtoEmployee(emp *dto.EmployeeDTO) *proto.Employee {
 		FirstName:      emp.FirstName,
 		LastName:       emp.LastName,
 		Email:          emp.Email,
-		Phone:          emp.Phone,
-		DateOfBirth:    &proto.Timestamp{Seconds: emp.DateOfBirth.Unix()},
+		DateOfBirth:    timestamppb.New(emp.DateOfBirth),
 		EmploymentType: emp.EmploymentType,
-		Status:         emp.Status,
-		HiredDate:      &proto.Timestamp{Seconds: emp.HiredDate.Unix()},
+		HiredDate:      timestamppb.New(*emp.HiredDate),
 		OrganizationId: uint64(emp.OrganizationID),
 		DepartmentId:   uint64(emp.DepartmentID),
 		DesignationId:  uint64(emp.DesignationID),

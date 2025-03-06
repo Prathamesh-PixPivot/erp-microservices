@@ -14,21 +14,23 @@ service ContactService {
 
 message Contact {
     uint32 id = 1;
-    string first_name = 2;
-    string last_name = 3;
-    string email = 4;
-    string phone = 5;
-    string address = 6;
-    string city = 7;
-    string state = 8;
-    string country = 9;
-    string zip_code = 10;
-    string company = 11;
-    string position = 12;
-    string social_media_profiles = 13;
-    string notes = 14;
-    string created_at = 15;
-    string updated_at = 16;
+    string contact_type = 2;         // "individual" or "company"
+    string first_name = 3;
+    string last_name = 4;
+    string email = 5;
+    string phone = 6;
+    string address = 7;
+    string city = 8;
+    string state = 9;
+    string country = 10;
+    string zip_code = 11;
+    string company_name = 12;        // Used for company contacts or unregistered companies
+    string position = 13;
+    string social_media_profiles = 14;
+    string notes = 15;
+    uint32 taxation_detail_id = 16;  // Optional taxation detail association (0 if not provided)
+    string created_at = 17;
+    string updated_at = 18;
 }
 
 message CreateContactRequest {

@@ -4,9 +4,9 @@ import (
 	"context"
 
 	"hrms/internal/dto"
-	"hrms/internal/usecase"
 	proto "hrms/internal/transport/grpc/proto"
 
+	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -52,8 +52,7 @@ func (h *HrmsHandler) GetExitRecordsByEmployee(ctx context.Context, req *proto.G
 	return &proto.ListEmployeeExitsResponse{Exits: exits}, nil
 }
 
-// GetPendingClearances handles fetching all pending clearances
-func (h *HrmsHandler) GetPendingClearances(ctx context.Context, _ *proto.Empty) (*proto.ListEmployeeExitsResponse, error) {
+func (h *HrmsHandler) GetPendingClearances(ctx context.Context, _ *emptypb.Empty) (*proto.ListEmployeeExitsResponse, error) {
 	exitsDTO, err := h.HrmsUsecase.GetPendingClearances(ctx)
 	if err != nil {
 		return nil, err
@@ -68,7 +67,7 @@ func (h *HrmsHandler) GetPendingClearances(ctx context.Context, _ *proto.Empty) 
 }
 
 // UpdateClearanceStatus handles updating clearance status
-func (h *HrmsHandler) UpdateClearanceStatus(ctx context.Context, req *proto.UpdateClearanceStatusRequest) (*proto.Empty, error) {
+func (h *HrmsHandler) UpdateClearanceStatus(ctx context.Context, req *proto.UpdateClearanceStatusRequest) (*emptypb.Empty, error) {
 	updateReq := dto.UpdateClearanceStatusRequest{
 		ClearanceStatus: req.ClearanceStatus,
 	}
@@ -77,16 +76,16 @@ func (h *HrmsHandler) UpdateClearanceStatus(ctx context.Context, req *proto.Upda
 		return nil, err
 	}
 
-	return &proto.Empty{}, nil
+	return &emptypb.Empty{}, nil
 }
 
 // DeleteEmployeeExit handles deleting an employee exit record
-func (h *HrmsHandler) DeleteEmployeeExit(ctx context.Context, req *proto.DeleteEmployeeExitRequest) (*proto.Empty, error) {
+func (h *HrmsHandler) DeleteEmployeeExit(ctx context.Context, req *proto.DeleteEmployeeExitRequest) (*emptypb.Empty, error) {
 	if err := h.HrmsUsecase.DeleteEmployeeExit(ctx, uint(req.ExitId)); err != nil {
 		return nil, err
 	}
 
-	return &proto.Empty{}, nil
+	return &emptypb.Empty{}, nil
 }
 
 // mapToProtoExit maps DTO to Protobuf message

@@ -2,11 +2,12 @@ package grpc
 
 import (
 	"go.uber.org/zap"
-	"hrms/internal/usecase"
+
 	proto "hrms/internal/transport/grpc/proto"
+	"hrms/internal/usecase"
 )
 
-// HrmsHandler implements the gRPC service for user operations
+// HrmsHandler implements all gRPC services for HRMS.
 type HrmsHandler struct {
 	proto.UnimplementedAttendanceServiceServer
 	proto.UnimplementedBonusServiceServer
@@ -31,14 +32,15 @@ type HrmsHandler struct {
 	proto.UnimplementedShiftServiceServer
 	proto.UnimplementedSkillDevelopmentServiceServer
 	proto.UnimplementedWorkHistoryServiceServer
+
 	HrmsUsecase *usecase.HrmsUsecase
 	Logger      *zap.Logger
 }
 
 // NewHrmsGrpcHandler initializes a new gRPC HrmsHandler
-func NewHrmsGrpcHandler(userUsecase *usecase.HrmsUsecase, logger *zap.Logger) *HrmsHandler {
+func NewHrmsGrpcHandler(usecase *usecase.HrmsUsecase, logger *zap.Logger) *HrmsHandler {
 	return &HrmsHandler{
-		HrmsUsecase: userUsecase,
+		HrmsUsecase: usecase,
 		Logger:      logger,
 	}
 }

@@ -4,66 +4,81 @@
 package main
 
 import (
-	"user-service/config"
-	"user-service/infrastructure"
-	"user-service/internal/repository"
-	"user-service/internal/transport/grpc"
-	"user-service/internal/usecase"
+	"hrms/internal/repository"
+	"hrms/internal/transport/grpc/handler"
+	"hrms/internal/usecase"
 
 	"github.com/google/wire"
-	"go.uber.org/zap"
 )
 
-type Dependencies struct {
-	Config     *config.Config
-	Logger     *zap.Logger
-	Database   *infrastructure.Database
-	GRPCServer *grpc.UserGrpcHandler // ✅ Fix: Use gRPC service implementation
+// ProvideRepositories sets up the repository dependencies.
+func ProvideRepositories() *repository.HrmsRepository {
+	return repository.NewHrmsRepository()
 }
 
-// InitializeConfig provides the app configuration
-func InitializeConfig() (*config.Config, error) {
-	return config.LoadConfig()
+// ProvideUsecases sets up the use case dependencies.
+func ProvideUsecases(repo *repository.HrmsRepository) *usecase.HrmsUsecase {
+	return usecase.NewHrmsUsecase(repo)
 }
 
-// InitializeLogger sets up the logger using the entire `cfg` object
-func InitializeLogger(cfg *config.Config) *zap.Logger {
-	infrastructure.InitLogger(cfg) // ✅ Pass full configuration
-	return infrastructure.GetLogger()
+// ProvideHandlers initializes all gRPC handlers with dependencies.
+func ProvideHandlers(usecase *usecase.HrmsUsecase) *Handlers {
+	return &Handlers{
+		AttendanceHandler:        &handler.AttendanceHandler{Usecase: usecase},
+		BonusHandler:             &handler.BonusHandler{Usecase: usecase},
+		DepartmentHandler:        &handler.DepartmentHandler{Usecase: usecase},
+		DesignationHandler:       &handler.DesignationHandler{Usecase: usecase},
+		EmpBenefitsHandler:       &handler.EmpBenefitsHandler{Usecase: usecase},
+		EmpDocHandler:            &handler.EmpDocHandler{Usecase: usecase},
+		EmpExitHandler:           &handler.EmpExitHandler{Usecase: usecase},
+		EmpPerkHandler:           &handler.EmpPerkHandler{Usecase: usecase},
+		EmployeeHandler:          &handler.EmployeeHandler{Usecase: usecase},
+		ExpenseHandler:           &handler.ExpenseHandler{Usecase: usecase},
+		LeaveBalanceHandler:      &handler.LeaveBalanceHandler{Usecase: usecase},
+		LeaveHandler:             &handler.LeaveHandler{Usecase: usecase},
+		LeavePolicyHandler:       &handler.LeavePolicyHandler{Usecase: usecase},
+		LoanAdvanceHandler:       &handler.LoanAdvanceHandler{Usecase: usecase},
+		OrganizationHandler:      &handler.OrganizationHandler{Usecase: usecase},
+		PayrollHandler:           &handler.PayrollHandler{Usecase: usecase},
+		PerformanceKPIHandler:    &handler.PerformanceKPIHandler{Usecase: usecase},
+		PerformanceReviewHandler: &handler.PerformanceReviewHandler{Usecase: usecase},
+		PublicHolidayHandler:     &handler.PublicHolidayHandler{Usecase: usecase},
+		SalaryStructureHandler:   &handler.SalaryStructureHandler{Usecase: usecase},
+		ShiftHandler:             &handler.ShiftHandler{Usecase: usecase},
+		SkillDevelopmentHandler:  &handler.SkillDevelopmentHandler{Usecase: usecase},
+		WorkHistoryHandler:       &handler.WorkHistoryHandler{Usecase: usecase},
+	}
 }
 
-// InitializeDatabase sets up the PostgreSQL database connection
-func InitializeDatabase(cfg *config.Config, logger *zap.Logger) (*infrastructure.Database, error) {
-	return infrastructure.NewDatabase(cfg, logger)
+// Handlers struct aggregates all gRPC handlers.
+type Handlers struct {
+	AttendanceHandler        *handler.AttendanceHandler
+	BonusHandler             *handler.BonusHandler
+	DepartmentHandler        *handler.DepartmentHandler
+	DesignationHandler       *handler.DesignationHandler
+	EmpBenefitsHandler       *handler.EmpBenefitsHandler
+	EmpDocHandler            *handler.EmpDocHandler
+	EmpExitHandler           *handler.EmpExitHandler
+	EmpPerkHandler           *handler.EmpPerkHandler
+	EmployeeHandler          *handler.EmployeeHandler
+	ExpenseHandler           *handler.ExpenseHandler
+	LeaveBalanceHandler      *handler.LeaveBalanceHandler
+	LeaveHandler             *handler.LeaveHandler
+	LeavePolicyHandler       *handler.LeavePolicyHandler
+	LoanAdvanceHandler       *handler.LoanAdvanceHandler
+	OrganizationHandler      *handler.OrganizationHandler
+	PayrollHandler           *handler.PayrollHandler
+	PerformanceKPIHandler    *handler.PerformanceKPIHandler
+	PerformanceReviewHandler *handler.PerformanceReviewHandler
+	PublicHolidayHandler     *handler.PublicHolidayHandler
+	SalaryStructureHandler   *handler.SalaryStructureHandler
+	ShiftHandler             *handler.ShiftHandler
+	SkillDevelopmentHandler  *handler.SkillDevelopmentHandler
+	WorkHistoryHandler       *handler.WorkHistoryHandler
 }
 
-// ProvideHrmsUsecase initializes UserUsecase with UserRepository
-func ProvideHrmsUsecase(userRepo *repository.UserRepository, logger *zap.Logger) *usecase.UserUsecase {
-	return usecase.NewUserUsecase(userRepo, logger)
-}
-
-// ProvideHrmsRepository initializes UserRepository
-func ProvideHrmsRepository(db *infrastructure.Database, logger *zap.Logger) *repository.UserRepository {
-	return repository.NewUserRepository(db.DB, logger)
-}
-
-// InitializeGRPCServer initializes gRPC UserService
-func InitializeGRPCServer(userUseCase *usecase.UserUsecase, logger *zap.Logger) *grpc.UserGrpcHandler {
-	return grpc.NewUserGrpcHandler(userUseCase, logger) // ✅ Fix: Correctly initialize gRPC server
-}
-
-// WireSet groups dependencies for Wire to generate them automatically
-var WireSet = wire.NewSet(
-	InitializeConfig,      // ✅ Load Config
-	InitializeLogger,      // ✅ Initialize Logger
-	InitializeDatabase,    // ✅ Initialize Database
-	InitializeGRPCServer,  // ✅ Initialize gRPC server
-	ProvideHrmsRepository, // ✅ Initialize UserRepository
-	ProvideHrmsUsecase,    // ✅ Initialize UserUsecase
-)
-
-// InitializeDependencies sets up the entire dependency graph
-func InitializeDependencies() (*Dependencies, error) {
-	wire.Build(WireSet, wire.Struct(new(Dependencies), "Config", "Logger", "Database", "GRPCServer")) // ✅ Inject dependencies
-	return &Dependencies{}, nil
+// InitializeHandlers wires everything together using Google Wire.
+func InitializeDependencies() *Handlers {
+	wire.Build(ProvideRepositories, ProvideUsecases, ProvideHandlers)
+	return nil
 }

@@ -5,6 +5,8 @@ import (
 	"hrms/internal/dto"
 	proto "hrms/internal/transport/grpc/proto"
 
+	"go.uber.org/zap"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -68,7 +70,6 @@ func (h *HrmsHandler) ListBonuses(ctx context.Context, req *proto.ListBonusesReq
 	return &proto.ListBonusesResponse{Bonuses: protoBonuses}, nil
 }
 
-
 // UpdateBonus updates a bonus record
 func (h *HrmsHandler) UpdateBonus(ctx context.Context, req *proto.UpdateBonusRequest) (*proto.BonusResponse, error) {
 	updateReq := dto.UpdateBonusRequest{}
@@ -99,28 +100,28 @@ func (h *HrmsHandler) UpdateBonus(ctx context.Context, req *proto.UpdateBonusReq
 }
 
 // DeleteBonus removes a bonus record
-func (h *HrmsHandler) DeleteBonus(ctx context.Context, req *proto.DeleteBonusRequest) (*proto.BonusResponse, error) {
+func (h *HrmsHandler) DeleteBonus(ctx context.Context, req *proto.DeleteBonusRequest) (*emptypb.Empty, error) {
 	err := h.HrmsUsecase.DeleteBonus(ctx, uint(req.Id))
 	if err != nil {
+		h.Logger.Error("Failed to delete bonus", zap.Error(err))
 		return nil, err
 	}
-
-	return &proto.BonusResponse{}, nil
+	return &emptypb.Empty{}, nil
 }
 
 // mapToProtoBonus converts domain model to gRPC response
 func mapToProtoBonus(b *dto.BonusDTO) *proto.Bonus {
 	return &proto.Bonus{
-		Id:          uint64(b.ID),
-		EmployeeId:  uint64(b.EmployeeID),
-		Amount:      b.Amount,
-		BonusType:   b.BonusType,
-		Description: b.Description,
-		ApprovedBy:  uint64(b.ApprovedBy),
+		Id:           uint64(b.ID),
+		EmployeeId:   uint64(b.EmployeeID),
+		Amount:       b.Amount,
+		BonusType:    b.BonusType,
+		Description:  b.Description,
+		ApprovedBy:   uint64(b.ApprovedBy),
 		ApprovalDate: toProtoTimestamp(b.ApprovalDate),
-		IssueDate:   timestamppb.New(b.IssueDate),
-		Status:      b.Status,
-		CreatedAt:   timestamppb.New(b.CreatedAt),
-		UpdatedAt:   timestamppb.New(b.UpdatedAt),
+		IssueDate:    timestamppb.New(b.IssueDate),
+		Status:       b.Status,
+		CreatedAt:    timestamppb.New(b.CreatedAt),
+		UpdatedAt:    timestamppb.New(b.UpdatedAt),
 	}
 }

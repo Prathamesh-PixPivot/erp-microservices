@@ -24,7 +24,7 @@ func NewContactHandler(service services.ContactService) *ContactHandler {
 func (h *ContactHandler) CreateContact(ctx context.Context, req *contactpb.CreateContactRequest) (*contactpb.CreateContactResponse, error) {
 	log.Printf("Received CreateContact request: %+v", req)
 
-	// Convert Proto to Model
+	// Convert Proto to Model (new unified model)
 	contact := convertProtoToModel(req.Contact)
 
 	// Validate and Create Contact
@@ -34,24 +34,23 @@ func (h *ContactHandler) CreateContact(ctx context.Context, req *contactpb.Creat
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	// Convert Model to Proto
+	// Convert Model to Proto response
 	return &contactpb.CreateContactResponse{
 		Contact: convertModelToProto(createdContact),
 	}, nil
 }
 
-// Implement other methods: GetContact, UpdateContact, DeleteContact, ListContacts
 func (h *ContactHandler) GetContact(ctx context.Context, req *contactpb.GetContactRequest) (*contactpb.GetContactResponse, error) {
 	log.Printf("Received GetContact request: %+v", req)
 
-	// Get Contact
+	// Get Contact from service layer
 	contact, err := h.contactService.GetContact(uint(req.Id))
 	if err != nil {
 		log.Printf("Error getting contact: %v", err)
 		return nil, status.Error(codes.NotFound, err.Error())
 	}
 
-	// Convert Model to Proto
+	// Convert Model to Proto response
 	return &contactpb.GetContactResponse{
 		Contact: convertModelToProto(contact),
 	}, nil
@@ -70,42 +69,41 @@ func (h *ContactHandler) UpdateContact(ctx context.Context, req *contactpb.Updat
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	// Convert Model to Proto
+	// Convert Model to Proto response
 	return &contactpb.UpdateContactResponse{
 		Contact: convertModelToProto(updatedContact),
 	}, nil
 }
 
 func (h *ContactHandler) DeleteContact(ctx context.Context, req *contactpb.DeleteContactRequest) (*contactpb.DeleteContactResponse, error) {
-    log.Printf("Received DeleteContact request: %+v", req)
+	log.Printf("Received DeleteContact request: %+v", req)
 
-    // Call the service layer to delete the contact
-    err := h.contactService.DeleteContact(uint(req.Id))
-    if err != nil {
-        if err == services.ErrContactNotFound {
-            return nil, status.Error(codes.NotFound, err.Error())
-        }
-        return nil, status.Error(codes.Internal, err.Error())
-    }
+	// Delete the contact through the service layer
+	err := h.contactService.DeleteContact(uint(req.Id))
+	if err != nil {
+		if err == services.ErrContactNotFound {
+			return nil, status.Error(codes.NotFound, err.Error())
+		}
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
-    // Return a successful response
-    return &contactpb.DeleteContactResponse{
-        Success: true,
-    }, nil
+	// Return a successful response
+	return &contactpb.DeleteContactResponse{
+		Success: true,
+	}, nil
 }
 
 func (h *ContactHandler) ListContacts(ctx context.Context, req *contactpb.ListContactsRequest) (*contactpb.ListContactsResponse, error) {
 	log.Printf("Received ListContacts request: %+v", req)
 
-	// List Contacts
-	// Example arguments: page, pageSize, sortBy, ascending
+	// List Contacts with example pagination parameters
 	contacts, err := h.contactService.ListContacts(1, 10, "created_at", true)
 	if err != nil {
 		log.Printf("Error listing contacts: %v", err)
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	// Convert Model to Proto
+	// Convert Model slice to Proto slice
 	var protoContacts []*contactpb.Contact
 	for _, contact := range contacts {
 		protoContacts = append(protoContacts, convertModelToProto(&contact))
@@ -116,12 +114,23 @@ func (h *ContactHandler) ListContacts(ctx context.Context, req *contactpb.ListCo
 	}, nil
 }
 
-// Helper functions to convert between Proto and Model
+// --- Helper Functions ---
+
+// convertProtoToModel maps the proto Contact message to the unified Contact model.
+// It translates new fields like ContactType, CompanyName, and TaxationDetailID.
 func convertProtoToModel(protoContact *contactpb.Contact) *models.Contact {
+	var taxationDetailID *uint
+	if protoContact.TaxationDetailId != 0 {
+		temp := uint(protoContact.TaxationDetailId)
+		taxationDetailID = &temp
+	}
+
 	return &models.Contact{
 		ID:                  uint(protoContact.Id),
+		ContactType:         protoContact.ContactType,
 		FirstName:           protoContact.FirstName,
 		LastName:            protoContact.LastName,
+		CompanyName:         protoContact.CompanyName,
 		Email:               protoContact.Email,
 		Phone:               protoContact.Phone,
 		Address:             protoContact.Address,
@@ -129,20 +138,28 @@ func convertProtoToModel(protoContact *contactpb.Contact) *models.Contact {
 		State:               protoContact.State,
 		Country:             protoContact.Country,
 		ZipCode:             protoContact.ZipCode,
-		Company:             protoContact.Company,
 		Position:            protoContact.Position,
 		SocialMediaProfiles: protoContact.SocialMediaProfiles,
 		Notes:               protoContact.Notes,
+		TaxationDetailID:    taxationDetailID,
 		CreatedAt:           parseTime(protoContact.CreatedAt),
 		UpdatedAt:           parseTime(protoContact.UpdatedAt),
 	}
 }
 
+// convertModelToProto maps the unified Contact model back to the proto Contact message.
 func convertModelToProto(modelContact *models.Contact) *contactpb.Contact {
+	var taxationDetailId uint32
+	if modelContact.TaxationDetailID != nil {
+		taxationDetailId = uint32(*modelContact.TaxationDetailID)
+	}
+
 	return &contactpb.Contact{
 		Id:                  uint32(modelContact.ID),
+		ContactType:         modelContact.ContactType,
 		FirstName:           modelContact.FirstName,
 		LastName:            modelContact.LastName,
+		CompanyName:         modelContact.CompanyName,
 		Email:               modelContact.Email,
 		Phone:               modelContact.Phone,
 		Address:             modelContact.Address,
@@ -150,15 +167,16 @@ func convertModelToProto(modelContact *models.Contact) *contactpb.Contact {
 		State:               modelContact.State,
 		Country:             modelContact.Country,
 		ZipCode:             modelContact.ZipCode,
-		Company:             modelContact.Company,
 		Position:            modelContact.Position,
 		SocialMediaProfiles: modelContact.SocialMediaProfiles,
 		Notes:               modelContact.Notes,
+		TaxationDetailId:    taxationDetailId,
 		CreatedAt:           modelContact.CreatedAt.Format(time.RFC3339),
 		UpdatedAt:           modelContact.UpdatedAt.Format(time.RFC3339),
 	}
 }
 
+// parseTime converts an RFC3339 time string to a time.Time value.
 func parseTime(timeStr string) time.Time {
 	t, err := time.Parse(time.RFC3339, timeStr)
 	if err != nil {
