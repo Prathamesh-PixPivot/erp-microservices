@@ -29,7 +29,7 @@ func LoadConfig() (*Config, error) {
 	var err error
 
 	// Database Configuration
-	cfg.DBHost = getEnv("DB_HOST", "host.docker.internal")
+	cfg.DBHost = getEnv("DB_HOST", "localhost")
 	cfg.DBPort, err = getEnvAsInt("DB_PORT", 5432)
 	if err != nil {
 		return nil, fmt.Errorf("invalid DB_PORT: %v", err)

@@ -28,7 +28,7 @@ func NewUserServiceServer(repo *repository.UserRepository) *UserServiceServer {
 // ProduceEvent is a helper function to send events to Kafka
 func ProduceEvent(topic, message string) {
 	writer := kafka.NewWriter(kafka.WriterConfig{
-		Brokers: []string{"host.docker.internal:9092"}, // Ensure this matches your Kafka broker address
+		Brokers: []string{"localhost:9092"}, // Ensure this matches your Kafka broker address
 		Topic:   topic,
 	})
 

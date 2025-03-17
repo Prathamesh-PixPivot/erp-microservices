@@ -57,44 +57,62 @@ service LedgerService {
 
 // ------------------- Request and Response Messages -------------------
 
+
 // Invoice message
 message Invoice {
     string id = 1;
-    string type = 2; // "sales", "proforma", "challan", "purchase"
-    string vendor_id = 3; // Vendor for purchase invoices
-    string customer_id = 4;
-    string organization_id = 5;
-    repeated InvoiceItem items = 6;
-    double total_amount = 7;
-    double cgst = 8;
-    double sgst = 9;
-    double igst = 10;
-    string status = 11; // "pending", "paid", etc.
-    google.protobuf.Timestamp invoice_date = 12;
-    google.protobuf.Timestamp created_at = 13;
-    google.protobuf.Timestamp updated_at = 14;
+    string invoice_number = 2;
+    google.protobuf.Timestamp invoice_date = 3;
+    string type = 4; // "sales", "proforma", "challan", "purchase"
+    optional string vendor_id = 5; // Vendor for purchase invoices
+    optional string customer_id = 6;
+    string organization_id = 7;
+    repeated InvoiceItem items = 8;
+    
+    google.protobuf.Timestamp due_date = 9;
+    google.protobuf.Timestamp delivery_date = 10;
+    string po_number = 11;
+    string eway_number = 12;
+    string status = 13; // "pending", "paid", etc.
+    string payment_type = 14;
+    string cheque_number = 15;
+    string challan_number = 16;
+    google.protobuf.Timestamp challan_date = 17;
+    string reverse_charge = 18;
+    string lr_number = 19;
+    string transporter_name = 20;
+    string transporter_id = 21;
+    string vehicle_number = 22;
+    string against_invoice_number = 23;
+    google.protobuf.Timestamp against_invoice_date = 24;
+
+    double total_amount = 25;
+    float gst_rate = 26;
+    double cgst = 27;
+    double sgst = 28;
+    double igst = 29;
+
 }
 
+// InvoiceItem message
 message InvoiceItem {
     string id = 1;
     string invoice_id = 2;
-    string item_id = 3; // Reference to item in inventory
-    string name = 4;
-    double price = 5;
+    string name = 3;
+    string description = 4;
+    int32 hsn = 5;
     int32 quantity = 6;
-    double total = 7;
+    double price = 7;
+    double total = 8;
 }
 
+// Request and Response messages
 message CreateInvoiceRequest {
     Invoice invoice = 1;
 }
 
-message InvoiceResponse {
-    Invoice invoice = 1;
-}
-
 message GetInvoiceByIDRequest {
-    string invoice_id = 1;
+    string id = 1;
 }
 
 message ListInvoicesRequest {
@@ -110,8 +128,12 @@ message UpdateInvoiceRequest {
     Invoice invoice = 1;
 }
 
+message InvoiceResponse {
+    Invoice invoice = 1;
+}
+
 message DeleteInvoiceRequest {
-    string invoice_id = 1;
+    string id = 1;
 }
 
 message DeleteInvoiceResponse {
@@ -119,8 +141,11 @@ message DeleteInvoiceResponse {
 }
 
 message SearchInvoicesRequest {
-    string query = 1; // Search query, could be invoice number, customer/vendor name, etc.
+    string query = 1;
+    int32 page = 2;
+    int32 page_size = 3;
 }
+
 
 // Credit/Debit Note message types
 message CreditDebitNote {

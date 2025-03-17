@@ -21,21 +21,44 @@ func NewInvoiceHandler(service services.InvoiceService) *InvoiceHandler {
 }
 
 func (h *InvoiceHandler) CreateInvoice(ctx context.Context, req *finance_pb.CreateInvoiceRequest) (*finance_pb.InvoiceResponse, error) {
-	// Initialize invoice with required fields
-	invoice := &models.Invoice{
-		ID:             uuid.New(),
-		Type:           req.Invoice.Type,
-		TotalAmount:    req.Invoice.TotalAmount,
-		CGST:           req.Invoice.Cgst,
-		SGST:           req.Invoice.Sgst,
-		IGST:           req.Invoice.Igst,
-		Status:         req.Invoice.Status,
-		InvoiceDate:    req.Invoice.InvoiceDate.AsTime(),
-		VendorID:       &req.Invoice.VendorId,
-		CustomerID:     &req.Invoice.CustomerId,
-		OrganizationID: req.Invoice.OrganizationId, // Ensure this field exists in the proto definition
+	// Check if request is nil
+	if req == nil || req.Invoice == nil {
+		log.Printf("Error: Received nil request or nil invoice")
 	}
 
+	// Initialize invoice with required fields
+	invoice := &models.Invoice{
+		ID:                   uuid.New(),
+		InvoiceNumber:        req.Invoice.InvoiceNumber,
+		InvoiceDate:          req.Invoice.InvoiceDate.AsTime(),
+		Type:                 req.Invoice.Type,
+		VendorId:             req.Invoice.VendorId,
+		CustomerId:           req.Invoice.CustomerId,
+		OrganizationId:       req.Invoice.OrganizationId,
+		DueDate:              req.Invoice.DueDate.AsTime(),
+		DeliveryDate:         req.Invoice.DeliveryDate.AsTime(),
+		PoNumber:             req.Invoice.PoNumber,
+		EwayNumber:           req.Invoice.EwayNumber,
+		Status:               req.Invoice.Status,
+		PaymentType:          req.Invoice.PaymentType,
+		ChequeNumber:         req.Invoice.ChequeNumber,
+		ChallanNumber:        req.Invoice.ChallanNumber,
+		ChallanDate:          req.Invoice.ChallanDate.AsTime(),
+		ReverseCharge:        req.Invoice.ReverseCharge,
+		LrNumber:             req.Invoice.LrNumber,
+		TransporterName:      req.Invoice.TransporterName,
+		TransporterId:        req.Invoice.TransporterId,
+		VehicleNumber:        req.Invoice.VehicleNumber,
+		AgainstInvoiceNumber: req.Invoice.AgainstInvoiceNumber,
+		AgainstInvoiceDate:   req.Invoice.AgainstInvoiceDate.AsTime(),
+		TotalAmount:          req.Invoice.TotalAmount,
+		GstRate:              req.Invoice.GstRate,
+		CGST:                 req.Invoice.Cgst,
+		SGST:                 req.Invoice.Sgst,
+		IGST:                 req.Invoice.Igst,
+	}
+
+	log.Println(invoice)
 	// Check if TotalAmount is calculated correctly
 	if invoice.TotalAmount == 0 {
 		log.Println("Warning: TotalAmount is zero; ensure calculation is correct.")
@@ -48,13 +71,14 @@ func (h *InvoiceHandler) CreateInvoice(ctx context.Context, req *finance_pb.Crea
 		calculatedTotalAmount += total
 
 		invoice.Items = append(invoice.Items, models.InvoiceItem{
-			ID:        uuid.New(),
-			InvoiceID: invoice.ID,
-			ItemID:    item.ItemId,
-			Name:      item.Name,
-			Price:     item.Price,
-			Quantity:  int(item.Quantity),
-			Total:     total,
+			ID:          uuid.New(),
+			InvoiceID:   invoice.ID,
+			Hsn:         int(item.Hsn),
+			Description: item.Description,
+			Name:        item.Name,
+			Price:       item.Price,
+			Quantity:    int(item.Quantity),
+			Total:       total,
 		})
 	}
 
@@ -71,8 +95,8 @@ func (h *InvoiceHandler) CreateInvoice(ctx context.Context, req *finance_pb.Crea
 	// Generate invoice number if it's not provided
 	if invoice.InvoiceNumber == "" {
 		var err error
-		log.Println("Organization ID:", invoice.OrganizationID)
-		invoice.InvoiceNumber, err = h.service.GenerateInvoiceNumber(invoice.OrganizationID)
+		log.Println("Organization ID:", invoice.OrganizationId)
+		invoice.InvoiceNumber, err = h.service.GenerateInvoiceNumber(invoice.OrganizationId)
 		if err != nil {
 			log.Printf("Error generating invoice number: %v", err)
 			return nil, err
@@ -93,7 +117,7 @@ func (h *InvoiceHandler) CreateInvoice(ctx context.Context, req *finance_pb.Crea
 }
 
 func (h *InvoiceHandler) GetInvoiceByID(ctx context.Context, req *finance_pb.GetInvoiceByIDRequest) (*finance_pb.InvoiceResponse, error) {
-	invoice, err := h.service.GetInvoiceByID(uuid.MustParse(req.InvoiceId))
+	invoice, err := h.service.GetInvoiceByID(uuid.MustParse(req.Id))
 	if err != nil {
 		log.Printf("Error fetching invoice by ID: %v", err)
 		return nil, err
@@ -135,13 +159,14 @@ func (h *InvoiceHandler) UpdateInvoice(ctx context.Context, req *finance_pb.Upda
 		// Loop through and add new items
 		for _, item := range req.Invoice.Items {
 			invoice.Items = append(invoice.Items, models.InvoiceItem{
-				ID:        uuid.New(),
-				InvoiceID: invoice.ID,
-				ItemID:    item.ItemId,
-				Name:      item.Name,
-				Price:     item.Price,
-				Quantity:  int(item.Quantity),
-				Total:     item.Price * float64(item.Quantity), // Calculate the total for the item
+				ID:          uuid.New(),
+				InvoiceID:   invoice.ID,
+				Name:        item.Name,
+				Hsn:         int(item.Hsn),
+				Description: item.Description,
+				Price:       item.Price,
+				Quantity:    int(item.Quantity),
+				Total:       item.Price * float64(item.Quantity), // Calculate the total for the item
 			})
 		}
 
@@ -152,8 +177,8 @@ func (h *InvoiceHandler) UpdateInvoice(ctx context.Context, req *finance_pb.Upda
 
 	// Generate invoice number if it's not provided
 	if invoice.InvoiceNumber == "" {
-		log.Println("Organization ID:", invoice.OrganizationID)
-		invoice.InvoiceNumber, err = h.service.GenerateInvoiceNumber(invoice.OrganizationID)
+		log.Println("Organization ID:", invoice.OrganizationId)
+		invoice.InvoiceNumber, err = h.service.GenerateInvoiceNumber(invoice.OrganizationId)
 		if err != nil {
 			log.Printf("Error generating invoice number: %v", err)
 			return nil, err
@@ -173,7 +198,7 @@ func (h *InvoiceHandler) UpdateInvoice(ctx context.Context, req *finance_pb.Upda
 }
 
 func (h *InvoiceHandler) DeleteInvoice(ctx context.Context, req *finance_pb.DeleteInvoiceRequest) (*finance_pb.DeleteInvoiceResponse, error) {
-	invoiceID, err := uuid.Parse(req.InvoiceId)
+	invoiceID, err := uuid.Parse(req.Id)
 	if err != nil {
 		log.Printf("Invalid invoice ID: %v", err)
 		return nil, err
@@ -211,29 +236,49 @@ func (h *InvoiceHandler) ListInvoices(ctx context.Context, req *finance_pb.ListI
 
 func convertModelToProtoInvoice(invoice *models.Invoice) *finance_pb.Invoice {
 	protoInvoice := &finance_pb.Invoice{
-		Id:          invoice.ID.String(),
-		Type:        invoice.Type,
-		VendorId:    *invoice.VendorID,
-		CustomerId:  *invoice.CustomerID,
-		TotalAmount: invoice.TotalAmount,
-		Cgst:        invoice.CGST,
-		Sgst:        invoice.SGST,
-		Igst:        invoice.IGST,
-		Status:      invoice.Status,
-		InvoiceDate: timestamppb.New(invoice.InvoiceDate),
-		CreatedAt:   timestamppb.New(invoice.CreatedAt),
-		UpdatedAt:   timestamppb.New(invoice.UpdatedAt),
+		Id:                   invoice.ID.String(),
+		InvoiceNumber:        invoice.InvoiceNumber,
+		InvoiceDate:          timestamppb.New(invoice.InvoiceDate),
+		Type:                 invoice.Type,
+		VendorId:             invoice.VendorId,
+		CustomerId:           invoice.CustomerId,
+		OrganizationId:       invoice.OrganizationId,
+		DueDate:              timestamppb.New(invoice.DueDate),
+		DeliveryDate:         timestamppb.New(invoice.DeliveryDate),
+		PoNumber:             invoice.PoNumber,
+		EwayNumber:           invoice.EwayNumber,
+		Status:               invoice.Status,
+		PaymentType:          invoice.PaymentType,
+		ChequeNumber:         invoice.ChequeNumber,
+		ChallanNumber:        invoice.ChallanNumber,
+		ChallanDate:          timestamppb.New(invoice.ChallanDate),
+		ReverseCharge:        invoice.ReverseCharge,
+		LrNumber:             invoice.LrNumber,
+		TransporterName:      invoice.TransporterName,
+		TransporterId:        invoice.TransporterId,
+		VehicleNumber:        invoice.VehicleNumber,
+		AgainstInvoiceNumber: invoice.AgainstInvoiceNumber,
+		AgainstInvoiceDate:   timestamppb.New(invoice.AgainstInvoiceDate),
+		TotalAmount:          invoice.TotalAmount,
+		GstRate:              invoice.GstRate,
+		Cgst:                 invoice.CGST,
+		Sgst:                 invoice.SGST,
+		Igst:                 invoice.IGST,
+		CreatedAt:            timestamppb.New(invoice.CreatedAt),
+		UpdatedAt:            timestamppb.New(invoice.UpdatedAt),
 	}
 
+	// Convert invoice items
 	for _, item := range invoice.Items {
 		protoInvoice.Items = append(protoInvoice.Items, &finance_pb.InvoiceItem{
-			Id:        item.ID.String(),
-			InvoiceId: item.InvoiceID.String(),
-			ItemId:    item.ItemID,
-			Name:      item.Name,
-			Price:     item.Price,
-			Quantity:  int32(item.Quantity),
-			Total:     item.Total,
+			Id:          item.ID.String(),
+			InvoiceId:   item.InvoiceID.String(),
+			Name:        item.Name,
+			Description: item.Description,
+			Hsn:         int32(item.Hsn),
+			Quantity:    int32(item.Quantity),
+			Price:       item.Price,
+			Total:       item.Total,
 		})
 	}
 
