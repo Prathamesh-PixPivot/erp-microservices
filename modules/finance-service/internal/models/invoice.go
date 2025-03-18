@@ -8,12 +8,11 @@ import (
 
 // Invoice model for Sales, Purchase, Proforma, and Challan Invoices
 type Invoice struct {
-
 	ID uuid.UUID `gorm:"type:uuid;primary_key;" json:"id"`
 
-	InvoiceNumber  string        `json:"invoice_number"`
-	InvoiceDate    time.Time     `json:"invoice_date"`                      // Date of the invoice
-	Type           string        `json:"type"`                              // "sales", "proforma", "challan", "purchase"
+	InvoiceNumber string    `json:"invoice_number"`
+	InvoiceDate   time.Time `json:"invoice_date"` // Date of the invoice
+	Type          string    `json:"type"`         // "sales", "proforma", "challan", "purchase"
 	VendorId       *string       `json:"vendor_id"`                         // Vendor ID for purchase invoices
 	CustomerId     *string       `json:"customer_id"`                       // Customer ID for sales and other invoices
 	OrganizationId string        `json:"organization_id"`                   // Organization ID for generating invoice number
@@ -23,9 +22,9 @@ type Invoice struct {
 	DeliveryDate         time.Time `json:"delivery_date"`
 	PoNumber             string    `json:"po_number"`
 	EwayNumber           string    `json:"eway_number"`
-	Status               string    `json:"status"`       // e.g., "paid", "pending", etc.
-	PaymentType          string    `json:"payment_type"` // e.g., "paid", "pending", etc.
-	ChequeNumber         string    `json:"cheque_number"`    // e.g., "paid", "pending", etc.
+	Status               string    `json:"status"`        // e.g., "paid", "pending", etc.
+	PaymentType          string    `json:"payment_type"`  // e.g., "paid", "pending", etc.
+	ChequeNumber         string    `json:"cheque_number"` // e.g., "paid", "pending", etc.
 	ChallanNumber        string    `json:"challan_number"`
 	ChallanDate          time.Time `json:"challan_date"`
 	ReverseCharge        string    `json:"reverse_charge"`

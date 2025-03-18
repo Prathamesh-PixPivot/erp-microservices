@@ -62,35 +62,38 @@ service LedgerService {
 message Invoice {
     string id = 1;
     string invoice_number = 2;
-    google.protobuf.Timestamp invoice_date = 3;
+    string invoice_date = 3;
     string type = 4; // "sales", "proforma", "challan", "purchase"
     optional string vendor_id = 5; // Vendor for purchase invoices
     optional string customer_id = 6;
     string organization_id = 7;
     repeated InvoiceItem items = 8;
     
-    google.protobuf.Timestamp due_date = 9;
-    google.protobuf.Timestamp delivery_date = 10;
+    string due_date = 9;
+    string delivery_date = 10;
     string po_number = 11;
     string eway_number = 12;
     string status = 13; // "pending", "paid", etc.
     string payment_type = 14;
     string cheque_number = 15;
     string challan_number = 16;
-    google.protobuf.Timestamp challan_date = 17;
+    string challan_date = 17;
     string reverse_charge = 18;
     string lr_number = 19;
     string transporter_name = 20;
     string transporter_id = 21;
     string vehicle_number = 22;
     string against_invoice_number = 23;
-    google.protobuf.Timestamp against_invoice_date = 24;
+    string against_invoice_date = 24;
 
     double total_amount = 25;
     float gst_rate = 26;
     double cgst = 27;
     double sgst = 28;
     double igst = 29;
+
+    string created_at = 30;
+    string updated_at = 31;
 
 }
 
