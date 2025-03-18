@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package hrms;
+
+option go_package = "/hrms_pb";
+
+service OnboardingService {
+    rpc StartOnboarding(StartOnboardingRequest) returns (OnboardingResponse);
+    rpc GetOnboardingStatus(GetOnboardingStatusRequest) returns (OnboardingResponse);
+    rpc UpdateOnboarding(UpdateOnboardingRequest) returns (OnboardingResponse);
+    rpc CompleteOnboarding(CompleteOnboardingRequest) returns (OnboardingResponse);
+}
+
+message Onboarding {
+    string onboarding_id = 1;
+    string employee_id = 2;
+    string department_id = 3;
+    string assigned_manager = 4;
+    repeated string required_documents = 5;
+    string status = 6; // Pending, In Progress, Completed
+    google.protobuf.Timestamp start_date = 7;
+    google.protobuf.Timestamp end_date = 8;
+}
+
+message StartOnboardingRequest { Onboarding onboarding = 1; }
+message GetOnboardingStatusRequest { string employee_id = 1; }
+message UpdateOnboardingRequest { Onboarding onboarding = 1; }
+message CompleteOnboardingRequest { string onboarding_id = 1; }
+message OnboardingResponse { Onboarding onboarding = 1; }

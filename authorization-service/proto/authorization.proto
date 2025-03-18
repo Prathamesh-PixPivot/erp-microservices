@@ -1,0 +1,67 @@
+syntax = "proto3";
+
+package authz;
+
+option go_package = "/authzpb";
+
+// -------------------- Authorization Service --------------------
+service AuthorizationService {
+    // Role & Access Management
+    rpc AssignRole(AssignRoleRequest) returns (AssignRoleResponse);
+    rpc GetRoles(GetRolesRequest) returns (GetRolesResponse);
+
+    // Permission Checks (RBAC)
+    rpc CheckPermissions(CheckPermissionsRequest) returns (CheckPermissionsResponse);
+    rpc ListPermissions(ListPermissionsRequest) returns (ListPermissionsResponse);
+
+    // Access Control Management
+    rpc DefineResourceAccess(DefineResourceAccessRequest) returns (DefineResourceAccessResponse);
+    rpc ModifyPermissions(ModifyPermissionsRequest) returns (ModifyPermissionsResponse);
+}
+
+// -------------------- Role Management --------------------
+enum Role {
+    ROLE_UNSPECIFIED = 0;
+    ADMIN = 1;
+    MANAGER = 2;
+    EMPLOYEE = 3;
+    
+}
+
+message AssignRoleRequest {
+    string user_id = 1;
+    Role role = 2;
+}
+message AssignRoleResponse { bool success = 1; }
+
+message GetRolesRequest { string user_id = 1; }
+message GetRolesResponse { repeated Role roles = 1; }
+
+// -------------------- Permission Management --------------------
+message Permission {
+    string resource = 1;
+    repeated string actions = 2; // ["read", "write"]
+}
+
+message CheckPermissionsRequest {
+    string user_id = 1;
+    Permission permission = 2;
+}
+
+message CheckPermissionsResponse { bool allowed = 1; }
+
+message ListPermissionsRequest { Role role = 1; }
+message ListPermissionsResponse { repeated Permission permissions = 1; }
+
+// -------------------- Access Control Management --------------------
+message DefineResourceAccessRequest {
+    Role role = 1;
+    Permission permission = 2;
+}
+message DefineResourceAccessResponse { bool success = 1; }
+
+message ModifyPermissionsRequest {
+    Role role = 1;
+    Permission permission = 2;
+}
+message ModifyPermissionsResponse { bool success = 1; }

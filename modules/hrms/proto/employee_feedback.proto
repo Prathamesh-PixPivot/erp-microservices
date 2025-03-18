@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package hrms;
+
+option go_package = "/hrms_pb";
+
+service FeedbackService {
+    rpc SubmitFeedback(SubmitFeedbackRequest) returns (FeedbackResponse);
+    rpc ListFeedback(ListFeedbackRequest) returns (ListFeedbackResponse);
+}
+
+message Feedback {
+    string feedback_id = 1;
+    string employee_id = 2;
+    string feedback_text = 3;
+    google.protobuf.Timestamp submitted_at = 4;
+}
+
+message SubmitFeedbackRequest { Feedback feedback = 1; }
+message ListFeedbackRequest { int32 limit = 1; int32 offset = 2; }
+message ListFeedbackResponse { repeated Feedback feedbacks = 1; }
+message FeedbackResponse { Feedback feedback = 1; }

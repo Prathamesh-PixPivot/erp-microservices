@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package hrms;
+
+option go_package = "/hrms_pb";
+
+service RecruitmentService {
+    rpc PostJob(PostJobRequest) returns (JobResponse);
+    rpc GetJob(GetJobRequest) returns (JobResponse);
+    rpc UpdateJob(UpdateJobRequest) returns (JobResponse);
+    rpc DeleteJob(DeleteJobRequest) returns (DeleteJobResponse);
+    rpc ListJobs(ListJobsRequest) returns (ListJobsResponse);
+
+    rpc ApplyForJob(ApplyJobRequest) returns (ApplyJobResponse);
+    rpc GetApplicant(GetApplicantRequest) returns (ApplicantResponse);
+    rpc UpdateApplicant(UpdateApplicantRequest) returns (ApplicantResponse);
+    rpc ListApplicants(ListApplicantsRequest) returns (ListApplicantsResponse);
+
+    rpc ScheduleInterview(ScheduleInterviewRequest) returns (InterviewResponse);
+    rpc GetInterviewDetails(GetInterviewRequest) returns (InterviewResponse);
+    rpc UpdateInterview(UpdateInterviewRequest) returns (InterviewResponse);
+}
+
+message Job {
+    string job_id = 1;
+    string title = 2;
+    string department_id = 3;
+    string description = 4;
+    string requirements = 5;
+    string employment_type = 6; // Full-time, Part-time, Contract
+    float salary_range_start = 7;
+    float salary_range_end = 8;
+    string location = 9;
+    google.protobuf.Timestamp posted_at = 10;
+    google.protobuf.Timestamp updated_at = 11;
+}
+
+message Applicant {
+    string applicant_id = 1;
+    string job_id = 2;
+    string full_name = 3;
+    string email = 4;
+    string phone = 5;
+    string resume_url = 6;
+    string status = 7; // Applied, Interview Scheduled, Hired, Rejected
+    google.protobuf.Timestamp applied_at = 8;
+}
+
+message Interview {
+    string interview_id = 1;
+    string applicant_id = 2;
+    string interviewer = 3;
+    google.protobuf.Timestamp scheduled_time = 4;
+    string status = 5; // Scheduled, Completed, Rescheduled
+}
+
+message PostJobRequest { Job job = 1; }
+message GetJobRequest { string job_id = 1; }
+message UpdateJobRequest { Job job = 1; }
+message DeleteJobRequest { string job_id = 1; }
+message DeleteJobResponse { bool success = 1; }
+message ListJobsRequest { int32 limit = 1; int32 offset = 2; }
+message ListJobsResponse { repeated Job jobs = 1; }
+
+message ApplyJobRequest { Applicant applicant = 1; }
+message ApplyJobResponse { bool success = 1; }
+message GetApplicantRequest { string applicant_id = 1; }
+message ApplicantResponse { Applicant applicant = 1; }
+message UpdateApplicantRequest { Applicant applicant = 1; }
+message ListApplicantsRequest { string job_id = 1; int32 limit = 2; int32 offset = 3; }
+message ListApplicantsResponse { repeated Applicant applicants = 1; }
+
+message ScheduleInterviewRequest { Interview interview = 1; }
+message GetInterviewRequest { string interview_id = 1; }
+message UpdateInterviewRequest { Interview interview = 1; }
+message InterviewResponse { Interview interview = 1; }

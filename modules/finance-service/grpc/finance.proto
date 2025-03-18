@@ -6,7 +6,7 @@ package finance;
 
 option go_package = "/finance_pb";
 
-// Sales Invoice, Proforma Invoice, Challan services
+// --------------- Invoice & Tax Services ----------------
 service InvoiceService {
     rpc CreateInvoice(CreateInvoiceRequest) returns (InvoiceResponse);
     rpc GetInvoiceByID(GetInvoiceByIDRequest) returns (InvoiceResponse);
@@ -14,249 +14,178 @@ service InvoiceService {
     rpc UpdateInvoice(UpdateInvoiceRequest) returns (InvoiceResponse);
     rpc DeleteInvoice(DeleteInvoiceRequest) returns (DeleteInvoiceResponse);
     rpc SearchInvoices(SearchInvoicesRequest) returns (ListInvoicesResponse);
-
-    rpc CreateProformaInvoice(CreateInvoiceRequest) returns (InvoiceResponse);
-    rpc GetProformaInvoiceByID(GetInvoiceByIDRequest) returns (InvoiceResponse);
-    rpc UpdateProformaInvoice(UpdateInvoiceRequest) returns (InvoiceResponse);
-    rpc DeleteProformaInvoice(DeleteInvoiceRequest) returns (DeleteResponse);
-    rpc ListProformaInvoices(ListInvoicesRequest) returns (ListInvoicesResponse);
-
-    rpc CreateChallan(CreateInvoiceRequest) returns (InvoiceResponse);
-    rpc GetChallanByID(GetInvoiceByIDRequest) returns (InvoiceResponse);
-    rpc UpdateChallan(UpdateInvoiceRequest) returns (InvoiceResponse);
-    rpc DeleteChallan(DeleteInvoiceRequest) returns (DeleteResponse);
-    rpc ListChallans(ListInvoicesRequest) returns (ListInvoicesResponse);
 }
 
-// Credit/Debit Note related services
+// --------------- Credit/Debit Note Services ----------------
 service CreditDebitNoteService {
     rpc CreateCreditDebitNote(CreateCreditDebitNoteRequest) returns (CreditDebitNoteResponse);
     rpc GetCreditDebitNoteByID(GetCreditDebitNoteByIDRequest) returns (CreditDebitNoteResponse);
-    rpc ListCreditDebitNotesByInvoiceID(ListCreditDebitNotesByInvoiceIDRequest) returns (ListCreditDebitNotesResponse);
-    rpc ListAllCreditDebitNotes(ListCreditDebitNotesRequest) returns (ListCreditDebitNotesResponse);
+    rpc ListCreditDebitNotes(ListCreditDebitNotesRequest) returns (ListCreditDebitNotesResponse);
     rpc UpdateCreditDebitNote(UpdateCreditDebitNoteRequest) returns (CreditDebitNoteResponse);
     rpc DeleteCreditDebitNote(DeleteCreditDebitNoteRequest) returns (DeleteCreditDebitNoteResponse);
 }
 
-// Payment-related services
+// --------------- Payment & Bank Reconciliation Services ----------------
 service PaymentService {
     rpc AddPaymentDue(AddPaymentDueRequest) returns (PaymentDueResponse);
-    rpc GetPaymentDueByID(GetPaymentDueByIDRequest) returns (PaymentDueResponse);
-    rpc ListPaymentDues(ListPaymentDueRequest) returns (ListPaymentDueResponse);
     rpc MarkPaymentAsPaid(MarkPaymentAsPaidRequest) returns (PaymentDueResponse);
+    rpc ListPaymentDues(ListPaymentDueRequest) returns (ListPaymentDueResponse);
 }
 
-// Ledger-related services
+service BankReconciliationService {
+    rpc ReconcileTransaction(ReconcileTransactionRequest) returns (ReconciliationResponse);
+}
+
+// --------------- Ledger & Financial Reporting Services ----------------
 service LedgerService {
     rpc AddLedgerEntry(AddLedgerEntryRequest) returns (LedgerResponse);
-    rpc GetLedgerEntryByID(GetLedgerEntryByIDRequest) returns (LedgerResponse);
     rpc ListLedgerEntries(ListLedgerEntriesRequest) returns (ListLedgerEntriesResponse);
-    rpc DeleteLedgerEntry(DeleteLedgerEntryRequest) returns (DeleteResponse);
-    rpc UpdateLedgerEntry(UpdateLedgerEntryRequest) returns (LedgerResponse);
 }
 
-// ------------------- Request and Response Messages -------------------
+service FinancialReportService {
+    rpc GenerateProfitLossReport(ReportRequest) returns (ProfitLossReport);
+    rpc GenerateBalanceSheetReport(ReportRequest) returns (BalanceSheetReport);
+    rpc GenerateTrialBalanceReport(ReportRequest) returns (TrialBalanceReport);
+}
 
-// Invoice message
+// --------------- Budgeting & Budget Allocation Services ----------------
+service BudgetService {
+    rpc CreateBudget(CreateBudgetRequest) returns (BudgetResponse);
+    rpc ListBudgets(ListBudgetsRequest) returns (ListBudgetsResponse);
+}
+
+service BudgetAllocationService {
+    rpc AllocateBudget(AllocateBudgetRequest) returns (BudgetAllocationResponse);
+    rpc ListBudgetAllocations(ListBudgetAllocationsRequest) returns (ListBudgetAllocationsResponse);
+}
+
+service BudgetComparisonService {
+    rpc GetBudgetComparisonReport(BudgetComparisonRequest) returns (BudgetComparisonResponse);
+}
+
+// --------------- Expense Management Services ----------------
+service ExpenseService {
+    rpc CreateExpense(CreateExpenseRequest) returns (ExpenseResponse);
+    rpc ListExpenses(ListExpensesRequest) returns (ListExpensesResponse);
+}
+
+// ---------------- Message Definitions ----------------
+
+// Invoice Messages
 message Invoice {
     string id = 1;
-    string type = 2; // "sales", "proforma", "challan", "purchase"
-    string vendor_id = 3; // Vendor for purchase invoices
-    string customer_id = 4;
-    string organization_id = 5;
-    repeated InvoiceItem items = 6;
-    double total_amount = 7;
-    double cgst = 8;
-    double sgst = 9;
-    double igst = 10;
-    string status = 11; // "pending", "paid", etc.
-    google.protobuf.Timestamp invoice_date = 12;
-    google.protobuf.Timestamp created_at = 13;
-    google.protobuf.Timestamp updated_at = 14;
+    string type = 2; // "sales", "purchase", "proforma"
+    string customer_id = 3;
+    string vendor_id = 4;
+    double total_amount = 5;
+    string currency = 6;
+    double exchange_rate = 7;
+    repeated TaxConfig taxes = 8;
+    string status = 9; // "pending", "paid"
+    google.protobuf.Timestamp invoice_date = 10;
 }
 
-message InvoiceItem {
-    string id = 1;
-    string invoice_id = 2;
-    string item_id = 3; // Reference to item in inventory
-    string name = 4;
-    double price = 5;
-    int32 quantity = 6;
-    double total = 7;
+// Tax Messages
+message TaxConfig {
+    string tax_name = 1; // "GST", "VAT", etc.
+    double tax_rate = 2;
 }
 
-message CreateInvoiceRequest {
-    Invoice invoice = 1;
-}
-
-message InvoiceResponse {
-    Invoice invoice = 1;
-}
-
-message GetInvoiceByIDRequest {
-    string invoice_id = 1;
-}
-
-message ListInvoicesRequest {
-    int32 page = 1;
-    int32 page_size = 2;
-}
-
-message ListInvoicesResponse {
-    repeated Invoice invoices = 1;
-}
-
-message UpdateInvoiceRequest {
-    Invoice invoice = 1;
-}
-
-message DeleteInvoiceRequest {
-    string invoice_id = 1;
-}
-
-message DeleteInvoiceResponse {
-    string message = 1;
-}
-
-message SearchInvoicesRequest {
-    string query = 1; // Search query, could be invoice number, customer/vendor name, etc.
-}
-
-// Credit/Debit Note message types
+// Credit/Debit Note Messages
 message CreditDebitNote {
-    string note_id = 1;                  // Unique ID for the credit/debit note
-    string invoice_id = 2;               // ID of the associated invoice
-    string type = 3;                     // Type: "credit" or "debit"
-    double amount = 4;                   // Amount of the credit or debit
-    string reason = 5;                   // Reason for the note
-    google.protobuf.Timestamp created_at = 6;  // Date of creation
-    google.protobuf.Timestamp updated_at = 7;  // Date of last update
-}
-
-message CreateCreditDebitNoteRequest {
-    string invoice_id = 1;
-    string type = 2;         // Either "credit" or "debit"
-    double amount = 3;
-    string reason = 4;
-}
-
-message GetCreditDebitNoteByIDRequest {
-    string note_id = 1;
-}
-
-message UpdateCreditDebitNoteRequest {
     string note_id = 1;
     string invoice_id = 2;
-    string type = 3;
+    string type = 3; // "credit" or "debit"
     double amount = 4;
-    string reason = 5;
 }
 
-message DeleteCreditDebitNoteRequest {
-    string note_id = 1;
-}
-
-message CreditDebitNoteResponse {
-    string note_id = 1;
+// Payment Messages
+message PaymentDue {
+    string payment_due_id = 1;
     string invoice_id = 2;
-    string type = 3;
-    double amount = 4;
-    string reason = 5;
-    google.protobuf.Timestamp created_at = 6;
-    google.protobuf.Timestamp updated_at = 7;
-}
-
-message DeleteCreditDebitNoteResponse {
-    string message = 1;
-}
-
-message DeleteResponse {
-    string message = 1;
-}
-
-message ListCreditDebitNotesByInvoiceIDRequest {
-    string invoice_id = 1;
-}
-
-message ListCreditDebitNotesRequest {}
-
-message ListCreditDebitNotesResponse {
-    repeated CreditDebitNote notes = 1;
-}
-// Payment Due messages
-message AddPaymentDueRequest {
-    string invoice_id = 1;
-    google.protobuf.Timestamp due_date = 2;
     double amount_due = 3;
+    google.protobuf.Timestamp due_date = 4;
+    string status = 5; // "paid", "unpaid"
 }
 
-message GetPaymentDueByIDRequest {
-    string payment_due_id = 1;
-}
-
-message PaymentDueResponse {
-    string payment_due_id = 1;
-    string invoice_id = 2;
-    google.protobuf.Timestamp due_date = 3;
-    double amount_due = 4;
-    string status = 5; // e.g., 'paid', 'unpaid'
-}
-
-message ListPaymentDueRequest {
-    string status = 1; // Optional filter by payment status
-}
-
-message ListPaymentDueResponse {
-    repeated PaymentDueResponse payments = 1;
-}
-
-message MarkPaymentAsPaidRequest {
-    string payment_due_id = 1;
-    google.protobuf.Timestamp paid_date = 2;
-}
-
-// Ledger-related messages
-message AddLedgerEntryRequest {
+// Bank Reconciliation Messages
+message ReconcileTransactionRequest {
     string transaction_id = 1;
-    string description = 2;
-    double debit = 3;                    // Debit amount (outgoing)
-    double credit = 4;                   // Credit amount (incoming)
-    double balance = 5;                  // Balance after the transaction
-    google.protobuf.Timestamp transaction_date = 6;
+    double amount = 2;
+    google.protobuf.Timestamp transaction_date = 3;
 }
 
-message UpdateLedgerEntryRequest {
+message ReconciliationResponse {
+    bool matched = 1;
+    string status = 2; // "Matched", "Pending", "Discrepancy Found"
+}
+
+// Ledger Messages
+message LedgerEntry {
     string entry_id = 1;
     string description = 2;
     double debit = 3;
     double credit = 4;
-    double balance = 5;
-    google.protobuf.Timestamp transaction_date = 6;
+    google.protobuf.Timestamp transaction_date = 5;
 }
 
-message GetLedgerEntryByIDRequest {
-    string entry_id = 1;
+// Financial Reporting Messages
+message ReportRequest {
+    google.protobuf.Timestamp start_date = 1;
+    google.protobuf.Timestamp end_date = 2;
 }
 
-message DeleteLedgerEntryRequest {
-    string entry_id = 1;
+message ProfitLossReport {
+    double total_revenue = 1;
+    double total_expenses = 2;
+    double net_profit = 3;
 }
 
-message LedgerResponse {
-    string entry_id = 1;
-    string transaction_id = 2;
-    string description = 3;
-    double debit = 4;
-    double credit = 5;
-    double balance = 6;
-    google.protobuf.Timestamp transaction_date = 7;
+message BalanceSheetReport {
+    double total_assets = 1;
+    double total_liabilities = 2;
+    double net_worth = 3;
 }
 
-message ListLedgerEntriesRequest {
-    google.protobuf.Timestamp from_date = 1; // Filter by date
-    google.protobuf.Timestamp to_date = 2;   // Filter by date
+message TrialBalanceReport {
+    repeated LedgerEntry entries = 1;
 }
 
-message ListLedgerEntriesResponse {
-    repeated LedgerResponse ledger_entries = 1;
+// Budget Messages
+message Budget {
+    string budget_id = 1;
+    string name = 2; // "IT Budget", "Marketing Budget"
+    double total_amount = 3;
+    string status = 4; // "Active", "Closed"
+}
+
+message BudgetAllocation {
+    string allocation_id = 1;
+    string budget_id = 2;
+    string department_id = 3;
+    double allocated_amount = 4;
+    double spent_amount = 5;
+    double remaining_amount = 6;
+}
+
+message BudgetComparisonResponse {
+    string budget_id = 1;
+    double total_budget = 2;
+    double total_allocated = 3;
+    double total_spent = 4;
+    double remaining_budget = 5;
+}
+
+// Expense Messages
+message Expense {
+    string expense_id = 1;
+    string category = 2; // "Office Supplies", "Travel", "Utilities"
+    double amount = 3;
+    string currency = 4;
+    google.protobuf.Timestamp expense_date = 5;
+}
+
+// General Response Messages
+message DeleteResponse {
+    string message = 1;
 }

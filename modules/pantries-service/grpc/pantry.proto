@@ -1,197 +1,207 @@
 syntax = "proto3";
 
+import "google/protobuf/timestamp.proto";
+
 package pantry;
 
 option go_package = "/pantry_pb";
 
-// Inventory Management Service
+// --------------- Pantry Inventory Management Service ---------------
 service PantryService {
-    
-    // CRUD for pantry items
     rpc CreatePantryItem (CreatePantryItemRequest) returns (CreatePantryItemResponse);
     rpc GetPantryItem (GetPantryItemRequest) returns (GetPantryItemResponse);
     rpc UpdatePantryItem (UpdatePantryItemRequest) returns (UpdatePantryItemResponse);
     rpc DeletePantryItem (DeletePantryItemRequest) returns (DeletePantryItemResponse);
     rpc ListPantryItems (ListPantryItemsRequest) returns (ListPantryItemsResponse);
 
-	// CRUD for pantry items
+    rpc UsePantryItem(UsePantryItemRequest) returns (UsePantryItemResponse);
+    rpc SetStockThreshold(SetStockThresholdRequest) returns (SetStockThresholdResponse);
+}
+
+// --------------- Bucket Management Service ---------------
+service BucketService {
     rpc CreateBucketItem (CreateBucketItemRequest) returns (CreateBucketItemResponse);
     rpc GetBucketItem (GetBucketItemRequest) returns (GetBucketItemResponse);
     rpc UpdateBucketItem (UpdateBucketItemRequest) returns (UpdateBucketItemResponse);
     rpc DeleteBucketItem (DeleteBucketItemRequest) returns (DeleteBucketItemResponse);
     rpc ListBucketItems (ListBucketItemsRequest) returns (ListBucketItemsResponse);
-
-	// 	// CRUD for pantry items
-    rpc CreateExpenseLog (CreateExpenseLogRequest) returns (CreateExpenseLogResponse);
-    rpc GetExpenseLog (GetExpenseLogRequest) returns (GetExpenseLogResponse);
-    rpc UpdateExpenseLog (UpdateExpenseLogRequest) returns (UpdateExpenseLogResponse);
-    rpc DeleteExpenseLog (DeleteExpenseLogRequest) returns (DeleteExpenseLogResponse);
-    rpc ListExpenseLogs (ListExpenseLogsRequest) returns (ListExpenseLogsResponse);
-
 }
 
-// pantry items
+// --------------- Vendor & Auto Restocking Service ---------------
+service VendorIntegrationService {
+    rpc AutoReorderPantryItem(AutoReorderRequest) returns (AutoReorderResponse);
+    rpc ListVendors(ListVendorsRequest) returns (ListVendorsResponse);
+}
+
+// --------------- User Roles & Access Control (RBAC) ---------------
+service UserRoleService {
+    rpc AssignUserRole(AssignUserRoleRequest) returns (UserRoleResponse);
+    rpc GetUserRoles(GetUserRolesRequest) returns (UserRoleResponse);
+}
+
+// --------------- Budget Planning & Expense Limits ---------------
+service PantryBudgetService {
+    rpc SetMonthlyBudget(SetMonthlyBudgetRequest) returns (SetMonthlyBudgetResponse);
+    rpc GetBudgetUsage(GetBudgetUsageRequest) returns (GetBudgetUsageResponse);
+}
+
+// --------------- Audit Logging & History Tracking ---------------
+service PantryAuditService {
+    rpc LogPantryAction(LogPantryActionRequest) returns (PantryAuditResponse);
+}
+
+// --------------- Notifications & Alerts ---------------
+service NotificationService {
+    rpc SendStockAlert(StockAlertRequest) returns (StockAlertResponse);
+    rpc SendExpenseAlert(ExpenseAlertRequest) returns (ExpenseAlertResponse);
+}
+
+// --------------- Bulk Upload & Import Pantry Items ---------------
+service BulkUploadService {
+    rpc ImportPantryItems(ImportPantryRequest) returns (ImportPantryResponse);
+}
+
+// --------------- AI-Based Consumption Analytics ---------------
+service ConsumptionAnalyticsService {
+    rpc GetConsumptionTrends(ConsumptionTrendsRequest) returns (ConsumptionTrendsResponse);
+}
+
+// ---------------- Pantry Item Messages ----------------
 message PantryItem {
-	string  product_name=1;
-	float 	price=2;
-	string  category=3;
-	string created_at=4;
-	string updated_at=5;
+    string product_id = 1;
+    string product_name = 2;
+    string category = 3; // "Vegetables", "Dairy", "Beverages"
+    float price = 4;
+    float stock_quantity = 5;  
+    string unit_of_measurement = 6; // "kg", "liters", "pcs"
+    google.protobuf.Timestamp created_at = 7;
+    google.protobuf.Timestamp updated_at = 8;
 }
 
-// pantry bucket items
+// ---------------- Bucket Messages ----------------
 message BucketItem {
-    string    product_id=1;
-	float   qty=2;
-	float   price=3;
-	float   total=4;
-	string    paid_by=5;
-	string created_at=6;
-	string updated_at=7;
-}
-// pantry expense logs
-message ExpenseLog {
-    float   amt_received=1;
-	float   amt_spend=2;
-	string created_at=3;
-	string updated_at=4;
+    string bucket_id = 1;
+    string product_id = 2;
+    float qty = 3;
+    float price = 4;
+    float total = 5;
+    string paid_by = 6;
+    repeated string contributors = 7; // Supports multiple people sharing payment
+    google.protobuf.Timestamp purchase_date = 8;
+    google.protobuf.Timestamp created_at = 9;
+    google.protobuf.Timestamp updated_at = 10;
 }
 
-// messages for pantry items
-message CreatePantryItemRequest{
-    PantryItem item=1;
+// ---------------- Pantry Item Requests/Responses ----------------
+message CreatePantryItemRequest { PantryItem item = 1; }
+message CreatePantryItemResponse { PantryItem item = 1; bool success = 2; }
+message GetPantryItemRequest { string product_id = 1; }
+message GetPantryItemResponse { PantryItem item = 1; bool success = 2; }
+message UpdatePantryItemRequest { PantryItem item = 1; }
+message UpdatePantryItemResponse { PantryItem item = 1; bool success = 2; }
+message DeletePantryItemRequest { string product_id = 1; }
+message DeletePantryItemResponse { bool success = 1; }
+message ListPantryItemsRequest { int32 limit = 1; int32 offset = 2; string category_filter = 3; }
+message ListPantryItemsResponse { repeated PantryItem items = 1; bool success = 2; }
+
+// ---------------- Bucket Item Requests/Responses ----------------
+message CreateBucketItemRequest { BucketItem item = 1; }
+message CreateBucketItemResponse { BucketItem item = 1; bool success = 2; }
+message GetBucketItemRequest { string bucket_id = 1; }
+message GetBucketItemResponse { BucketItem item = 1; bool success = 2; }
+message UpdateBucketItemRequest { BucketItem item = 1; }
+message UpdateBucketItemResponse { BucketItem item = 1; bool success = 2; }
+message DeleteBucketItemRequest { string bucket_id = 1; }
+message DeleteBucketItemResponse { bool success = 1; }
+message ListBucketItemsRequest { int32 limit = 1; int32 offset = 2; }
+message ListBucketItemsResponse { repeated BucketItem items = 1; bool success = 2; }
+
+// ---------------- Vendor & Auto Restocking Messages ----------------
+message AutoReorderRequest {
+    string product_id = 1;
+    int32 reorder_quantity = 2;
 }
 
-message CreatePantryItemResponse{
-    PantryItem item=1;
-	bool success=2;
+message AutoReorderResponse {
+    bool success = 1;
 }
 
-message GetPantryItemRequest{
-	string product_id=1;
+message ListVendorsRequest {}
+
+message ListVendorsResponse {
+    repeated string vendor_names = 1;
 }
 
-message GetPantryItemResponse{
-	PantryItem item=1;
-	bool success=2;
+// ---------------- User Role Messages ----------------
+message AssignUserRoleRequest {
+    string user_id = 1;
+    string role = 2; // "Admin", "Staff", "Viewer"
 }
 
-message UpdatePantryItemRequest{
-	PantryItem item=1;
+message UserRoleResponse {
+    string user_id = 1;
+    repeated string roles = 2;
 }
 
-message UpdatePantryItemResponse{
-	PantryItem item=1;
-	bool success=2;
+// ---------------- Budget & Expense Limit Messages ----------------
+message SetMonthlyBudgetRequest {
+    float budget_amount = 1;
 }
 
-message DeletePantryItemRequest{
-	string product_id=1;
+message SetMonthlyBudgetResponse {
+    bool success = 1;
 }
 
-message DeletePantryItemResponse{
-	bool success=1;
+message GetBudgetUsageRequest {}
+
+message GetBudgetUsageResponse {
+    float total_spent = 1;
+    float remaining_budget = 2;
 }
 
-message ListPantryItemsRequest{
-	int32 limit=1;
-	int32 offset=2;
+// ---------------- Audit Logging Messages ----------------
+message LogPantryActionRequest {
+    string action = 1; // "ADD_ITEM", "UPDATE_STOCK", "DELETE_ITEM"
+    string user_id = 2;
+    google.protobuf.Timestamp timestamp = 3;
 }
 
-message ListPantryItemsResponse{
-	repeated PantryItem items=1;
-	bool success=2;
+message PantryAuditResponse {
+    bool success = 1;
 }
 
-//messages for Pantry bucket items
-message CreateBucketItemRequest{
-	BucketItem item=1;
+// ---------------- Notifications & Alerts Messages ----------------
+message StockAlertRequest {
+    string product_id = 1;
+    string message = 2;
 }
 
-message CreateBucketItemResponse{
-	BucketItem item=1;
-	bool success=2;
+message StockAlertResponse {
+    bool success = 1;
 }
 
-message GetBucketItemRequest{
-	string product_id=1;
+message ExpenseAlertRequest {
+    float amount_spent = 1;
+    string message = 2;
 }
 
-message GetBucketItemResponse{
-	BucketItem item=1;
-	bool success=2;
+message ExpenseAlertResponse {
+    bool success = 1;
 }
 
-message UpdateBucketItemRequest{
-	BucketItem item=1;
+// ---------------- Bulk Upload Messages ----------------
+message ImportPantryRequest {
+    string file_path = 1; // Path to CSV/Excel file
 }
 
-message UpdateBucketItemResponse{
-	BucketItem item=1;
-	bool success=2;
+message ImportPantryResponse {
+    bool success = 1;
 }
 
-message DeleteBucketItemRequest{
-	string product_id=1;
-}
+// ---------------- Consumption Analytics Messages ----------------
+message ConsumptionTrendsRequest {}
 
-message DeleteBucketItemResponse{
-	bool success=1;
-}
-
-message ListBucketItemsRequest{
-	int32 limit=1;
-	int32 offset=2;
-}
-
-message ListBucketItemsResponse{
-	repeated BucketItem items=1;
-	bool success=2;
-}
-
-
-//messages for Pantry bucket items
-message CreateExpenseLogRequest{
-	ExpenseLog log=1;
-}
-
-message CreateExpenseLogResponse{
-	ExpenseLog log=1;
-	bool success=2;
-}
-
-message GetExpenseLogRequest{
-	string logID=1;
-}
-
-message GetExpenseLogResponse{
-	ExpenseLog log=1;
-	bool success=2;
-}
-
-message UpdateExpenseLogRequest{
-	ExpenseLog log=1;
-}
-
-message UpdateExpenseLogResponse{
-	ExpenseLog log=1;
-	bool success=2;
-}
-
-message DeleteExpenseLogRequest{
-	string logID=1;
-}
-
-message DeleteExpenseLogResponse{
-	bool success=1;
-}
-
-message ListExpenseLogsRequest{
-	int32 limit=1;
-	int32 offset=2;
-}
-
-message ListExpenseLogsResponse{
-	repeated ExpenseLog logs=1;
-	bool success=2;
+message ConsumptionTrendsResponse {
+    string product_name = 1;
+    float predicted_usage_next_month = 2;
 }

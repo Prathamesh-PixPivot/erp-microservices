@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package gst;
+
+option go_package = "/gst_pb";
+
+service GSTPaymentService {
+    rpc GetGSTLiability(GetGSTLiabilityRequest) returns (GSTLiabilityResponse);
+    rpc MakeGSTPayment(MakeGSTPaymentRequest) returns (GSTPaymentResponse);
+}
+
+message GSTLiability {
+    string taxpayer_id = 1;
+    float gst_payable = 2;
+    float input_tax_credit = 3;
+    float net_liability = 4;
+    google.protobuf.Timestamp due_date = 5;
+}
+
+message GetGSTLiabilityRequest { string taxpayer_id = 1; }
+message GSTLiabilityResponse { GSTLiability liability = 1; }
+
+message MakeGSTPaymentRequest {
+    string taxpayer_id = 1;
+    float amount = 2;
+    string payment_method = 3; // UPI, Net Banking, Credit Card
+}
+
+message GSTPaymentResponse { bool success = 1; }

@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package gst;
+
+option go_package = "/gst_pb";
+
+service GSTLedgerService {
+    rpc GetCashLedger(GetCashLedgerRequest) returns (GSTLedgerResponse);
+    rpc GetCreditLedger(GetCreditLedgerRequest) returns (GSTLedgerResponse);
+}
+
+message GSTLedger {
+    string gstin = 1;
+    float balance = 2;
+    google.protobuf.Timestamp last_updated = 3;
+}
+
+message GetCashLedgerRequest { string gstin = 1; }
+message GetCreditLedgerRequest { string gstin = 1; }
+message GSTLedgerResponse { GSTLedger ledger = 1; }

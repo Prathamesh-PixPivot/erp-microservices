@@ -1,22 +1,25 @@
 syntax = "proto3";
 
+import "google/protobuf/timestamp.proto";
+
 package organization;
 
 option go_package = "/organizationpb";
 
-// The OrganizationService defines the gRPC service for organization-related operations
+// -------------------- Organization Service --------------------
 service OrganizationService {
-    rpc GetOrganization (GetOrganizationRequest) returns (GetOrganizationResponse);
-    rpc CreateOrganization (CreateOrganizationRequest) returns (CreateOrganizationResponse);
+    rpc GetOrganization(GetOrganizationRequest) returns (GetOrganizationResponse);
+    rpc CreateOrganization(CreateOrganizationRequest) returns (CreateOrganizationResponse);
+    rpc UpdateOrganization(UpdateOrganizationRequest) returns (UpdateOrganizationResponse);
+    rpc DeleteOrganization(DeleteOrganizationRequest) returns (DeleteOrganizationResponse);
+    rpc ListOrganizations(ListOrganizationsRequest) returns (ListOrganizationsResponse);
+    rpc GetChildOrganizations(GetChildOrganizationsRequest) returns (GetChildOrganizationsResponse);
+    rpc AssignParentOrganization(AssignParentOrganizationRequest) returns (AssignParentOrganizationResponse);
+    rpc GetOrganizationHierarchy(GetOrganizationHierarchyRequest) returns (GetOrganizationHierarchyResponse);
 }
 
-// Request message for getting an organization by ID
-message GetOrganizationRequest {
-    uint32 id = 1;  // Organization ID
-}
-
-// Response message containing organization details and associated users
-message GetOrganizationResponse {
+// -------------------- Organization Messages --------------------
+message Organization {
     uint32 id = 1;
     string gst_in = 2;
     string name = 3;
@@ -31,21 +34,54 @@ message GetOrganizationResponse {
     string module_id = 12;
     string zipcode = 13;
     string industry = 14;
-    repeated User users = 15;  // List of users
+    string status = 15; // "Pending", "Verified", "Suspended"
+    uint32 parent_org_id = 16; // Parent organization for branches/multi-tenancy
+    repeated OrganizationConfig configs = 17;
+    google.protobuf.Timestamp created_at = 18;
+    google.protobuf.Timestamp updated_at = 19;
 }
 
-message User {
-    uint32 id = 1;
-    string first_name = 2;
-    string last_name = 3;
-    string email = 4;
-    string phone = 5;
-    string role = 6;
-    uint32 organization_id = 7;
-    string keycloak_id = 8;
+// Organization Configuration (Industry-Specific Settings)
+message OrganizationConfig {
+    string key = 1;
+    string value = 2;
 }
 
-// Request message for creating an organization
+// -------------------- Parent-Child Organization Management --------------------
+message GetChildOrganizationsRequest {
+    uint32 parent_org_id = 1;
+}
+
+message GetChildOrganizationsResponse {
+    repeated Organization child_organizations = 1;
+}
+
+message AssignParentOrganizationRequest {
+    uint32 child_org_id = 1;
+    uint32 parent_org_id = 2;
+}
+
+message AssignParentOrganizationResponse {
+    bool success = 1;
+}
+
+message GetOrganizationHierarchyRequest {
+    uint32 org_id = 1;
+}
+
+message GetOrganizationHierarchyResponse {
+    Organization parent_org = 1;
+    repeated Organization child_organizations = 2;
+}
+
+// -------------------- Request & Response Messages --------------------
+message GetOrganizationRequest { uint32 id = 1; }
+
+message GetOrganizationResponse {
+    Organization organization = 1;
+    repeated User users = 2;
+}
+
 message CreateOrganizationRequest {
     string gst_in = 1;
     string name = 2;
@@ -60,10 +96,22 @@ message CreateOrganizationRequest {
     string module_id = 11;
     string zipcode = 12;
     string industry = 13;
+    optional uint32 parent_org_id = 14;
 }
 
-// Response message for creating an organization
-message CreateOrganizationResponse {
-    uint32 id = 1;
-    string name = 2;
+message CreateOrganizationResponse { Organization organization = 1; }
+
+message UpdateOrganizationRequest { Organization organization = 1; }
+message UpdateOrganizationResponse { Organization organization = 1; }
+
+message DeleteOrganizationRequest { uint32 id = 1; }
+message DeleteOrganizationResponse { bool success = 1; }
+
+message ListOrganizationsRequest {
+    int32 page = 1;
+    int32 page_size = 2;
+    string sort_by = 3;
+    bool ascending = 4;
 }
+
+message ListOrganizationsResponse { repeated Organization organizations = 1; }

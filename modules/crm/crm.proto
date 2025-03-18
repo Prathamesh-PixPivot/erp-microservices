@@ -1,0 +1,213 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package crmpb;
+
+option go_package = "/grpc/crmpb";
+
+// --------------- User Roles & Permissions Service ----------------
+service RoleService {
+    rpc AssignRoleToUser(AssignRoleRequest) returns (RoleResponse);
+    rpc GetUserRoles(GetUserRolesRequest) returns (UserRolesResponse);
+}
+
+message AssignRoleRequest {
+    uint32 user_id = 1;
+    string role = 2; // "Admin", "Sales", "Manager", "Viewer"
+}
+
+message UserRolesResponse {
+    uint32 user_id = 1;
+    repeated string roles = 2;
+}
+
+// --------------- Contact Management Service ----------------
+service ContactService {
+    rpc CreateContact(CreateContactRequest) returns (ContactResponse);
+    rpc GetContact(GetContactRequest) returns (ContactResponse);
+    rpc UpdateContact(UpdateContactRequest) returns (ContactResponse);
+    rpc DeleteContact(DeleteContactRequest) returns (DeleteResponse);
+    rpc ListContacts(ListContactsRequest) returns (ListContactsResponse);
+}
+
+message Contact {
+    uint32 id = 1;
+    string contact_type = 2;  // "individual" or "company"
+    string first_name = 3;
+    string last_name = 4;
+    repeated string emails = 5;
+    repeated string phones = 6;
+    string address = 7;
+    string company_name = 8;
+    google.protobuf.Timestamp created_at = 9;
+    google.protobuf.Timestamp updated_at = 10;
+}
+
+// --------------- Lead Management Service ----------------
+service LeadService {
+    rpc CreateLead (CreateLeadRequest) returns (LeadResponse);
+    rpc GetLead (GetLeadRequest) returns (LeadResponse);
+    rpc UpdateLead (UpdateLeadRequest) returns (LeadResponse);
+    rpc DeleteLead (DeleteLeadRequest) returns (DeleteResponse);
+    rpc ConvertLeadToOpportunity(ConvertLeadRequest) returns (ConvertLeadResponse);
+    rpc ListLeads (ListLeadsRequest) returns (ListLeadsResponse);
+}
+
+message Lead {
+    uint32 id = 1;
+    string first_name = 2;
+    string last_name = 3;
+    string email = 4;
+    string phone = 5;
+    string status = 6;
+    double lead_score = 7; // AI-based lead prioritization
+    uint32 assigned_to = 8;
+    google.protobuf.Timestamp created_at = 9;
+}
+
+message ConvertLeadRequest {
+    uint32 lead_id = 1;
+}
+
+message ConvertLeadResponse {
+    uint32 opportunity_id = 1;
+}
+
+// --------------- Opportunity Management Service ----------------
+service OpportunityService {
+    rpc CreateOpportunity (CreateOpportunityRequest) returns (OpportunityResponse);
+    rpc GetOpportunity (GetOpportunityRequest) returns (OpportunityResponse);
+    rpc UpdateOpportunity (UpdateOpportunityRequest) returns (OpportunityResponse);
+    rpc DeleteOpportunity (DeleteOpportunityRequest) returns (DeleteResponse);
+    rpc ListOpportunities (ListOpportunitiesRequest) returns (ListOpportunitiesResponse);
+}
+
+message Opportunity {
+    uint32 id = 1;
+    string name = 2;
+    string stage = 3; // "New", "Negotiation", "Closed-Won", "Closed-Lost"
+    double amount = 4;
+    google.protobuf.Timestamp close_date = 5;
+    uint32 assigned_to = 6;
+}
+
+// --------------- Activity & Task Service ----------------
+service ActivityService {
+    rpc CreateActivity(CreateActivityRequest) returns (ActivityResponse);
+    rpc GetActivity(GetActivityRequest) returns (ActivityResponse);
+    rpc UpdateActivity(UpdateActivityRequest) returns (ActivityResponse);
+    rpc DeleteActivity(DeleteActivityRequest) returns (DeleteResponse);
+    rpc ListActivities(ListActivitiesRequest) returns (ListActivitiesResponse);
+}
+
+message Activity {
+    uint32 id = 1;
+    string title = 2;
+    string description = 3;
+    string type = 4;
+    string status = 5;
+    google.protobuf.Timestamp due_date = 6;
+    uint32 assigned_user_id = 7;
+}
+
+// --------------- Meeting & Event Scheduling Service ----------------
+service MeetingService {
+    rpc ScheduleMeeting(ScheduleMeetingRequest) returns (MeetingResponse);
+}
+
+message ScheduleMeetingRequest {
+    string title = 1;
+    google.protobuf.Timestamp start_time = 2;
+    google.protobuf.Timestamp end_time = 3;
+    string meeting_link = 4;
+}
+
+message MeetingResponse {
+    uint32 meeting_id = 1;
+    string status = 2;
+}
+
+// --------------- Customer Interaction History Service ----------------
+service InteractionHistoryService {
+    rpc LogInteraction(LogInteractionRequest) returns (InteractionResponse);
+}
+
+message LogInteractionRequest {
+    uint32 contact_id = 1;
+    string type = 2; // "Call", "Email", "Meeting"
+    string notes = 3;
+}
+
+message InteractionResponse {
+    string message = 1;
+}
+
+// --------------- Deal & Proposal Management Service ----------------
+service DealService {
+    rpc CreateProposal(CreateProposalRequest) returns (ProposalResponse);
+}
+
+message CreateProposalRequest {
+    uint32 opportunity_id = 1;
+    string proposal_details = 2;
+    double proposal_amount = 3;
+}
+
+message ProposalResponse {
+    string message = 1;
+}
+
+// --------------- SLA & Follow-up Tracking Service ----------------
+service FollowUpService {
+    rpc ScheduleFollowUp(ScheduleFollowUpRequest) returns (FollowUpResponse);
+}
+
+message ScheduleFollowUpRequest {
+    uint32 lead_id = 1;
+    google.protobuf.Timestamp follow_up_date = 2;
+}
+
+message FollowUpResponse {
+    string message = 1;
+}
+
+// --------------- API Logging & Rate Limiting Service ----------------
+service LoggingService {
+    rpc LogEvent(LogEventRequest) returns (LogEventResponse);
+}
+
+message LogEventRequest {
+    string event_type = 1; // "LOGIN", "UPDATE_LEAD", "DELETE_CONTACT"
+    string user_id = 2;
+}
+
+message LogEventResponse {
+    string message = 1;
+}
+
+// --------------- Notification Service ----------------
+service NotificationService {
+    rpc SendEmail(SendEmailRequest) returns (NotificationResponse);
+    rpc SendSMS(SendSMSRequest) returns (NotificationResponse);
+}
+
+message SendEmailRequest {
+    string recipient_email = 1;
+    string subject = 2;
+    string body = 3;
+}
+
+message SendSMSRequest {
+    string phone_number = 1;
+    string message = 2;
+}
+
+message NotificationResponse {
+    string status = 1;
+}
+
+// --------------- General Response Messages ----------------
+message DeleteResponse {
+    string message = 1;
+}

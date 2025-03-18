@@ -1,60 +1,33 @@
 syntax = "proto3";
 
+import "google/protobuf/timestamp.proto";
+
 package user;
 
 option go_package = "/userpb";
 
-// The UserService defines the gRPC service for user-related operations
+// -------------------- User Service --------------------
 service UserService {
-    rpc GetUsersByOrganization (GetUsersByOrganizationRequest) returns (GetUsersByOrganizationResponse);
-    rpc GetUser (GetUserRequest) returns (GetUserResponse);
-    rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
+    // User CRUD Operations
+    rpc GetUser(GetUserRequest) returns (GetUserResponse);
+    rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+    rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+    rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+    rpc GetUsersByOrganization(GetUsersByOrganizationRequest) returns (GetUsersByOrganizationResponse);
+    rpc GetUsersByParentOrganization(GetUsersByParentOrganizationRequest) returns (GetUsersByParentOrganizationResponse);
+    
+    // Authentication & Authorization
+    rpc LoginUser(LoginUserRequest) returns (LoginUserResponse);
+    rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
+    rpc AssignRole(AssignRoleRequest) returns (AssignRoleResponse);
+    rpc CheckPermissions(CheckPermissionsRequest) returns (CheckPermissionsResponse);
+    
+    // Password Management
+    rpc ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse);
+    rpc ResetPassword(ResetPasswordRequest) returns (ResetPasswordResponse);
 }
 
-// Message to request creating a user
-message CreateUserRequest {
-    string first_name = 1;
-    string last_name = 2;
-    string email = 3;
-    string phone = 4;
-    string password = 5;  // Add password to create user
-    string role = 6;
-    uint32 organization_id = 7;
-}
-
-// Response message for creating a user
-message CreateUserResponse {
-    uint32 id = 1;
-}
-
-// Message to request a user by ID
-message GetUserRequest {
-    uint32 id = 1;
-}
-
-// Response message for getting a single user
-message GetUserResponse {
-    uint32 id = 1;
-    string first_name = 2;
-    string last_name = 3;
-    string email = 4;
-    string phone = 5;
-    string role = 6;
-    uint32 organization_id = 7;
-    string keycloak_id = 8;
-}
-
-// Request message for getting users by organization ID
-message GetUsersByOrganizationRequest {
-    uint32 organization_id = 1;  // The organization ID to fetch users for
-}
-
-// Response message containing a list of users for an organization
-message GetUsersByOrganizationResponse {
-    repeated User users = 1;  // List of users
-}
-
-// User message represents a user object
+// -------------------- User Messages --------------------
 message User {
     uint32 id = 1;
     string first_name = 2;
@@ -62,6 +35,86 @@ message User {
     string email = 4;
     string phone = 5;
     string role = 6;
-    uint32 organization_id = 7;
-    string keycloak_id = 8;
+    string permissions = 7; // ABAC permissions (Casbin attributes)
+    uint32 organization_id = 8;
+    optional uint32 parent_org_id = 9; // For users with access to parent-child hierarchy
+    google.protobuf.Timestamp created_at = 10;
+    google.protobuf.Timestamp updated_at = 11;
 }
+
+// -------------------- Parent Organization User Management --------------------
+message GetUsersByParentOrganizationRequest {
+    uint32 parent_org_id = 1;
+}
+
+message GetUsersByParentOrganizationResponse {
+    repeated User users = 1;
+}
+
+
+// -------------------- User CRUD Requests & Responses --------------------
+message CreateUserRequest {
+    string first_name = 1;
+    string last_name = 2;
+    string email = 3;
+    string phone = 4;
+    string password = 5;  // Required for authentication
+    string role = 6;
+    uint32 organization_id = 7;
+}
+
+message CreateUserResponse { uint32 id = 1; }
+
+message GetUserRequest { uint32 id = 1; }
+message GetUserResponse { User user = 1; }
+
+message UpdateUserRequest { User user = 1; }
+message UpdateUserResponse { User user = 1; }
+
+message DeleteUserRequest { uint32 id = 1; }
+message DeleteUserResponse { bool success = 1; }
+
+message GetUsersByOrganizationRequest { uint32 organization_id = 1; }
+message GetUsersByOrganizationResponse { repeated User users = 1; }
+
+// -------------------- Authentication Messages --------------------
+message LoginUserRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message LoginUserResponse {
+    string access_token = 1;
+    string refresh_token = 2;
+}
+
+message RefreshTokenRequest { string refresh_token = 1; }
+message RefreshTokenResponse { string access_token = 1; }
+
+// -------------------- Authorization (Casbin RBAC/ABAC) --------------------
+message AssignRoleRequest {
+    uint32 user_id = 1;
+    string role = 2;  // e.g., "admin", "manager", "employee"
+}
+
+message AssignRoleResponse { bool success = 1; }
+
+message CheckPermissionsRequest {
+    uint32 user_id = 1;
+    string resource = 2;  // The resource (e.g., "invoice", "report")
+    string action = 3;    // The action (e.g., "read", "write", "delete")
+}
+
+message CheckPermissionsResponse { bool allowed = 1; }
+
+// -------------------- Password Management --------------------
+message ChangePasswordRequest {
+    uint32 user_id = 1;
+    string old_password = 2;
+    string new_password = 3;
+}
+
+message ChangePasswordResponse { bool success = 1; }
+
+message ResetPasswordRequest { string email = 1; }
+message ResetPasswordResponse { bool success = 1; }
