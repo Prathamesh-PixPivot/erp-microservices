@@ -143,7 +143,7 @@ func (s *AuthServiceServer) Signup(ctx context.Context, req *authpb.SignupReques
 	from := smtpUser
 	to := []string{req.Email}
 	subject := "Subject: Email Verification\r\n"
-	body := fmt.Sprintf("Hello %s %s,\n\nPlease verify your email by clicking the link below:\n\nhttp://host.docker.internal:8080/verify?userID=%s\n\nThank you!", req.FirstName, req.LastName, strconv.Itoa(int(userRes.Id)))
+	body := fmt.Sprintf("Hello %s %s,\n\nPlease verify your email by clicking the link below:\n\nhttp://localhost:8080/verify?userID=%s\n\nThank you!", req.FirstName, req.LastName, strconv.Itoa(int(userRes.Id)))
 	message := []byte(subject + "\r\n" + body)
 	auth := smtp.PlainAuth("", smtpUser, smtpPass, smtpHost)
 

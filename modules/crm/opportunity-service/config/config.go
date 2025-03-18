@@ -11,7 +11,7 @@ type Config struct {
 
 func Load() *Config {
 	return &Config{
-		DB:       getEnv("DB_CONNECTION_STRING", "host=host.docker.internal user=postgres password=root dbname=opportunity-service port=5432 sslmode=disable"),
+		DB:       getEnv("DB_CONNECTION_STRING", "host=localhost user=postgres password=root dbname=opportunity-service port=5432 sslmode=disable"),
 		GRPCPort: getEnv("GRPC_PORT", ":50055"),
 	}
 }

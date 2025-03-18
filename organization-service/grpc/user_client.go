@@ -10,7 +10,7 @@ import (
 
 func GetUsersByOrganizationID(orgID uint) ([]*userpb.User, error) { // Returning []*pb.User instead of GetUserResponse
 	// Connect to user-service gRPC server
-	conn, err := grpc.Dial("host.docker.internal:50051", grpc.WithInsecure())
+	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Failed to connect to user-service: %v", err)
 	}

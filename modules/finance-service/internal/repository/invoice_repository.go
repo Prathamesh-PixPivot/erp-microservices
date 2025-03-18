@@ -2,6 +2,7 @@ package repository
 
 import (
 	"finance-service/internal/models"
+	"fmt"
 	"log"
 	"strconv"
 
@@ -28,6 +29,7 @@ func NewInvoiceRepository(db *gorm.DB) InvoiceRepository {
 }
 
 func (r *invoiceRepository) Create(invoice *models.Invoice) error {
+	fmt.Println(invoice);
 	return r.db.Create(invoice).Error
 }
 

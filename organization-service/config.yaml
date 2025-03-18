@@ -1,4 +1,4 @@
-DB_HOST: "host.docker.internal"
+DB_HOST: "localhost"
 DB_USER: "postgres"
 DB_PASSWORD: "root"
 DB_NAME: "organization-service"

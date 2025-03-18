@@ -59,7 +59,7 @@ services:
     depends_on:
       - keycloak
     environment:
-      DB_HOST: "host.docker.internal"
+      DB_HOST: "localhost"
       DB_PORT: "5432"
       DB_USER: "postgres"
       DB_PASSWORD: "root"
@@ -75,7 +75,7 @@ services:
     depends_on:
       - auth-service
     environment:
-      DB_HOST: "host.docker.internal"
+      DB_HOST: "localhost"
       DB_PORT: "5432"
       DB_USER: "postgres"
       DB_PASSWORD: "root"
@@ -91,7 +91,7 @@ services:
     depends_on:
       - auth-service
     environment:
-      DB_HOST: "host.docker.internal"
+      DB_HOST: "localhost"
       DB_PORT: "5432"
       DB_USER: "postgres"
       DB_PASSWORD: "root"
@@ -110,7 +110,7 @@ services:
       - user-service
       - contact-service
     environment:
-      DB_HOST: "host.docker.internal"
+      DB_HOST: "localhost"
       DB_PORT: "5432"
       DB_USER: "postgres"
       DB_PASSWORD: "root"
@@ -124,7 +124,7 @@ services:
       - graphql-gateway
       - user-service
     environment:
-      DB_HOST: "host.docker.internal"
+      DB_HOST: "localhost"
       DB_PORT: "5432"
       DB_USER: "postgres"
       DB_PASSWORD: "root"
@@ -138,7 +138,7 @@ services:
       - graphql-gateway
       - user-service
     environment:
-      DB_HOST: "host.docker.internal"
+      DB_HOST: "localhost"
       DB_PORT: "5432"
       DB_USER: "postgres"
       DB_PASSWORD: "root"
@@ -153,7 +153,7 @@ services:
       - user-service
       - contact-service
     environment:
-      DB_HOST: "host.docker.internal"
+      DB_HOST: "localhost"
       DB_PORT: "5432"
       DB_USER: "postgres"
       DB_PASSWORD: "root"
@@ -171,7 +171,7 @@ services:
       - user-service
       - organization-service
     environment:
-      DB_HOST: "host.docker.internal"
+      DB_HOST: "localhost"
       DB_PORT: "5432"
       DB_USER: "postgres"
       DB_PASSWORD: "root"
@@ -189,7 +189,7 @@ services:
       - user-service
       - organization-service
     environment:
-      DB_HOST: "host.docker.internal"
+      DB_HOST: "localhost"
       DB_PORT: "5432"
       DB_USER: "postgres"
       DB_PASSWORD: "root"
@@ -207,7 +207,7 @@ services:
       - user-service
       - organization-service
     environment:
-      DB_HOST: "host.docker.internal"
+      DB_HOST: "localhost"
       DB_PORT: "5432"
       DB_USER: "postgres"
       DB_PASSWORD: "root"

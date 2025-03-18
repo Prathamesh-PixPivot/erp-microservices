@@ -1,8 +1,8 @@
 package main
 
 import (
-	"hrms/infrastructure/migrations"
 	"log"
+	"hrms/infrastructure/migrations"
 )
 
 func main() {
@@ -19,3 +19,4 @@ func main() {
 	// Start the gRPC server
 	StartServer(deps)
 }
+

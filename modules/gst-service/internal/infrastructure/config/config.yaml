@@ -2,7 +2,7 @@ server:
   grpc_port: 50051  # gRPC server port
 
 database:
-  host: "host.docker.internal"
+  host: "localhost"
   port: 5432
   user: "postgres"
   password: "root"
@@ -20,7 +20,7 @@ external_api:
   api_key: "your-secret-api-key"
 
 cache:
-  redis_host: "host.docker.internal"
+  redis_host: "localhost"
   redis_port: 6379
   redis_password: ""
   redis_db: 0

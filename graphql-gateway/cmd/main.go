@@ -237,6 +237,7 @@ func main() {
 
 	// Set up GraphQL and Playground routes with logging
 	log.Println("Setting up routes...")
+
 	// Set up GraphQL and Playground routes
 	router.Handle("/", playground.Handler("GraphQL Playground", "/graphql"))
 	router.Handle("/graphql", gqlSrv)
@@ -245,6 +246,7 @@ func main() {
 		log.Println("Test endpoint accessed")
 		w.Write([]byte("CORS Middleware Test"))
 	}).Methods("GET")
+	
 	httpServer := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.GraphQLPort),
 		Handler:      router,

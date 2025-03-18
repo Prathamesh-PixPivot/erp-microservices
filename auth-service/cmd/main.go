@@ -28,13 +28,13 @@ func main() {
 	config.InitConfig()
 
 	// Connect to gRPC services (User and Organization)
-	userConn, err := grpc.Dial("host.docker.internal:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	userConn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("Failed to connect to user service: %v", err)
 	}
 	defer userConn.Close()
 
-	organizationConn, err := grpc.Dial("host.docker.internal:50052", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	organizationConn, err := grpc.Dial("localhost:50052", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("Failed to connect to organization service: %v", err)
 	}
@@ -87,7 +87,7 @@ func main() {
 	app := fiber.New()
 	// Use CORS middleware
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://host.docker.internal:3000",
+		AllowOrigins:     "http://localhost:3000",
 		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
 		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
 		AllowCredentials: true,
