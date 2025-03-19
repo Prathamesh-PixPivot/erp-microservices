@@ -2,73 +2,38 @@ syntax = "proto3";
 
 package auth;
 
-option go_package = "authorization-service/internal/transport/grpc/proto/policy";
+option go_package = "authorization-service/internal/transport/grpc/proto/role";
 
-// ✅ Role & Role Group Service
+// ✅ Role Service (RBAC Only)
 service RoleService {
-    rpc CreateRole(CreateRoleRequest) returns (RoleResponse);
-    rpc UpdateRole(UpdateRoleRequest) returns (RoleResponse);
-    rpc DeleteRole(DeleteRoleRequest) returns (DeleteResponse); // 🛠️ Fixed
-    rpc ListRoles(Empty) returns (ListRolesResponse);
+    rpc GetRoles(GetRolesRequest) returns (GetRolesResponse);
+    rpc AssignRoleToUser(AssignRoleToUserRequest) returns (AssignRoleToUserResponse);
+    rpc GetUserRoles(GetUserRolesRequest) returns (GetUserRolesResponse);
+}
 
-    rpc CreateRoleGroup(CreateRoleGroupRequest) returns (RoleGroupResponse);
-    rpc UpdateRoleGroup(UpdateRoleGroupRequest) returns (RoleGroupResponse);
-    rpc DeleteRoleGroup(DeleteRoleGroupRequest) returns (DeleteResponse); // 🛠️ Fixed
-    rpc AssignRoleToGroup(AssignRoleToGroupRequest) returns (AssignResponse);
-    rpc RemoveRoleFromGroup(RemoveRoleFromGroupRequest) returns (RemoveResponse);
+// ✅ Predefined Roles Enum (Standard Organization Roles)
+enum PredefinedRole {
+    ROLE_UNSPECIFIED = 0;
+    ADMIN = 1;
+    MANAGER = 2;
+    EMPLOYEE = 3;
+    FINANCE = 4;
+    HR = 5;
+    IT = 6;
+    SALES = 7;
+    SUPPORT = 8;
+    OPERATIONS = 9;
 }
 
 // ✅ Role Messages
-message CreateRoleRequest {
-    string role_name = 1;
-}
-message UpdateRoleRequest {
-    string role_id = 1;
-    string role_name = 2;
-}
-message DeleteRoleRequest {
-    string role_id = 1;
-}
-message RoleResponse {
-    string role_id = 1;
-    string role_name = 2;
-}
-message ListRolesResponse {
-    repeated RoleResponse roles = 1;
-}
+message GetRolesRequest {}
+message GetRolesResponse { repeated PredefinedRole roles = 1; }
 
-// ✅ Role Group Messages
-message CreateRoleGroupRequest {
-    string group_name = 1;
+message AssignRoleToUserRequest {
+    string user_id = 1;
+    PredefinedRole role = 2;
 }
-message UpdateRoleGroupRequest {
-    string group_id = 1;
-    string group_name = 2;
-}
-message DeleteRoleGroupRequest {
-    string group_id = 1;
-}
-message RoleGroupResponse {
-    string group_id = 1;
-    string group_name = 2;
-}
-message AssignRoleToGroupRequest {
-    string group_id = 1;
-    string role_id = 2;
-}
-message RemoveRoleFromGroupRequest {
-    string group_id = 1;
-    string role_id = 2;
-}
+message AssignRoleToUserResponse { bool success = 1; }
 
-// ✅ Common Messages
-message AssignResponse {
-    string message = 1;
-}
-message RemoveResponse {
-    string message = 1;
-}
-message DeleteResponse { // 🛠️ Added Definition
-    string message = 1;
-}
-message Empty {}
+message GetUserRolesRequest { string user_id = 1; }
+message GetUserRolesResponse { repeated PredefinedRole roles = 1; }

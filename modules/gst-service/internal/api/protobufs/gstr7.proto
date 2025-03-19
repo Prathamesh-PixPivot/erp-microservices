@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package gst;
+
+option go_package = "/gst_pb";
+
+service GSTR7Service {
+    rpc GetGSTR7(GetGSTR7Request) returns (GSTR7Response);
+}
+
+message GSTR7 {
+    string gstin = 1;
+    float total_tds = 2;
+    float tax_paid = 3;
+    google.protobuf.Timestamp filed_at = 4;
+}
+
+message GetGSTR7Request { string gstin = 1; }
+message GSTR7Response { GSTR7 gstr7 = 1; }

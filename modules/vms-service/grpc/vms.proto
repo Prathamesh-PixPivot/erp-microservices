@@ -6,7 +6,7 @@ package vms;
 
 option go_package = "/vms_pb";
 
-// Vendor related services
+// --------------- Vendor Management Service ---------------
 service VendorService {
     rpc CreateVendor(CreateVendorRequest) returns (VendorResponse);
     rpc GetVendorByID(GetVendorByIDRequest) returns (VendorResponse);
@@ -15,7 +15,13 @@ service VendorService {
     rpc SearchVendors(SearchVendorsRequest) returns (SearchVendorsResponse);
 }
 
-// Purchase Order related services
+// --------------- Vendor Rating & Review System ---------------
+service VendorRatingService {
+    rpc SubmitVendorRating(SubmitVendorRatingRequest) returns (VendorRatingResponse);
+    rpc GetVendorRatings(GetVendorRatingsRequest) returns (VendorRatingsResponse);
+}
+
+// --------------- Purchase Order Service ---------------
 service PurchaseOrderService {
     rpc CreatePurchaseOrder(CreatePurchaseOrderRequest) returns (PurchaseOrderResponse);
     rpc GetPurchaseOrderByID(GetPurchaseOrderByIDRequest) returns (PurchaseOrderResponse);
@@ -25,23 +31,52 @@ service PurchaseOrderService {
     rpc ReceiveGoods(ReceiveGoodsRequest) returns (ReceiveGoodsResponse);
 }
 
-// Performance management related services
+// --------------- Automated PO Generation ---------------
+service AutoPOGenerationService {
+    rpc GeneratePurchaseOrder(GeneratePORequest) returns (GeneratePOResponse);
+}
+
+// --------------- Multi-Level PO Approval Workflow ---------------
+service ApprovalService {
+    rpc RequestApproval(ApprovalRequest) returns (ApprovalResponse);
+    rpc GetApprovalStatus(GetApprovalStatusRequest) returns (ApprovalResponse);
+}
+
+// --------------- Vendor Performance Management ---------------
 service PerformanceService {
     rpc RecordPerformance(RecordPerformanceRequest) returns (PerformanceResponse);
     rpc GetPerformanceByID(GetPerformanceByIDRequest) returns (PerformanceResponse);
     rpc UpdatePerformance(UpdatePerformanceRequest) returns (PerformanceResponse);
     rpc DeletePerformance(DeletePerformanceRequest) returns (DeletePerformanceResponse);
+    rpc ListVendorAudits(ListVendorAuditsRequest) returns (ListVendorAuditsResponse);
 }
 
-// Payment related services
+// --------------- Goods Inspection & Quality Assurance ---------------
+service InspectionService {
+    rpc InspectReceivedGoods(InspectGoodsRequest) returns (InspectGoodsResponse);
+}
+
+// --------------- Payment & Invoice Matching ---------------
 service PaymentService {
     rpc ProcessInvoice(ProcessInvoiceRequest) returns (PaymentResponse);
     rpc UpdatePaymentStatus(UpdatePaymentStatusRequest) returns (PaymentResponse);
     rpc GetPaymentByID(GetPaymentByIDRequest) returns (PaymentResponse);
     rpc DeletePayment(DeletePaymentRequest) returns (DeletePaymentResponse);
+    rpc MatchInvoiceWithPO(MatchInvoiceRequest) returns (MatchInvoiceResponse);
 }
 
-// Vendor-related message types
+// --------------- Vendor Blacklist & Fraud Prevention ---------------
+service VendorBlacklistService {
+    rpc BlacklistVendor(BlacklistVendorRequest) returns (BlacklistVendorResponse);
+    rpc GetBlacklistedVendors(GetBlacklistedVendorsRequest) returns (BlacklistedVendorsResponse);
+}
+
+// --------------- Audit Logging for Vendor Transactions ---------------
+service AuditLoggingService {
+    rpc LogVendorTransaction(LogVendorTransactionRequest) returns (AuditLogResponse);
+}
+
+// ---------------- Vendor Messages ----------------
 message Vendor {
     string id = 1;
     string name = 2;
@@ -54,171 +89,91 @@ message Vendor {
     bool is_compliant = 9;
     float performance_score = 10;
     string risk_assessment = 11;
+    repeated VendorContact contacts = 12;
+    repeated VendorAddress addresses = 13;
 }
 
-message CreateVendorRequest {
-    Vendor vendor = 1;
+message VendorContact {
+    string name = 1;
+    string email = 2;
+    string phone = 3;
 }
 
-message GetVendorByIDRequest {
-    string id = 1;
+message VendorAddress {
+    string address_line1 = 1;
+    string address_line2 = 2;
+    string city = 3;
+    string state = 4;
+    string zip_code = 5;
+    string country = 6;
 }
 
-message UpdateVendorRequest {
-    Vendor vendor = 1;
-}
-
-message DeleteVendorRequest {
-    string id = 1;
-}
-
-message DeleteVendorResponse {
-    string message = 1;
-}
-
-message VendorResponse {
-    Vendor vendor = 1;
-}
-
-message SearchVendorsRequest {
-    string query = 1;
-}
-
-message SearchVendorsResponse {
-    repeated Vendor vendors = 1;
-}
-
-// Purchase Order related message types
-message PurchaseOrder {
-    string id = 1;
-    string vendor_id = 2;
-    string order_details = 3;
-    string status = 4;
-    google.protobuf.Timestamp delivery_date = 5;
-    google.protobuf.Timestamp received_date = 6;
-}
-
-message CreatePurchaseOrderRequest {
+// ---------------- Vendor Rating Messages ----------------
+message SubmitVendorRatingRequest {
     string vendor_id = 1;
-    string order_details = 2;
-    google.protobuf.Timestamp delivery_date = 3;
+    float rating = 2;
+    string feedback = 3;
 }
 
-message GetPurchaseOrderByIDRequest {
-    string id = 1;
+message VendorRatingResponse {
+    bool success = 1;
 }
 
-message UpdatePurchaseOrderRequest {
-    PurchaseOrder purchase_order = 1;
-}
-
-message DeletePurchaseOrderRequest {
-    string id = 1;
-}
-
-message DeletePurchaseOrderResponse {
-    string message = 1;
-}
-
-message PurchaseOrderResponse {
-    string id = 1;
-    string vendor_id = 2;
-    string order_details = 3;
-    string status = 4;
-    string delivery_date = 5;
-    string received_date = 6;
-}
-
-message TrackOrderStatusRequest {
-    string id = 1;
-}
-
-message ReceiveGoodsRequest {
-    string id = 1;
-    google.protobuf.Timestamp received_date = 2;
-}
-
-message ReceiveGoodsResponse {
-    string message = 1;
-}
-
-// Performance-related message types
-message VendorPerformance {
-    string id = 1;
-    string vendor_id = 2;
-    float score = 3;
-    string risk_level = 4;
-    google.protobuf.Timestamp evaluated_at = 5;
-}
-
-message RecordPerformanceRequest {
+message GetVendorRatingsRequest {
     string vendor_id = 1;
-    float score = 2;
-    string risk_level = 3;
-    google.protobuf.Timestamp evaluated_at = 4;
 }
 
-message GetPerformanceByIDRequest {
-    string id = 1;
+message VendorRatingsResponse {
+    repeated float ratings = 1;
 }
 
-message UpdatePerformanceRequest {
-    VendorPerformance performance = 1;
-}
-
-message DeletePerformanceRequest {
-    string id = 1;
-}
-
-message DeletePerformanceResponse {
-    string message = 1;
-}
-
-message PerformanceResponse {
+// ---------------- Auto PO Generation Messages ----------------
+message GeneratePORequest {
     string vendor_id = 1;
-    float score = 2;
-    string risk_level = 3;
-    string evaluated_at = 4;
 }
 
-// Payment-related message types
-message Payment {
-    string id = 1;
-    string purchase_order_id = 2;
-    float amount = 3;
-    string status = 4;
-    string payment_terms = 5;
-    google.protobuf.Timestamp paid_at = 6;
+message GeneratePOResponse {
+    bool success = 1;
 }
 
-message ProcessInvoiceRequest {
+// ---------------- Goods Inspection Messages ----------------
+message InspectGoodsRequest {
     string purchase_order_id = 1;
-    float amount = 2;
-    string payment_terms = 3;
+    string inspection_notes = 2;
 }
 
-message UpdatePaymentStatusRequest {
-    string id = 1;
-    string status = 2;
+message InspectGoodsResponse {
+    bool success = 1;
 }
 
-message GetPaymentByIDRequest {
-    string id = 1;
+// ---------------- Vendor Blacklist Messages ----------------
+message BlacklistVendorRequest {
+    string vendor_id = 1;
+    string reason = 2;
 }
 
-message DeletePaymentRequest {
-    string id = 1;
+message BlacklistVendorResponse {
+    bool success = 1;
 }
 
-message DeletePaymentResponse {
+message GetBlacklistedVendorsRequest {}
+
+message BlacklistedVendorsResponse {
+    repeated string vendor_ids = 1;
+}
+
+// ---------------- Audit Logging Messages ----------------
+message LogVendorTransactionRequest {
+    string vendor_id = 1;
+    string action = 2; // "CREATE_PO", "APPROVE_CONTRACT", "BLACKLIST_VENDOR"
+    google.protobuf.Timestamp timestamp = 3;
+}
+
+message AuditLogResponse {
+    bool success = 1;
+}
+
+// ---------------- General Response Messages ----------------
+message DeleteResponse {
     string message = 1;
-}
-
-message PaymentResponse {
-    string id = 1;
-    string purchase_order_id = 2;
-    float amount = 3;
-    string status = 4;
-    string payment_terms = 5;
-    string paid_at = 6;
 }

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package hrms;
+
+option go_package = "/hrms_pb";
+
+service HRAnalyticsService {
+    rpc GetEmployeeRetentionRate(EmptyRequest) returns (AnalyticsResponse);
+    rpc GetSalaryDistribution(EmptyRequest) returns (AnalyticsResponse);
+}
+
+message AnalyticsResponse {
+    string report_name = 1;
+    string report_data = 2;
+}

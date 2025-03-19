@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package gst;
+
+option go_package = "/gst_pb";
+
+service GSTR2BService {
+    rpc GetGSTR2B(GetGSTR2BRequest) returns (GSTR2BResponse);
+}
+
+message GSTR2B {
+    string gstin = 1;
+    float eligible_itc = 2;
+    float ineligible_itc = 3;
+    google.protobuf.Timestamp generated_at = 4;
+}
+
+message GetGSTR2BRequest { string gstin = 1; }
+message GSTR2BResponse { GSTR2B gstr2b = 1; }

@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+package hrms;
+
+option go_package = "/hrms_pb";
+
+service GrievanceService {
+    rpc FileGrievance(FileGrievanceRequest) returns (GrievanceResponse);
+    rpc GetGrievance(GetGrievanceRequest) returns (GrievanceResponse);
+    rpc ResolveGrievance(ResolveGrievanceRequest) returns (GrievanceResponse);
+}
+
+message Grievance {
+    string grievance_id = 1;
+    string employee_id = 2;
+    string issue = 3;
+    string status = 4; // Filed, Under Review, Resolved
+    google.protobuf.Timestamp filed_at = 5;
+}
+
+message FileGrievanceRequest { Grievance grievance = 1; }
+message GetGrievanceRequest { string grievance_id = 1; }
+message ResolveGrievanceRequest { string grievance_id = 1; }
+message GrievanceResponse { Grievance grievance = 1; }
