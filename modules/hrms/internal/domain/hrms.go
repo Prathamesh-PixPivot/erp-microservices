@@ -1,8 +1,9 @@
 package domain
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 )
 
 // Organization Model
@@ -44,6 +45,7 @@ type Employee struct {
 	LeaveBalances []LeaveBalance     `gorm:"foreignKey:EmployeeID"`
 	Documents     []EmployeeDocument `gorm:"foreignKey:EmployeeID"`
 	Benefits      EmployeeBenefits   `gorm:"foreignKey:EmployeeID"`
+	ShiftID       uint               `json:"shift_id" gorm:"index"`
 }
 
 // Shift Model (Updated)
@@ -81,9 +83,9 @@ type EmployeeDocument struct {
 type EmployeeExit struct {
 	gorm.Model
 	EmployeeID      uint      `json:"employee_id"`
-	ExitType        string    `json:"exit_type" gorm:"type:enum('Resignation','Termination','Retirement')"`
+	ExitType        string    `json:"exit_type" gorm:"type:varchar(20)"`
 	ExitDate        time.Time `json:"exit_date"`
-	ClearanceStatus string    `json:"clearance_status" gorm:"type:enum('Pending','Completed')"`
+	ClearanceStatus string    `json:"clearance_status" gorm:"type:varchar(20)"`
 }
 
 // LoanAdvance Model - Tracks loans & advance salaries for employees
@@ -246,16 +248,16 @@ type Expense struct {
 // Performance Review Model (Unified)
 type PerformanceReview struct {
 	gorm.Model
-	EmployeeID   uint             `json:"employee_id" gorm:"index"`  // Employee being reviewed
-	ReviewerID   uint             `json:"reviewer_id" gorm:"index"`  // Manager or HR
-	ReviewDate   time.Time        `json:"review_date"`
-	ReviewPeriod string           `json:"review_period" gorm:"type:varchar(20)"` // Monthly, Annual, etc.
-	OverallRating int             `json:"overall_rating"` // 1-5 scale
-	Feedback     string           `json:"feedback"`
-	Promotion    bool             `json:"promotion"`
+	EmployeeID    uint      `json:"employee_id" gorm:"index"` // Employee being reviewed
+	ReviewerID    uint      `json:"reviewer_id" gorm:"index"` // Manager or HR
+	ReviewDate    time.Time `json:"review_date"`
+	ReviewPeriod  string    `json:"review_period" gorm:"type:varchar(20)"` // Monthly, Annual, etc.
+	OverallRating int       `json:"overall_rating"`                        // 1-5 scale
+	Feedback      string    `json:"feedback"`
+	Promotion     bool      `json:"promotion"`
 
 	// Relations
-	KPIs              []PerformanceKPI  `gorm:"foreignKey:ReviewID"`
+	KPIs              []PerformanceKPI   `gorm:"foreignKey:ReviewID"`
 	SkillDevelopments []SkillDevelopment `gorm:"foreignKey:ReviewID"`
 }
 
@@ -286,4 +288,3 @@ type SkillDevelopment struct {
 	Skill    string `json:"skill"`
 	Progress string `json:"progress"`
 }
-

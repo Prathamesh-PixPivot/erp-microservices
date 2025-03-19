@@ -154,3 +154,18 @@ const (
 	PromotionApproved PromotionStatus = "Promotion Approved"
 	NeedsImprovement  PromotionStatus = "Needs Improvement"
 )
+
+type EmployeeExitType string
+
+const (
+	Resignation EmployeeExitType = "Resignation"
+	Termination EmployeeExitType = "Termination"
+	Retirement  EmployeeExitType = "Retirement"
+)
+
+type EmployeeExitClearenceStatusType string
+
+const (
+	ExitStatPending EmployeeExitClearenceStatusType ="Pending"
+	ExitStatCompleted EmployeeExitClearenceStatusType ="Completed"
+)

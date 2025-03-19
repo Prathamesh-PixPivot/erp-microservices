@@ -3,8 +3,9 @@ package infrastructure
 import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"os"
 	"hrms/config"
+	"os"
+	"runtime"
 )
 
 // Logger holds the Zap logger instance
@@ -61,7 +62,12 @@ func InitLogger(cfg *config.Config) {
 
 	// ✅ Ensure logger flushes before shutdown
 	defer func() {
-		if err := Logger.Sync(); err != nil {
+		err := Logger.Sync()
+		if err != nil && runtime.GOOS == "windows" {
+			// Ignore the sync error on Windows
+			return
+		}
+		if err != nil {
 			Logger.Error("Failed to sync logger", zap.Error(err))
 		}
 	}()

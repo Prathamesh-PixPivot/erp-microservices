@@ -1,0 +1,128 @@
+2025-03-19T10:17:26.693+0530	[34mINFO[0m	infrastructure/logger.go:69	✅ Logger initialized successfully	{"level": "info", "format": "console", "output": "logs"}
+2025-03-19T10:17:26.696+0530	[31mERROR[0m	infrastructure/logger.go:65	Failed to sync logger	{"error": "sync /dev/stdout: The handle is invalid."}
+hrms/infrastructure.InitLogger.func1
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/infrastructure/logger.go:65
+hrms/infrastructure.InitLogger
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/infrastructure/logger.go:74
+main.InitializeLogger
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/wire_gen.go:60
+main.InitializeDependencies
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/wire_gen.go:27
+main.main
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/main.go:10
+runtime.main
+	C:/Program Files/Go/src/runtime/proc.go:283
+2025-03-19T10:17:26.777+0530	[31mFATAL[0m	infrastructure/database.go:31	Failed to connect to database	{"error": "failed to connect to `user=postgres database=hrms`: 127.0.0.1:5432 (127.0.0.1): server error: FATAL: database \"hrms\" does not exist (SQLSTATE 3D000)"}
+hrms/infrastructure.NewDatabase
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/infrastructure/database.go:31
+main.InitializeDatabase
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/wire_gen.go:66
+main.InitializeDependencies
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/wire_gen.go:28
+main.main
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/main.go:10
+runtime.main
+	C:/Program Files/Go/src/runtime/proc.go:283
+2025-03-19T10:24:40.072+0530	[34mINFO[0m	infrastructure/logger.go:69	✅ Logger initialized successfully	{"level": "info", "format": "console", "output": "logs"}
+2025-03-19T10:24:40.076+0530	[31mERROR[0m	infrastructure/logger.go:65	Failed to sync logger	{"error": "sync /dev/stdout: The handle is invalid."}
+hrms/infrastructure.InitLogger.func1
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/infrastructure/logger.go:65
+hrms/infrastructure.InitLogger
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/infrastructure/logger.go:74
+main.InitializeLogger
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/wire_gen.go:60
+main.InitializeDependencies
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/wire_gen.go:27
+main.main
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/main.go:10
+runtime.main
+	C:/Program Files/Go/src/runtime/proc.go:283
+2025-03-19T10:24:40.141+0530	[31mFATAL[0m	infrastructure/database.go:31	Failed to connect to database	{"error": "failed to connect to `user=postgres database=hrms`: 127.0.0.1:5432 (127.0.0.1): server error: FATAL: database \"hrms\" does not exist (SQLSTATE 3D000)"}
+hrms/infrastructure.NewDatabase
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/infrastructure/database.go:31
+main.InitializeDatabase
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/wire_gen.go:66
+main.InitializeDependencies
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/wire_gen.go:28
+main.main
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/main.go:10
+runtime.main
+	C:/Program Files/Go/src/runtime/proc.go:283
+2025-03-19T10:25:55.223+0530	[34mINFO[0m	infrastructure/logger.go:69	✅ Logger initialized successfully	{"level": "info", "format": "console", "output": "logs"}
+2025-03-19T10:25:55.229+0530	[31mERROR[0m	infrastructure/logger.go:65	Failed to sync logger	{"error": "sync /dev/stdout: The handle is invalid."}
+hrms/infrastructure.InitLogger.func1
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/infrastructure/logger.go:65
+hrms/infrastructure.InitLogger
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/infrastructure/logger.go:74
+main.InitializeLogger
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/wire_gen.go:60
+main.InitializeDependencies
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/wire_gen.go:27
+main.main
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/main.go:10
+runtime.main
+	C:/Program Files/Go/src/runtime/proc.go:283
+2025-03-19T10:25:55.351+0530	[34mINFO[0m	infrastructure/database.go:45	✅ Database connection successfully established!
+2025-03-19T10:25:55.436+0530	[31mFATAL[0m	migrations/migrations.go:39	❌ Migration failed	{"error": "ERROR: relation \"designations\" does not exist (SQLSTATE 42P01)"}
+hrms/infrastructure/migrations.Migrate
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/infrastructure/migrations/migrations.go:39
+main.main
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/main.go:16
+runtime.main
+	C:/Program Files/Go/src/runtime/proc.go:283
+2025-03-19T10:37:34.333+0530	[34mINFO[0m	infrastructure/logger.go:69	✅ Logger initialized successfully	{"level": "info", "format": "console", "output": "logs"}
+2025-03-19T10:37:34.342+0530	[31mERROR[0m	infrastructure/logger.go:65	Failed to sync logger	{"error": "sync /dev/stdout: The handle is invalid."}
+hrms/infrastructure.InitLogger.func1
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/infrastructure/logger.go:65
+hrms/infrastructure.InitLogger
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/infrastructure/logger.go:74
+main.InitializeLogger
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/wire_gen.go:60
+main.InitializeDependencies
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/wire_gen.go:27
+main.main
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/main.go:10
+runtime.main
+	C:/Program Files/Go/src/runtime/proc.go:283
+2025-03-19T10:37:34.672+0530	[34mINFO[0m	infrastructure/database.go:45	✅ Database connection successfully established!
+2025-03-19T10:37:34.900+0530	[31mFATAL[0m	migrations/migrations.go:39	❌ Migration failed	{"error": "ERROR: relation \"designations\" does not exist (SQLSTATE 42P01)"}
+hrms/infrastructure/migrations.Migrate
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/infrastructure/migrations/migrations.go:39
+main.main
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/main.go:16
+runtime.main
+	C:/Program Files/Go/src/runtime/proc.go:283
+2025-03-19T10:40:23.581+0530	[34mINFO[0m	infrastructure/logger.go:75	✅ Logger initialized successfully	{"level": "info", "format": "console", "output": "logs"}
+2025-03-19T10:40:23.649+0530	[34mINFO[0m	infrastructure/database.go:45	✅ Database connection successfully established!
+2025-03-19T10:40:23.789+0530	[31mFATAL[0m	migrations/migrations.go:39	❌ Migration failed	{"error": "ERROR: relation \"designations\" does not exist (SQLSTATE 42P01)"}
+hrms/infrastructure/migrations.Migrate
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/infrastructure/migrations/migrations.go:39
+main.main
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/main.go:16
+runtime.main
+	C:/Program Files/Go/src/runtime/proc.go:283
+2025-03-19T11:07:39.213+0530	[34mINFO[0m	infrastructure/logger.go:75	✅ Logger initialized successfully	{"level": "info", "format": "console", "output": "logs"}
+2025-03-19T11:07:39.282+0530	[34mINFO[0m	infrastructure/database.go:45	✅ Database connection successfully established!
+2025-03-19T11:07:39.439+0530	[31mFATAL[0m	migrations/migrations.go:39	❌ Migration failed	{"error": "ERROR: relation \"shifts\" does not exist (SQLSTATE 42P01)"}
+hrms/infrastructure/migrations.Migrate
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/infrastructure/migrations/migrations.go:39
+main.main
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/main.go:16
+runtime.main
+	C:/Program Files/Go/src/runtime/proc.go:283
+2025-03-19T11:11:17.575+0530	[34mINFO[0m	infrastructure/logger.go:75	✅ Logger initialized successfully	{"level": "info", "format": "console", "output": "logs"}
+2025-03-19T11:11:17.647+0530	[34mINFO[0m	infrastructure/database.go:45	✅ Database connection successfully established!
+2025-03-19T11:11:17.861+0530	[31mFATAL[0m	migrations/migrations.go:49	❌ Migration failed	{"error": "ERROR: type \"enum\" does not exist (SQLSTATE 42704)"}
+hrms/infrastructure/migrations.Migrate
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/infrastructure/migrations/migrations.go:49
+main.main
+	C:/Users/ShivdasJadhav/Desktop/thepixpivot/erp-microservices/modules/hrms/cmd/main.go:16
+runtime.main
+	C:/Program Files/Go/src/runtime/proc.go:283
+2025-03-19T11:23:43.792+0530	[34mINFO[0m	infrastructure/logger.go:75	✅ Logger initialized successfully	{"level": "info", "format": "console", "output": "logs"}
+2025-03-19T11:23:44.001+0530	[34mINFO[0m	infrastructure/database.go:45	✅ Database connection successfully established!
+2025-03-19T11:23:44.547+0530	[34mINFO[0m	migrations/migrations.go:51	✅ Database migration completed successfully
+2025-03-19T11:23:44.548+0530	[34mINFO[0m	cmd/server.go:21	🔁 Starting the GRPC server	{"port": "50006"}
+2025-03-19T11:23:44.549+0530	[34mINFO[0m	cmd/server.go:40	🚀 gRPC server started	{"port": "50006"}
+2025-03-19T11:24:48.499+0530	[34mINFO[0m	cmd/server.go:57	🔄 Gracefully shutting down gRPC server...
+2025-03-19T11:24:48.501+0530	[34mINFO[0m	cmd/server.go:66	✅ gRPC server stopped

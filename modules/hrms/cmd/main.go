@@ -6,7 +6,6 @@ import (
 )
 
 func main() {
-
 	// Initialize dependencies using Wire
 	deps, err := InitializeDependencies()
 	if err != nil {
@@ -19,4 +18,3 @@ func main() {
 	// Start the gRPC server
 	StartServer(deps)
 }
-
