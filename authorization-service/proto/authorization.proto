@@ -64,4 +64,5 @@ message ModifyPermissionsRequest {
     Role role = 1;
     Permission permission = 2;
 }
+
 message ModifyPermissionsResponse { bool success = 1; }

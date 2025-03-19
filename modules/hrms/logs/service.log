@@ -126,3 +126,10 @@ runtime.main
 2025-03-19T11:23:44.549+0530	[34mINFO[0m	cmd/server.go:40	🚀 gRPC server started	{"port": "50006"}
 2025-03-19T11:24:48.499+0530	[34mINFO[0m	cmd/server.go:57	🔄 Gracefully shutting down gRPC server...
 2025-03-19T11:24:48.501+0530	[34mINFO[0m	cmd/server.go:66	✅ gRPC server stopped
+2025-03-19T12:19:43.688+0530	[34mINFO[0m	infrastructure/logger.go:75	✅ Logger initialized successfully	{"level": "info", "format": "console", "output": "logs"}
+2025-03-19T12:19:43.761+0530	[34mINFO[0m	infrastructure/database.go:45	✅ Database connection successfully established!
+2025-03-19T12:19:44.390+0530	[34mINFO[0m	migrations/migrations.go:51	✅ Database migration completed successfully
+2025-03-19T12:19:44.390+0530	[34mINFO[0m	cmd/server.go:21	🔁 Starting the GRPC server	{"port": "50006"}
+2025-03-19T12:19:44.392+0530	[34mINFO[0m	cmd/server.go:40	🚀 gRPC server started	{"port": "50006"}
+2025-03-19T12:19:50.398+0530	[34mINFO[0m	cmd/server.go:57	🔄 Gracefully shutting down gRPC server...
+2025-03-19T12:19:50.400+0530	[34mINFO[0m	cmd/server.go:66	✅ gRPC server stopped

@@ -5,6 +5,7 @@ package services
 import (
 	"activity-task-service/internal/models"
 	"activity-task-service/internal/repository"
+	"context"
 	"errors"
 	"regexp"
 	"time"
@@ -21,7 +22,7 @@ var (
 
 // ActivityService defines the methods for activity and task management.
 type ActivityService interface {
-	CreateActivity(activity *models.Activity) (*models.Activity, error)
+	CreateActivity(ctx context.Context, activity *models.Activity) (*models.Activity, error)
 	GetActivity(id uint) (*models.Activity, error)
 	UpdateActivity(activity *models.Activity) (*models.Activity, error)
 	DeleteActivity(id uint) error
@@ -55,7 +56,7 @@ func NewActivityService(repo repository.ActivityRepository) ActivityService {
 }
 
 // CreateActivity validates and creates a new activity.
-func (s *activityService) CreateActivity(activity *models.Activity) (*models.Activity, error) {
+func (s *activityService) CreateActivity(ctx context.Context, activity *models.Activity) (*models.Activity, error) {
 	// Validate required fields
 	if activity.Title == "" || activity.Type == "" || activity.Status == "" || activity.ContactID == 0 {
 		return nil, ErrInvalidActivityData
@@ -80,7 +81,7 @@ func (s *activityService) CreateActivity(activity *models.Activity) (*models.Act
 	activity.UpdatedAt = now
 
 	// Attempt to create the activity
-	createdActivity, err := s.repo.CreateActivity(activity)
+	createdActivity, err := s.repo.CreateActivity(ctx, activity)
 	if err != nil {
 		if errors.Is(err, repository.ErrActivityExists) {
 			return nil, ErrActivityExists

@@ -31,7 +31,7 @@ func (h *ActivityHandler) CreateActivity(ctx context.Context, req *activitypb.Cr
 	activity := convertProtoToModel(req.Activity)
 
 	// Create Activity via Service
-	createdActivity, err := h.activityService.CreateActivity(activity)
+	createdActivity, err := h.activityService.CreateActivity(ctx,activity)
 	if err != nil {
 		log.Printf("Error creating activity: %v", err)
 		switch err {
@@ -270,7 +270,6 @@ func (h *ActivityHandler) ListTasks(ctx context.Context, req *activitypb.ListTas
 func convertProtoToModel(protoActivity *activitypb.Activity) *models.Activity {
 	dueDate, _ := time.Parse(time.RFC3339, protoActivity.DueDate)
 	return &models.Activity{
-		ID:          uint(protoActivity.Id),
 		Title:       protoActivity.Title,
 		Description: protoActivity.Description,
 		Type:        protoActivity.Type,
@@ -301,7 +300,6 @@ func convertModelToProto(modelActivity *models.Activity) *activitypb.Activity {
 func convertProtoToModelTask(protoTask *activitypb.Task) *models.Task {
 	dueDate, _ := time.Parse(time.RFC3339, protoTask.DueDate)
 	return &models.Task{
-		ID:          uint(protoTask.Id),
 		Title:       protoTask.Title,
 		Description: protoTask.Description,
 		Status:      protoTask.Status,

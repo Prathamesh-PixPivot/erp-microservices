@@ -3,3 +3,8 @@
 {"level":"info","timestamp":"2025-02-26T14:37:59.472+0530","msg":"🚀 gRPC Server Started","address":":50051"}
 {"level":"info","timestamp":"2025-02-26T14:38:05.086+0530","msg":"⚠️ Shutting down gRPC server..."}
 {"level":"info","timestamp":"2025-02-26T14:38:05.087+0530","msg":"✅ gRPC Server Stopped Successfully"}
+{"level":"info","timestamp":"2025-03-19T12:18:50.880+0530","msg":"✅ Application logger initialized"}
+{"level":"info","msg":"✅ SIS security logger initialized","time":"2025-03-19T12:18:50+05:30"}
+{"level":"info","timestamp":"2025-03-19T12:18:51.037+0530","msg":"🚀 gRPC Server Started","address":":50051"}
+{"level":"info","timestamp":"2025-03-19T12:19:30.678+0530","msg":"⚠️ Shutting down gRPC server..."}
+{"level":"info","timestamp":"2025-03-19T12:19:30.680+0530","msg":"✅ gRPC Server Stopped Successfully"}

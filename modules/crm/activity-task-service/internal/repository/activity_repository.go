@@ -4,7 +4,9 @@ package repository
 
 import (
 	"activity-task-service/internal/models"
+	"context"
 	"errors"
+	"log"
 
 	"github.com/jackc/pgconn"
 	"gorm.io/gorm"
@@ -19,12 +21,13 @@ var (
 
 // ActivityRepository defines the methods for activity-related database operations.
 type ActivityRepository interface {
-	CreateActivity(activity *models.Activity) (*models.Activity, error)
+	CreateActivity(ctx context.Context, activity *models.Activity) (*models.Activity, error)
 	GetActivity(id uint) (*models.Activity, error)
 	UpdateActivity(activity *models.Activity) (*models.Activity, error)
 	DeleteActivity(id uint) error
 	ListActivities(pageNumber, pageSize uint, sortBy string, ascending bool, contactID uint) ([]models.Activity, error)
 	GetActivityByID(id uint) (*models.Activity, error)
+
 	CreateTask(task *models.Task) (*models.Task, error)
 	GetTaskByID(id uint) (*models.Task, error)
 	UpdateTask(task *models.Task) (*models.Task, error)
@@ -40,19 +43,36 @@ func NewActivityRepository(db *gorm.DB) ActivityRepository {
 	return &activityRepository{db: db}
 }
 
-// CreateActivity inserts a new activity into the database.
-func (r *activityRepository) CreateActivity(activity *models.Activity) (*models.Activity, error) {
-	if err := r.db.Create(activity).Error; err != nil {
-		// Check for unique constraint violation on Title
-		if pgErr, ok := err.(*pgconn.PgError); ok {
-			if pgErr.Code == "23505" { // unique_violation
-				return nil, ErrActivityExists
-			}
+func (r *activityRepository) CreateActivity(ctx context.Context, activity *models.Activity) (*models.Activity, error) {
+	tx := r.db.WithContext(ctx).Begin() // Start transaction
+
+	// Ensure rollback happens if function exits unexpectedly
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+			log.Printf("Transaction panic recovered: %v", r)
 		}
+	}()
+
+	// Attempt to create activity
+	if err := tx.Create(activity).Error; err != nil {
+		tx.Rollback() // Explicit rollback on failure
+		if pgErr, ok := err.(*pgconn.PgError); ok && pgErr.Code == "23505" { // Unique violation
+			return nil, ErrActivityExists
+		}
+		log.Printf("Failed to create activity: %v", err)
 		return nil, err
 	}
+
+	// Commit transaction on success
+	if err := tx.Commit().Error; err != nil {
+		log.Printf("Transaction commit failed: %v", err)
+		return nil, err
+	}
+
 	return activity, nil
 }
+
 
 func (r *activityRepository) GetActivity(id uint) (*models.Activity, error) {
 	var activity models.Activity

@@ -2,11 +2,15 @@
 
 package models
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 // Activity represents a high-level action or event related to customer interactions.
 type Activity struct {
-	ID          uint   `gorm:"primaryKey"`
+	*gorm.Model
 	Title       string `gorm:"size:255;not null;unique"`
 	Description string `gorm:"type:text"`
 	Type        string `gorm:"size:50;not null"` // e.g., Call, Meeting, Email
