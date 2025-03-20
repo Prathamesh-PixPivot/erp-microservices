@@ -3,6 +3,7 @@ package repository
 import (
 	"contacts-service/internal/models"
 	"errors"
+	"log"
 
 	"github.com/jackc/pgconn"
 	"gorm.io/gorm"
@@ -66,7 +67,12 @@ func (r *contactRepository) Update(contact *models.Contact) (*models.Contact, er
 	if result.RowsAffected == 0 {
 		return nil, ErrContactNotFound
 	}
-	return contact, nil
+	var updatedContact models.Contact
+	if err := r.db.First(&updatedContact, "id=?", contact.ID).Error; err != nil {
+		log.Printf("failed to reload updated contact")
+		return nil, err
+	}
+	return &updatedContact, nil
 }
 
 // Delete removes a unified contact by its ID.
