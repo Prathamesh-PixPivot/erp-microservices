@@ -6,6 +6,7 @@ import (
 	"leads-service/internal/models"
 	"leads-service/internal/repository"
 	"regexp"
+	"time"
 )
 
 // Custom errors
@@ -74,6 +75,7 @@ func (s *leadService) GetLeadByEmail(email string) (*models.Lead, error) {
 // UpdateLead updates the lead in the database, with validation logic.
 func (s *leadService) UpdateLead(lead *models.Lead) (*models.Lead, error) {
 	// Validate if the lead exists
+	lead.UpdatedAt = time.Now()
 	existingLead, err := s.repo.GetByID(lead.ID)
 	if err != nil || existingLead == nil {
 		return nil, ErrLeadNotFound

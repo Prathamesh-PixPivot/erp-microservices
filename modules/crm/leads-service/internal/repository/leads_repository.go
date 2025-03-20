@@ -53,10 +53,24 @@ func (r *leadRepository) GetByEmail(email string) (*models.Lead, error) {
 }
 
 func (r *leadRepository) Update(lead *models.Lead) (*models.Lead, error) {
-	if err := r.db.Save(lead).Error; err != nil {
+	// if err := r.db.Save(lead).Error; err != nil {
+	// 	return nil, err
+	// }
+	// return lead, nil
+
+	if err := r.db.Where("id=?", lead.ID).Updates(lead).Error; err != nil {
+		print("failed to update")
 		return nil, err
 	}
-	return lead, nil
+
+	var updatedLead models.Lead
+
+	if err := r.db.First(&updatedLead, "id=?", lead.ID).Error; err != nil {
+		print("failed to reload the updated lead")
+		return lead, nil
+	}
+
+	return &updatedLead, nil
 }
 
 func (r *leadRepository) Delete(id uint) error {

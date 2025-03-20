@@ -4,25 +4,19 @@ import (
 	"leads-service/grpc/leadspb"
 	"leads-service/internal/models"
 	"log"
-	"strconv"
+	"time"
 )
 
 // ConvertProtoToModelLead converts a protobuf lead to a models lead.
 func ConvertProtoToModelLead(protoLead *leadspb.Lead) *models.Lead {
 	return &models.Lead{
-		ID:        uint(protoLead.Id),
-		FirstName: protoLead.FirstName,
-		LastName:  protoLead.LastName,
-		Email:     protoLead.Email,
-		Phone:     protoLead.Phone,
-		Status:    protoLead.Status, // Added Status field
-		AssignedTo: func() int {
-			assignedTo, err := strconv.Atoi(protoLead.AssignedTo)
-			if err != nil {
-				return 0 // or handle the error appropriately
-			}
-			return assignedTo
-		}(),
+		ID:             uint(protoLead.Id),
+		FirstName:      protoLead.FirstName,
+		LastName:       protoLead.LastName,
+		Email:          protoLead.Email,
+		Phone:          protoLead.Phone,
+		Status:         protoLead.Status, // Added Status field
+		AssignedTo:     int(protoLead.AssignedTo),
 		OrganizationID: int(protoLead.OrganizationId),
 	}
 }
@@ -41,7 +35,16 @@ func ConvertModelToProtoLead(modelLead *models.Lead) *leadspb.Lead {
 		Email:          modelLead.Email,
 		Phone:          modelLead.Phone,
 		Status:         modelLead.Status,
-		AssignedTo:     strconv.Itoa(modelLead.AssignedTo),
+		AssignedTo:     uint32(modelLead.AssignedTo),
 		OrganizationId: uint32(modelLead.OrganizationID),
+		CreatedAt:      modelLead.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:      modelLead.UpdatedAt.Format(time.RFC3339),
 	}
+}
+func parseTime(timeStr string) time.Time {
+	t, err := time.Parse(time.RFC3339, timeStr)
+	if err != nil {
+		return time.Time{}
+	}
+	return t
 }

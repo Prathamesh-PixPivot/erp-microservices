@@ -20,8 +20,10 @@ message Lead {
     string email = 4;
     string phone = 5;
     string status = 6;
-    string assigned_to = 7;
+    uint32 assigned_to = 7;
     uint32 organization_id = 8;
+    string created_at=9;
+    string updated_at=10;
 }
 
 message CreateLeadRequest {

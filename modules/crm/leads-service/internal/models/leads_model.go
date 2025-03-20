@@ -11,6 +11,6 @@ type Lead struct {
     Status        string    `gorm:"not null"`
     AssignedTo    int       // This will reference a user ID from user-service
     OrganizationID int      // This will reference an organization ID from organization-service
-    CreatedAt     time.Time
+    CreatedAt     time.Time `gorm:"autoCreateTime"`
     UpdatedAt     time.Time
 }
