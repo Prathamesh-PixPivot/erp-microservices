@@ -23,10 +23,10 @@ var (
 type ActivityRepository interface {
 	CreateActivity(ctx context.Context, activity *models.Activity) (*models.Activity, error)
 	GetActivity(id uint) (*models.Activity, error)
+	GetActivityByID(id uint) (*models.Activity, error)
 	UpdateActivity(activity *models.Activity) (*models.Activity, error)
 	DeleteActivity(id uint) error
 	ListActivities(pageNumber, pageSize uint, sortBy string, ascending bool, contactID uint) ([]models.Activity, error)
-	GetActivityByID(id uint) (*models.Activity, error)
 
 	CreateTask(task *models.Task) (*models.Task, error)
 	GetTaskByID(id uint) (*models.Task, error)
@@ -56,7 +56,7 @@ func (r *activityRepository) CreateActivity(ctx context.Context, activity *model
 
 	// Attempt to create activity
 	if err := tx.Create(activity).Error; err != nil {
-		tx.Rollback() // Explicit rollback on failure
+		tx.Rollback()                                                        // Explicit rollback on failure
 		if pgErr, ok := err.(*pgconn.PgError); ok && pgErr.Code == "23505" { // Unique violation
 			return nil, ErrActivityExists
 		}
@@ -73,7 +73,6 @@ func (r *activityRepository) CreateActivity(ctx context.Context, activity *model
 	return activity, nil
 }
 
-
 func (r *activityRepository) GetActivity(id uint) (*models.Activity, error) {
 	var activity models.Activity
 	if err := r.db.Preload("Tasks").First(&activity, id).Error; err != nil {
@@ -87,20 +86,32 @@ func (r *activityRepository) GetActivity(id uint) (*models.Activity, error) {
 
 // UpdateActivity modifies an existing activity.
 func (r *activityRepository) UpdateActivity(activity *models.Activity) (*models.Activity, error) {
-	result := r.db.Model(&models.Activity{}).Where("id = ?", activity.ID).Updates(activity)
+	// Perform the update while omitting CreatedAt
+	result := r.db.Model(&models.Activity{}).Where("id = ?", activity.Id).Omit("CreatedAt").Updates(activity)
+
+	// Check for errors
 	if result.Error != nil {
 		if isUniqueConstraintError(result.Error, "activities_title_key") {
 			return nil, ErrActivityExists
 		}
 		return nil, result.Error
 	}
+
+	// Check if any row was affected
 	if result.RowsAffected == 0 {
 		return nil, ErrActivityNotFound
 	}
-	return activity, nil
+
+	// Reload the updated record
+	var updatedActivity models.Activity
+	if err := r.db.First(&updatedActivity, "id = ?", activity.Id).Error; err != nil {
+		return nil, err
+	}
+
+	return &updatedActivity, nil
 }
 
-// DeleteActivity removes an activity by its ID.
+// DeleteActivity removes an activity by its Id.
 func (r *activityRepository) DeleteActivity(id uint) error {
 	result := r.db.Delete(&models.Activity{}, id)
 	if result.Error != nil {
@@ -118,7 +129,7 @@ func (r *activityRepository) ListActivities(pageNumber uint, pageSize uint, sort
 
 	query := r.db.Model(&models.Activity{})
 
-	// Apply filter by contact ID if provided
+	// Apply filter by contact Id if provided
 	if contactID != 0 {
 		query = query.Where("contact_id = ?", contactID)
 	}
@@ -145,7 +156,7 @@ func (r *activityRepository) ListActivities(pageNumber uint, pageSize uint, sort
 	return activities, nil
 }
 
-// GetActivityByID retrieves an activity by its ID.
+// GetActivityByID retrieves an activity by its Id.
 func (r *activityRepository) GetActivityByID(id uint) (*models.Activity, error) {
 	var activity models.Activity
 	if err := r.db.First(&activity, id).Error; err != nil {
@@ -168,7 +179,7 @@ func (r *activityRepository) CreateTask(task *models.Task) (*models.Task, error)
 	return task, nil
 }
 
-// GetTaskByID retrieves a task by its ID.
+// GetTaskByID retrieves a task by its Id.
 func (r *activityRepository) GetTaskByID(id uint) (*models.Task, error) {
 	var task models.Task
 	if err := r.db.First(&task, id).Error; err != nil {
@@ -182,20 +193,33 @@ func (r *activityRepository) GetTaskByID(id uint) (*models.Task, error) {
 
 // UpdateTask modifies an existing task.
 func (r *activityRepository) UpdateTask(task *models.Task) (*models.Task, error) {
-	result := r.db.Model(&models.Task{}).Where("id = ?", task.ID).Updates(task)
+	// Perform the update, omitting CreatedAt
+	result := r.db.Model(&models.Task{}).Where("id = ?", task.Id).Omit("CreatedAt").Updates(task)
+
+	// Check for update errors
 	if result.Error != nil {
 		if isUniqueConstraintError(result.Error, "tasks_title_key") {
 			return nil, ErrTaskExists
 		}
 		return nil, result.Error
 	}
+
+	// Check if any row was actually updated
 	if result.RowsAffected == 0 {
 		return nil, ErrTaskNotFound
 	}
-	return task, nil
+
+	// Reload the updated record
+	var updatedTask models.Task
+	if err := r.db.First(&updatedTask, "id = ?", task.Id).Error; err != nil {
+		log.Println("Failed to reload updated task:", err)
+		return nil, err
+	}
+
+	return &updatedTask, nil
 }
 
-// DeleteTask removes a task by its ID.
+// DeleteTask removes a task by its Id.
 func (r *activityRepository) DeleteTask(id uint) error {
 	result := r.db.Delete(&models.Task{}, id)
 	if result.Error != nil {
@@ -213,7 +237,7 @@ func (r *activityRepository) ListTasks(pageNumber uint, pageSize uint, sortBy st
 
 	query := r.db.Model(&models.Task{})
 
-	// Apply filter by activity ID if provided
+	// Apply filter by activity Id if provided
 	if activityID != 0 {
 		query = query.Where("activity_id = ?", activityID)
 	}

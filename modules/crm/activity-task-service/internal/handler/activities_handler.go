@@ -31,7 +31,7 @@ func (h *ActivityHandler) CreateActivity(ctx context.Context, req *activitypb.Cr
 	activity := convertProtoToModel(req.Activity)
 
 	// Create Activity via Service
-	createdActivity, err := h.activityService.CreateActivity(ctx,activity)
+	createdActivity, err := h.activityService.CreateActivity(ctx, activity)
 	if err != nil {
 		log.Printf("Error creating activity: %v", err)
 		switch err {
@@ -70,6 +70,7 @@ func (h *ActivityHandler) GetActivity(ctx context.Context, req *activitypb.GetAc
 
 // UpdateActivity handles updating an existing activity.
 func (h *ActivityHandler) UpdateActivity(ctx context.Context, req *activitypb.UpdateActivityRequest) (*activitypb.UpdateActivityResponse, error) {
+
 	log.Printf("Received UpdateActivity request: %+v", req)
 
 	// Convert Proto to Model
@@ -77,6 +78,7 @@ func (h *ActivityHandler) UpdateActivity(ctx context.Context, req *activitypb.Up
 
 	// Update Activity via Service
 	updatedActivity, err := h.activityService.UpdateActivity(activity)
+
 	if err != nil {
 		log.Printf("Error updating activity: %v", err)
 		switch err {
@@ -92,6 +94,7 @@ func (h *ActivityHandler) UpdateActivity(ctx context.Context, req *activitypb.Up
 	}
 
 	// Convert Model to Proto
+	log.Print("updated log", updatedActivity)
 	return &activitypb.UpdateActivityResponse{
 		Activity: convertModelToProto(updatedActivity),
 	}, nil
@@ -270,6 +273,7 @@ func (h *ActivityHandler) ListTasks(ctx context.Context, req *activitypb.ListTas
 func convertProtoToModel(protoActivity *activitypb.Activity) *models.Activity {
 	dueDate, _ := time.Parse(time.RFC3339, protoActivity.DueDate)
 	return &models.Activity{
+		Id:          uint(protoActivity.Id),
 		Title:       protoActivity.Title,
 		Description: protoActivity.Description,
 		Type:        protoActivity.Type,
@@ -285,7 +289,7 @@ func convertModelToProto(modelActivity *models.Activity) *activitypb.Activity {
 		dueDate = modelActivity.DueDate.Format(time.RFC3339)
 	}
 	return &activitypb.Activity{
-		Id:          uint32(modelActivity.ID),
+		Id:          uint32(modelActivity.Id),
 		Title:       modelActivity.Title,
 		Description: modelActivity.Description,
 		Type:        modelActivity.Type,
@@ -300,6 +304,7 @@ func convertModelToProto(modelActivity *models.Activity) *activitypb.Activity {
 func convertProtoToModelTask(protoTask *activitypb.Task) *models.Task {
 	dueDate, _ := time.Parse(time.RFC3339, protoTask.DueDate)
 	return &models.Task{
+		Id:          uint(protoTask.Id),
 		Title:       protoTask.Title,
 		Description: protoTask.Description,
 		Status:      protoTask.Status,
@@ -315,7 +320,7 @@ func convertTaskModelToProto(modelTask *models.Task) *activitypb.Task {
 		dueDate = modelTask.DueDate.Format(time.RFC3339)
 	}
 	return &activitypb.Task{
-		Id:          uint32(modelTask.ID),
+		Id:          uint32(modelTask.Id),
 		Title:       modelTask.Title,
 		Description: modelTask.Description,
 		Status:      modelTask.Status,

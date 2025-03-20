@@ -7,6 +7,7 @@ import (
 	"activity-task-service/internal/repository"
 	"context"
 	"errors"
+	"log"
 	"regexp"
 	"time"
 )
@@ -92,7 +93,7 @@ func (s *activityService) CreateActivity(ctx context.Context, activity *models.A
 	return createdActivity, nil
 }
 
-// GetActivity retrieves an activity by ID.
+// GetActivity retrieves an activity by Id.
 func (s *activityService) GetActivity(id uint) (*models.Activity, error) {
 	activity, err := s.repo.GetActivityByID(id)
 	if err != nil {
@@ -106,8 +107,8 @@ func (s *activityService) GetActivity(id uint) (*models.Activity, error) {
 
 // UpdateActivity validates and updates an existing activity.
 func (s *activityService) UpdateActivity(activity *models.Activity) (*models.Activity, error) {
-	// Validate activity ID
-	if activity.ID == 0 {
+	// Validate activity Id
+	if activity.Id == 0 {
 		return nil, ErrInvalidActivityData
 	}
 
@@ -143,6 +144,8 @@ func (s *activityService) UpdateActivity(activity *models.Activity) (*models.Act
 	activity.UpdatedAt = time.Now()
 
 	// Update the activity
+	log.Printf("serice is clear on new value %v", activity)
+
 	updatedActivity, err := s.repo.UpdateActivity(activity)
 	if err != nil {
 		if errors.Is(err, repository.ErrActivityNotFound) {
@@ -157,7 +160,7 @@ func (s *activityService) UpdateActivity(activity *models.Activity) (*models.Act
 	return updatedActivity, nil
 }
 
-// DeleteActivity removes an activity by ID.
+// DeleteActivity removes an activity by Id.
 func (s *activityService) DeleteActivity(id uint) error {
 	// Check if the activity exists
 	_, err := s.repo.GetActivityByID(id)
@@ -253,7 +256,7 @@ func (s *activityService) CreateTask(task *models.Task) (*models.Task, error) {
 	return createdTask, nil
 }
 
-// GetTask retrieves a task by ID.
+// GetTask retrieves a task by Id.
 func (s *activityService) GetTask(id uint) (*models.Task, error) {
 	task, err := s.repo.GetTaskByID(id)
 	if err != nil {
@@ -267,8 +270,8 @@ func (s *activityService) GetTask(id uint) (*models.Task, error) {
 
 // UpdateTask validates and updates an existing task.
 func (s *activityService) UpdateTask(task *models.Task) (*models.Task, error) {
-	// Validate task ID
-	if task.ID == 0 {
+	// Validate task Id
+	if task.Id == 0 {
 		return nil, ErrInvalidTaskData
 	}
 
@@ -318,7 +321,7 @@ func (s *activityService) UpdateTask(task *models.Task) (*models.Task, error) {
 	return updatedTask, nil
 }
 
-// DeleteTask removes a task by ID.
+// DeleteTask removes a task by Id.
 func (s *activityService) DeleteTask(id uint) error {
 	// Check if the task exists
 	_, err := s.repo.GetTaskByID(id)
