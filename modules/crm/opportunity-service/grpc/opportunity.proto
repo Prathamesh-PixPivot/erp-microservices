@@ -23,6 +23,8 @@ message Opportunity {
     uint32 lead_id = 8;
     uint32 account_id = 9;
     uint32 owner_id = 10;
+    string created_at=11;
+    string updated_at=12;
 }
 
 message CreateOpportunityRequest {

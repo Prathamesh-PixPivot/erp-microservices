@@ -69,35 +69,35 @@ func (r *opportunityRepository) UpdateSelective(opportunity *models.Opportunity)
 	// Create a map of fields to update
 	updates := map[string]interface{}{}
 
-	if opportunity.Name != nil {
+	if opportunity.Name != "" {
 		updates["name"] = opportunity.Name
 	}
-	if opportunity.Description != nil {
+	if opportunity.Description != "" {
 		updates["description"] = opportunity.Description
 	}
-	if opportunity.Stage != nil {
+	if opportunity.Stage != "" {
 		updates["stage"] = opportunity.Stage
 	}
-	if opportunity.Amount != nil {
+	if opportunity.Amount != 0 {
 		updates["amount"] = opportunity.Amount
 	}
-	if opportunity.CloseDate != nil {
+	if !opportunity.CloseDate.IsZero() {
 		updates["close_date"] = opportunity.CloseDate
 	}
-	if opportunity.Probability != nil {
+	if opportunity.Probability != 0 {
 		updates["probability"] = opportunity.Probability
 	}
-	if opportunity.LeadID != nil {
+	if opportunity.LeadID != 0 {
 		updates["lead_id"] = opportunity.LeadID
 	}
-	if opportunity.AccountID != nil {
+	if opportunity.AccountID != 0 {
 		updates["account_id"] = opportunity.AccountID
 	}
-	if opportunity.OwnerID != nil {
+	if opportunity.OwnerID != 0 {
 		updates["owner_id"] = opportunity.OwnerID
 	}
 
 	updates["updated_at"] = time.Now()
 
-	return r.db.Model(&models.Opportunity{}).Where("id = ?", opportunity.ID).Updates(updates).Error
+	return r.db.Model(&models.Opportunity{}).Where("id = ?", opportunity.Id).Updates(updates).Error
 }

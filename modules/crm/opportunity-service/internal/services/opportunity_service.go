@@ -32,16 +32,18 @@ func NewOpportunityService(repo repository.OpportunityRepository) OpportunitySer
 
 func (s *opportunityService) CreateOpportunity(opportunity *models.Opportunity) (*models.Opportunity, error) {
 	// Validate required fields
-	if opportunity.Name == nil || *opportunity.Name == "" ||
-		opportunity.Stage == nil || *opportunity.Stage == "" ||
-		opportunity.Amount == nil || *opportunity.Amount <= 0 ||
-		opportunity.CloseDate == nil || opportunity.CloseDate.IsZero() ||
-		opportunity.OwnerID == nil || *opportunity.OwnerID == 0 {
+	print("in service call\n")
+	if opportunity.CloseDate.IsZero() {
+		panic("failed to validate closedate")
+	}
+	print("validated date")
+
+	if opportunity.Name == "" || opportunity.Stage == "" || opportunity.Amount == 0 || opportunity.CloseDate.IsZero() || opportunity.OwnerID == 0 {
 		return nil, ErrInvalidOpportunityData
 	}
 
 	// Additional validations
-	if opportunity.Probability != nil && (*opportunity.Probability < 0 || *opportunity.Probability > 100) {
+	if opportunity.Probability != 0 && (opportunity.Probability < 0 || opportunity.Probability > 100) {
 		return nil, errors.New("probability must be between 0 and 100")
 	}
 
@@ -65,7 +67,7 @@ func (s *opportunityService) GetOpportunity(id uint) (*models.Opportunity, error
 }
 
 func (s *opportunityService) UpdateOpportunity(opportunity *models.Opportunity) (*models.Opportunity, error) {
-	if opportunity.ID == 0 {
+	if opportunity.Id == 0 {
 		return nil, ErrInvalidOpportunityData
 	}
 
@@ -79,7 +81,7 @@ func (s *opportunityService) UpdateOpportunity(opportunity *models.Opportunity) 
 	}
 
 	// Retrieve the updated opportunity
-	updatedOpportunity, err := s.repo.GetByID(opportunity.ID)
+	updatedOpportunity, err := s.repo.GetByID(opportunity.Id)
 	if err != nil {
 		return nil, err
 	}

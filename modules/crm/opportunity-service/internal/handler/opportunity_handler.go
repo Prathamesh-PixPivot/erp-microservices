@@ -2,15 +2,15 @@ package handler
 
 import (
 	"context"
+	"fmt"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"log"
 	"opportunity-service/grpc/opportunitypb"
 	"opportunity-service/internal/models"
 	"opportunity-service/internal/services"
 	"time"
-
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/types/known/wrapperspb"
+	// "google.golang.org/protobuf/types/known/wrapperspb"
 )
 
 type OpportunityHandler struct {
@@ -25,7 +25,12 @@ func NewOpportunityHandler(service services.OpportunityService) *OpportunityHand
 func (h *OpportunityHandler) CreateOpportunity(ctx context.Context, req *opportunitypb.CreateOpportunityRequest) (*opportunitypb.CreateOpportunityResponse, error) {
 	log.Printf("Received CreateOpportunity request: %+v", req)
 
-	opportunity := convertProtoToModel(req.Opportunity)
+	opportunity, err := convertProtoToModel(req.Opportunity)
+
+	if err != nil {
+		fmt.Print("failed to convert proto to model %v", err)
+		return nil, err
+	}
 
 	createdOpportunity, err := h.opportunityService.CreateOpportunity(opportunity)
 	if err != nil {
@@ -66,36 +71,36 @@ func (h *OpportunityHandler) UpdateOpportunity(ctx context.Context, req *opportu
 	}
 
 	// Update fields only if they are provided (non-zero values)
-	if req.Opportunity.Name != nil {
-		existingOpportunity.Name = &req.Opportunity.Name.Value
+	if req.Opportunity.Name != "" {
+		existingOpportunity.Name = req.Opportunity.Name
 	}
-	if req.Opportunity.Description != nil {
-		existingOpportunity.Description = &req.Opportunity.Description.Value
+	if req.Opportunity.Description != "" {
+		existingOpportunity.Description = req.Opportunity.Description
 	}
-	if req.Opportunity.Stage != nil {
-		existingOpportunity.Stage = &req.Opportunity.Stage.Value
+	if req.Opportunity.Stage != "" {
+		existingOpportunity.Stage = req.Opportunity.Stage
 	}
-	if req.Opportunity.Amount.GetValue() != 0 {
-		existingOpportunity.Amount = &req.Opportunity.Amount.Value
+	if req.Opportunity.Amount != 0 {
+		existingOpportunity.Amount = req.Opportunity.Amount
 	}
-	if req.Opportunity.CloseDate != nil {
-		parsedDate := parseDate(req.Opportunity.CloseDate.Value)
-		existingOpportunity.CloseDate = &parsedDate
+	if req.Opportunity.CloseDate != "" {
+		parsedDate, _ := parseDate(req.Opportunity.CloseDate)
+		existingOpportunity.CloseDate = parsedDate
 	}
-	if req.Opportunity.Probability != nil && req.Opportunity.Probability.Value != 0 {
-		existingOpportunity.Probability = &req.Opportunity.Probability.Value
+	if req.Opportunity.Probability != 0 {
+		existingOpportunity.Probability = req.Opportunity.Probability
 	}
 	if req.Opportunity.LeadId != 0 {
 		tempLeadID := uint(req.Opportunity.LeadId)
-		existingOpportunity.LeadID = &tempLeadID
+		existingOpportunity.LeadID = tempLeadID
 	}
 	if req.Opportunity.AccountId != 0 {
 		tempAccountID := uint(req.Opportunity.AccountId)
-		existingOpportunity.AccountID = &tempAccountID
+		existingOpportunity.AccountID = tempAccountID
 	}
 	if req.Opportunity.OwnerId != 0 {
 		tempOwnerID := uint(req.Opportunity.OwnerId)
-		existingOpportunity.OwnerID = &tempOwnerID
+		existingOpportunity.OwnerID = tempOwnerID
 	}
 
 	// Save the updated opportunity
@@ -150,106 +155,122 @@ func (h *OpportunityHandler) ListOpportunities(ctx context.Context, req *opportu
 }
 
 // Conversion functions
-func convertProtoToModel(protoOpp *opportunitypb.Opportunity) *models.Opportunity {
+func convertProtoToModel(protoOpp *opportunitypb.Opportunity) (*models.Opportunity, error) {
+	parsedDate, err := parseDate(protoOpp.CloseDate)
+	if err != nil {
+		return nil, fmt.Errorf("invalid close date format: %s", protoOpp.CloseDate)
+	}
+
 	// Convert protobuf Opportunity to models.Opportunity
 	return &models.Opportunity{
-		ID:          uint(protoOpp.Id),
-		Name:        getStringPointer(protoOpp.Name),
-		Description: getStringPointer(protoOpp.Description),
-		Stage:       getStringPointer(protoOpp.Stage),
-		Amount:      getFloatPointer(protoOpp.Amount),
-		CloseDate:   parseDatePointer(protoOpp.CloseDate.GetValue()),
-		Probability: getFloatPointer(protoOpp.Probability),
-		LeadID:      uintPointer(protoOpp.LeadId),
-		AccountID:   uintPointer(protoOpp.AccountId),
-		OwnerID:     uintPointer(protoOpp.OwnerId),
-	}
+		Id:          uint(protoOpp.Id), // Fixed casing to match struct
+		Name:        protoOpp.Name,
+		Description: protoOpp.Description,
+		Stage:       protoOpp.Stage,
+		Amount:      protoOpp.Amount,
+		CloseDate:   parsedDate, // Using the parsed date
+		Probability: protoOpp.Probability,
+		LeadID:      uint(protoOpp.LeadId),
+		AccountID:   uint(protoOpp.AccountId),
+		OwnerID:     uint(protoOpp.OwnerId),
+	}, nil
 }
 
 func convertModelToProto(modelOpp *models.Opportunity) *opportunitypb.Opportunity {
 	// Convert models.Opportunity to protobuf Opportunity
 	return &opportunitypb.Opportunity{
-		Id:          uint32(modelOpp.ID),
-		Name:        wrapperspb.String(getStringValue(modelOpp.Name)),
-		Description: wrapperspb.String(getStringValue(modelOpp.Description)),
-		Stage:       wrapperspb.String(getStringValue(modelOpp.Stage)),
-		Amount:      wrapperspb.Double(getFloatValue(modelOpp.Amount)),
-		CloseDate:   wrapperspb.String(getTimeValue(modelOpp.CloseDate)),
-		Probability: wrapperspb.Double(getFloatValue(modelOpp.Probability)),
-		LeadId:      getUint32Value(modelOpp.LeadID),
-		AccountId:   getUint32Value(modelOpp.AccountID),
-		OwnerId:     getUint32Value(modelOpp.OwnerID),
+		Id:          uint32(modelOpp.Id),
+		Name:        modelOpp.Name,
+		Description: modelOpp.Description,
+		Stage:       modelOpp.Stage,
+		Amount:      modelOpp.Amount,
+		CloseDate:   modelOpp.CloseDate.Format(time.RFC3339),
+		Probability: modelOpp.Probability,
+		LeadId:      uint32(modelOpp.LeadID),
+		AccountId:   uint32(modelOpp.AccountID),
+		OwnerId:     uint32(modelOpp.OwnerID),
+		CreatedAt:   modelOpp.CreatedAt.Format(time.RFC3339),
+		UpdatedAt:   modelOpp.UpdatedAt.Format(time.RFC3339),
 	}
 }
 
 // Helper functions
 
-func getFloatPointer(f *wrapperspb.DoubleValue) *float64 {
-	if f != nil {
-		val := f.GetValue()
-		return &val
-	}
-	return nil
-}
-func getStringPointer(s *wrapperspb.StringValue) *string {
-	if s != nil {
-		str := s.GetValue()
-		return &str
-	}
-	return nil
-}
+// func getFloatPointer(f *wrapperspb.DoubleValue) *float64 {
+// 	if f != nil {
+// 		val := f.GetValue()
+// 		return &val
+// 	}
+// 	return nil
+// }
+// func getStringPointer(s *wrapperspb.StringValue) *string {
+// 	if s != nil {
+// 		str := s.GetValue()
+// 		return &str
+// 	}
+// 	return nil
+// }
 
-func getStringValue(s *string) string {
-	if s != nil {
-		return *s
-	}
-	return ""
-}
+// func getStringValue(s string) string {
+// 	if s != nil {
+// 		return *s
+// 	}
+// 	return ""
+// }
 
-func getFloatValue(f *float64) float64 {
-	if f != nil {
-		return *f
-	}
-	return 0
-}
+// func getFloatValue(f float64) float64 {
+// 	if f != nil {
+// 		return *f
+// 	}
+// 	return 0
+// }
 
-func getTimeValue(t *time.Time) string {
-	if t != nil {
-		return t.Format("2006-01-02")
-	}
-	return ""
-}
+// func getTimeValue(t time.Time) string {
+// 	if t != nil {
+// 		return t.Format("2006-01-02")
+// 	}
+// 	return ""
+// }
 
-func parseDatePointer(dateStr string) *time.Time {
-	if dateStr == "" {
-		return nil
-	}
-	t, err := time.Parse("2006-01-02", dateStr)
-	if err != nil {
-		return nil
-	}
-	return &t
-}
+// func parseDatePointer(dateStr string) *time.Time {
+// 	if dateStr == "" {
+// 		return nil
+// 	}
+// 	t, err := time.Parse("2006-01-02", dateStr)
+// 	if err != nil {
+// 		return nil
+// 	}
+// 	return &t
+// }
 
-func uintPointer(u uint32) *uint {
-	if u != 0 {
-		temp := uint(u)
-		return &temp
-	}
-	return nil
-}
+// func uintPointer(u uint32) *uint {
+// 	if u != 0 {
+// 		temp := uint(u)
+// 		return &temp
+// 	}
+// 	return nil
+// }
 
-func getUint32Value(u *uint) uint32 {
-	if u != nil {
-		return uint32(*u)
-	}
-	return 0
-}
+// func getUint32Value(u *uint) uint32 {
+// 	if u != nil {
+// 		return uint32(*u)
+// 	}
+// 	return 0
+// }
 
-func parseDate(dateStr string) time.Time {
+func parseDate(dateStr string) (time.Time, error) {
+	// Try parsing in YYYY-MM-DD format
 	date, err := time.Parse("2006-01-02", dateStr)
-	if err != nil {
-		return time.Time{}
+	if err == nil {
+		return date, nil
 	}
-	return date
+
+	// Try parsing RFC3339 (ISO 8601 format)
+	date, err = time.Parse(time.RFC3339, dateStr)
+	if err == nil {
+		return date, nil
+	}
+
+	// Return error if both formats fail
+	return time.Time{}, fmt.Errorf("invalid date format: %s", dateStr)
 }
