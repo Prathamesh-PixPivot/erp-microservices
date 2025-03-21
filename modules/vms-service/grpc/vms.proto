@@ -166,7 +166,7 @@ message BlacklistedVendorsResponse {
 message LogVendorTransactionRequest {
     string vendor_id = 1;
     string action = 2; // "CREATE_PO", "APPROVE_CONTRACT", "BLACKLIST_VENDOR"
-    google.protobuf.Timestamp timestamp = 3;
+    string timestamp = 3;
 }
 
 message AuditLogResponse {

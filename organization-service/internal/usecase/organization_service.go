@@ -17,7 +17,7 @@ type OrganizationServiceServer struct {
 func (s *OrganizationServiceServer) CreateOrganization(ctx context.Context, req *pb.CreateOrganizationRequest) (*pb.CreateOrganizationResponse, error) {
     // Create an Organization model instance from the request
     organization := models.Organization{
-        GSTIn:      req.GstIn,
+        GstIn:      req.GstIn,
         Name:       req.Name,
         Phone:      req.Phone,
         Email:      req.Email,
@@ -40,7 +40,6 @@ func (s *OrganizationServiceServer) CreateOrganization(ctx context.Context, req 
 
     // Return the response with the organization ID and name
     return &pb.CreateOrganizationResponse{
-        Id:   uint32(organization.ID),
-        Name: organization.Name,
+        Organization: organization,
     }, nil
 }

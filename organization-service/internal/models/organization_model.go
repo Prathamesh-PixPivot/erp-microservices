@@ -5,7 +5,7 @@ import pb "organization-service/grpc/userpb"
 
 type Organization struct {
     gorm.Model
-    GSTIn      string  `json:"gstIn"`
+    GstIn      string  `json:"gst_in"`
     Name       string  `json:"name"`
     Phone      string  `json:"phone"`
     Email      string  `json:"email"`

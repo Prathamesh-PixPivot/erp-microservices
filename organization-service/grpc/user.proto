@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-import "google/protobuf/timestamp.proto";
+// import "google/protobuf/timestamp.proto";
 
 package user;
 
@@ -38,8 +38,8 @@ message User {
     string permissions = 7; // ABAC permissions (Casbin attributes)
     uint32 organization_id = 8;
     optional uint32 parent_org_id = 9; // For users with access to parent-child hierarchy
-    google.protobuf.Timestamp created_at = 10;
-    google.protobuf.Timestamp updated_at = 11;
+    string created_at = 10;
+    string updated_at = 11;
 }
 
 // -------------------- Parent Organization User Management --------------------

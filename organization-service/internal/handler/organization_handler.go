@@ -38,8 +38,9 @@ func ProduceEvent(topic, message string) {
 }
 
 func (s *OrganizationServiceServer) CreateOrganization(ctx context.Context, req *organizationpb.CreateOrganizationRequest) (*organizationpb.CreateOrganizationResponse, error) {
+	print("\n requested%v", req)
 	org := &models.Organization{
-		GSTIn:      req.GstIn,
+		GstIn:      req.GstIn,
 		Name:       req.Name,
 		Phone:      req.Phone,
 		Email:      req.Email,
