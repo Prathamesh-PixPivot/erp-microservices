@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package license;
+
+import "google/protobuf/timestamp.proto";
+import "common.proto";
+
+option go_package = "/proto";
+
+service LicenseService {
+    rpc RegisterLicense (RegisterLicenseRequest) returns (LicenseResponse);
+    rpc GetLicense (GetLicenseRequest) returns (LicenseResponse);
+    rpc UpdateLicense (UpdateLicenseRequest) returns (LicenseResponse);
+    rpc DeleteLicense (DeleteLicenseRequest) returns (common.GenericResponse);
+}
+
+message RegisterLicenseRequest {
+    string asset_id = 1;
+    string license_key = 2;
+    google.protobuf.Timestamp expiry_date = 3;
+    string vendor = 4;
+    string contract_details = 5;
+}
+
+message GetLicenseRequest {
+    string license_id = 1;
+}
+
+message UpdateLicenseRequest {
+    string license_id = 1;
+    string license_key = 2;
+    google.protobuf.Timestamp expiry_date = 3;
+    string vendor = 4;
+    string contract_details = 5;
+}
+
+message DeleteLicenseRequest {
+    string license_id = 1;
+}
+
+message LicenseResponse {
+    string license_id = 1;
+    string asset_id = 2;
+    string license_key = 3;
+    google.protobuf.Timestamp expiry_date = 4;
+    string vendor = 5;
+    string contract_details = 6;
+}

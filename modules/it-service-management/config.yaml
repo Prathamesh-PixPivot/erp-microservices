@@ -1,0 +1,23 @@
+grpc_port: ":50061"
+log_level: "INFO"
+
+logging:
+  level: "info"   # Options: debug, info, warn, error
+  format: "console"  # Options: json, console (text-based)
+  output: "logs"  # Options: stdout, file, both
+  file: "logs/it_service_management.log"  # Only used if output is file or both
+
+ZABBIX_API_URL: "http://172.27.5.246/api_jsonrpc.php"
+PORT: "9090"
+AUTH_TOKEN: "your_auth_token_here"
+USE_TLS: false
+TLS_CERT_FILE: "/home/pixpivot/server.crt"
+TLS_KEY_FILE: "/home/pixpivot/server.key"
+
+DATABASE:
+  HOST: "localhost"
+  USER: "postgres"
+  PASSWORD: "root"
+  DBNAME: "itsm"
+  PORT: 5432
+  SSLMODE: "disable"

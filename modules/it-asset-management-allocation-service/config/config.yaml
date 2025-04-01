@@ -1,0 +1,2 @@
+grpc_port: ":50061"
+log_level: "INFO"

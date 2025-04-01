@@ -1,0 +1,6 @@
+ZABBIX_API_URL: "http://172.27.5.246/api_jsonrpc.php"
+PORT: "8080"
+AUTH_TOKEN: "0229e9c7ef5baf56e9e32304c924c61a"
+USE_TLS: false
+TLS_CERT_FILE: "/home/pixpivot/server.crt"
+TLS_KEY_FILE: "/home/pixpivot/server.key"

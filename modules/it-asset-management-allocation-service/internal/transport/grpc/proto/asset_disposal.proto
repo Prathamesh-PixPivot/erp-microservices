@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package disposal;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "/proto";
+
+service DisposalService {
+    rpc DecommissionAsset (DecommissionAssetRequest) returns (DecommissionResponse);
+}
+
+message DecommissionAssetRequest {
+    string asset_id = 1;
+    string reason = 2;
+    google.protobuf.Timestamp decommission_date = 3;
+}
+
+message DecommissionResponse {
+    string message = 1;
+}

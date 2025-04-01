@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package maintenance;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "/proto";
+
+service MaintenanceService {
+    rpc ScheduleMaintenance (ScheduleMaintenanceRequest) returns (MaintenanceResponse);
+    rpc GetMaintenanceRecords (GetMaintenanceRecordsRequest) returns (GetMaintenanceRecordsResponse);
+}
+
+message ScheduleMaintenanceRequest {
+    string asset_id = 1;
+    string description = 2;
+    double cost = 3;
+}
+
+message MaintenanceResponse {
+    string id = 1;
+    string asset_id = 2;
+    google.protobuf.Timestamp maintenance_date = 3;
+    string description = 4;
+    double cost = 5;
+}
+
+message GetMaintenanceRecordsRequest {
+    string asset_id = 1;
+}
+
+message GetMaintenanceRecordsResponse {
+    repeated MaintenanceResponse records = 1;
+}

@@ -1,0 +1,141 @@
+syntax = "proto3";
+
+package itsm;
+
+option go_package = "itom/internal/transport/grpc/itsm";
+
+// Incident messages and service
+message Incident {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string hostid = 4;
+  string status = 5; // e.g., "open", "in_progress", "closed"
+  string created_at = 6; // ISO8601 formatted
+  string updated_at = 7; // ISO8601 formatted
+}
+
+message CreateIncidentRequest {
+  Incident incident = 1;
+}
+message CreateIncidentResponse {
+  Incident incident = 1;
+}
+
+message GetIncidentRequest {
+  string id = 1;
+}
+message GetIncidentResponse {
+  Incident incident = 1;
+}
+
+message UpdateIncidentRequest {
+  Incident incident = 1;
+}
+message UpdateIncidentResponse {
+  Incident incident = 1;
+}
+
+message ListIncidentsRequest {}
+
+message ListIncidentsResponse {
+  repeated Incident incidents = 1;
+}
+
+// Similarly, define messages for Change management.
+message Change {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string requester = 4;
+  string approver = 5;
+  string status = 6; // "pending", "approved", "implemented", etc.
+  string planned_time = 7;
+  string created_at = 8;
+  string updated_at = 9;
+}
+
+message CreateChangeRequest {
+  Change change = 1;
+}
+message CreateChangeResponse {
+  Change change = 1;
+}
+
+message GetChangeRequest {
+  string id = 1;
+}
+message GetChangeResponse {
+  Change change = 1;
+}
+
+message UpdateChangeRequest {
+  Change change = 1;
+}
+message UpdateChangeResponse {
+  Change change = 1;
+}
+
+message ListChangesRequest {}
+message ListChangesResponse {
+  repeated Change changes = 1;
+}
+
+// And messages for Service Request management.
+message ServiceRequest {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string requester = 4;
+  string status = 5; // "open", "in_progress", "completed", etc.
+  string sla = 6;
+  string created_at = 7;
+  string updated_at = 8;
+}
+
+message CreateServiceRequestRequest {
+  ServiceRequest sr = 1;
+}
+message CreateServiceRequestResponse {
+  ServiceRequest sr = 1;
+}
+
+message GetServiceRequestRequest {
+  string id = 1;
+}
+message GetServiceRequestResponse {
+  ServiceRequest sr = 1;
+}
+
+message UpdateServiceRequestRequest {
+  ServiceRequest sr = 1;
+}
+message UpdateServiceRequestResponse {
+  ServiceRequest sr = 1;
+}
+
+message ListServiceRequestsRequest {}
+message ListServiceRequestsResponse {
+  repeated ServiceRequest srs = 1;
+}
+
+// ITSM service definition
+service ITSMService {
+  // Incident Management
+  rpc CreateIncident(CreateIncidentRequest) returns (CreateIncidentResponse);
+  rpc GetIncident(GetIncidentRequest) returns (GetIncidentResponse);
+  rpc UpdateIncident(UpdateIncidentRequest) returns (UpdateIncidentResponse);
+  rpc ListIncidents(ListIncidentsRequest) returns (ListIncidentsResponse);
+
+  // Change Management
+  rpc CreateChange(CreateChangeRequest) returns (CreateChangeResponse);
+  rpc GetChange(GetChangeRequest) returns (GetChangeResponse);
+  rpc UpdateChange(UpdateChangeRequest) returns (UpdateChangeResponse);
+  rpc ListChanges(ListChangesRequest) returns (ListChangesResponse);
+
+  // Service Request Management
+  rpc CreateServiceRequest(CreateServiceRequestRequest) returns (CreateServiceRequestResponse);
+  rpc GetServiceRequest(GetServiceRequestRequest) returns (GetServiceRequestResponse);
+  rpc UpdateServiceRequest(UpdateServiceRequestRequest) returns (UpdateServiceRequestResponse);
+  rpc ListServiceRequests(ListServiceRequestsRequest) returns (ListServiceRequestsResponse);
+}

@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package asset;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "/proto";
+
+service AssetService {
+    rpc CreateAsset (CreateAssetRequest) returns (AssetResponse);
+    rpc GetAsset (GetAssetRequest) returns (AssetResponse);
+    rpc UpdateAsset (UpdateAssetRequest) returns (AssetResponse);
+    rpc DeleteAsset (DeleteAssetRequest) returns (DeleteAssetResponse);
+}
+
+message CreateAssetRequest {
+    string name = 1;
+    string description = 2;
+    string category = 3;
+    google.protobuf.Timestamp purchase_date = 4;
+    double purchase_price = 5;
+    string location = 6;
+    double depreciation_rate = 7;
+    string guidelines = 8;
+}
+
+message GetAssetRequest {
+    string id = 1;
+}
+
+message UpdateAssetRequest {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string category = 4;
+    google.protobuf.Timestamp purchase_date = 5;
+    double purchase_price = 6;
+    double current_value = 7;
+    string location = 8;
+    string status = 9;
+    double depreciation_rate = 10;
+    string guidelines = 11;
+}
+
+message DeleteAssetRequest {
+    string id = 1;
+}
+
+message AssetResponse {
+    string id = 1;
+    string name = 2;
+    string description = 3;
+    string category = 4;
+    google.protobuf.Timestamp purchase_date = 5;
+    double purchase_price = 6;
+    double current_value = 7;
+    string location = 8;
+    string status = 9;
+    double depreciation_rate = 10;
+    string guidelines = 11;
+}
+
+message DeleteAssetResponse {
+    string message = 1;
+}

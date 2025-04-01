@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package allocation;
+
+import "google/protobuf/timestamp.proto";
+import "common.proto";
+
+option go_package = "/proto";
+
+service AllocationService {
+    rpc AllocateAsset (AllocateAssetRequest) returns (AllocationResponse);
+    rpc ReallocateAsset (ReallocateAssetRequest) returns (common.GenericResponse);
+    rpc DeallocateAsset (DeallocateAssetRequest) returns (common.GenericResponse);
+}
+
+message AllocateAssetRequest {
+    string asset_id = 1;
+    string assigned_to = 2;
+}
+
+message AllocationResponse {
+    string id = 1;
+    string asset_id = 2;
+    string assigned_to = 3;
+    google.protobuf.Timestamp assignment_date = 4;
+}
+
+message ReallocateAssetRequest {
+    string asset_id = 1;
+    string new_assigned_to = 2;
+}
+
+message DeallocateAssetRequest {
+    string allocation_id = 1;
+}

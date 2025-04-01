@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package audit;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "/proto";
+
+service AuditService {
+    rpc AuditAsset (AuditAssetRequest) returns (AuditResponse);
+    rpc GetAuditHistory (GetAuditHistoryRequest) returns (GetAuditHistoryResponse);
+}
+
+message AuditAssetRequest {
+    string asset_id = 1;
+    string audited_by = 2;
+    string condition = 3; // e.g., Good, Needs Repair, etc.
+    string remarks = 4;
+}
+
+message AuditResponse {
+    string message = 1;
+    google.protobuf.Timestamp audit_date = 2;
+}
+
+message GetAuditHistoryRequest {
+    string asset_id = 1;
+}
+
+message GetAuditHistoryResponse {
+    repeated AuditResponse audits = 1;
+}

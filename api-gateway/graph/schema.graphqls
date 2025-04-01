@@ -1,0 +1,1943 @@
+# Enum for Activity Status
+enum ActivityStatus {
+  Pending
+  InProgress
+  Completed
+  Canceled
+  Scheduled
+}
+
+# Enum for Sorting Activity Fields
+enum ActivitySortField {
+  TITLE
+  DUEDATE
+  CREATEDAT
+  UPDATEDAT
+}
+
+# Enum for Task Status
+enum TaskStatus {
+  Pending
+  InProgress
+  Completed
+  Canceled
+}
+
+# Enum for Task Priority
+enum TaskPriority {
+  Low
+  Medium
+  High
+}
+
+# Enum for Sorting Task Fields
+enum TaskSortField {
+  TITLE
+  DUEDATE
+  CREATEDAT
+  UPDATEDAT
+}
+
+# Enum for Lead Status
+enum LeadStatus {
+  New
+  Contacted
+  Qualified
+  Converted
+  Unqualified
+}
+
+# Enum for Sorting Contact Fields
+enum ContactSortField {
+  FIRSTNAME
+  LASTNAME
+  EMAIL
+  CREATEDAT
+  UPDATEDAT
+}
+
+# Enum for Sorting Opportunity Fields
+enum OpportunitySortField {
+  NAME
+  AMOUNT
+  CREATEDAT
+  UPDATEDAT
+}
+
+# SignupResponse type
+type SignupResponse {
+  message: String!
+  userId: ID!
+  organizationId: ID!
+}
+
+# SigninResponse type
+type SigninResponse {
+  accessToken: String!
+  refreshToken: String!
+}
+
+# User type
+type User {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String!
+  role: String!
+  organization: Organization!
+}
+
+# Organization type
+type Organization {
+  id: ID!
+  gstIn: String!
+  name: String!
+  phone: String!
+  email: String!
+  address: String!
+  city: String!
+  country: String!
+  state: String!
+  zipcode: String!
+  website: String!
+  industry: String!
+}
+
+# Lead type
+type Lead {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String
+  status: LeadStatus!
+  assignedTo: String!
+  organization: Organization!
+}
+
+# Opportunity type
+type Opportunity {
+  id: ID!
+  name: String!
+  description: String
+  stage: String!
+  amount: Float!
+  closeDate: String!
+  probability: Float
+  lead: Lead!
+  account: Organization
+  owner: User!
+}
+
+# Contact type
+type Contact {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String
+  address: String
+  city: String
+  state: String
+  country: String
+  zipCode: String
+  company: String
+  position: String
+  socialMediaProfiles: String
+  notes: String
+  createdAt: String
+  updatedAt: String
+}
+
+# Activity type
+type Activity {
+  id: ID!
+  title: String!
+  description: String
+  type: String!
+  status: ActivityStatus!
+  dueDate: String
+  createdAt: String!
+  updatedAt: String!
+  contact: Contact!
+  tasks: [Task!]!
+}
+
+# Task type
+type Task {
+  id: ID!
+  title: String!
+  description: String
+  status: TaskStatus!
+  priority: TaskPriority!
+  dueDate: String
+  createdAt: String!
+  updatedAt: String!
+  activity: Activity!
+}
+
+type Vendor {
+    id: ID!
+    name: String!
+    category: String!
+    service: String!
+    industry: String!
+    gstin: String!
+    certifications: String
+    licenses: String
+    isCompliant: Boolean
+    performanceScore: Float
+    riskAssessment: String
+}
+
+type PurchaseOrder {
+    id: ID!
+    vendorId: ID!
+    orderDetails: String!
+    status: String!
+    deliveryDate: String  # ISO Date string in GraphQL
+    receivedDate: String  # ISO Date string in GraphQL
+}
+
+# Vendor Performance Type
+type VendorPerformance {
+    id: ID!
+    vendorId: ID!
+    score: Float
+    riskLevel: String
+    evaluatedAt: String
+}
+
+# Payment Type
+type Payment {
+    id: ID!
+    purchaseOrderId: ID!
+    amount: Float!
+    status: String!
+    paymentTerms: String
+    paidAt: String
+}
+
+type InvoiceItem {
+    id: ID!
+    item_id: String!
+    name: String!
+    price: Float!
+    quantity: Int!
+    total: Float!
+}
+
+type Invoice {
+    id: ID!
+    invoice_number: String!
+    type: String!          # "sales", "proforma", "challan", "purchase"
+    vendor_id: ID
+    customer_id: ID
+    total_amount: Float!
+    cgst: Float!
+    sgst: Float!
+    igst: Float!
+    status: String!
+    invoice_date: String!
+    items: [InvoiceItem!]!
+}
+
+type CreditDebitNote {
+    id: ID!
+    type: String!          # "credit" or "debit"
+    invoice_id: ID!        # Linked invoice ID
+    amount: Float!
+    reason: String!
+    date: String!
+}
+
+input CreateCreditDebitNoteInput {
+    type: String!
+    invoice_id: ID!
+    amount: Float!
+    reason: String!
+    date: String!
+}
+
+# Ledger Types and Inputs
+
+type LedgerEntry {
+    id: ID!
+    transaction_id: String!
+    description: String!
+    debit: Float
+    credit: Float
+    balance: Float
+    transaction_date: String!
+}
+
+input CreateLedgerEntryInput {
+    transaction_id: String!
+    description: String!
+    debit: Float
+    credit: Float
+    transaction_date: String!
+}
+
+# Payment Due Types and Inputs
+
+type PaymentDue {
+    id: ID!
+    invoice_id: ID!
+    amount_due: Float!
+    due_date: String!
+    status: String!
+}
+
+# Define the core Inventory Item type
+type InventoryItem {
+    productID: String!
+    productName: String!
+    productDescription: String
+    sku: String!
+    supplierID: String!
+    category: String
+    price: Float!
+    availableQuantity: Int!
+    reorderPoint: Int!
+    warehouseStocks: [WarehouseStock!]!
+}
+
+# WarehouseStock type for inventory items in different warehouses
+type WarehouseStock {
+    warehouseID: String!
+    stockLevel: Int!
+}
+
+# PickingItem type used for generating picking lists
+type PickingItem {
+    orderID: String!
+    productID: String!
+    productName: String!
+    quantity: Int!
+    warehouseID: String!
+    warehouseName: String!
+}
+
+# OrderItem input type for order processing
+input OrderItemInput {
+    productID: String!
+    quantity: Int!
+}
+
+input AddPaymentDueInput {
+    invoice_id: ID!
+    amount_due: Float!
+    due_date: String!
+    status: String!
+}
+
+
+input InvoiceItemInput {
+    item_id: String!
+    name: String!
+    price: Float!
+    quantity: Int!
+}
+
+input CreateInvoiceInput {
+    type: String!
+    vendor_id: ID
+    customer_id: ID
+    organization_id: ID!  # required field
+    items: [InvoiceItemInput!]!
+    invoice_date: String!
+}
+
+input UpdateInvoiceInput {
+    invoice_id: ID!
+    status: String
+    items: [InvoiceItemInput]
+    invoice_date: String
+}
+
+# Input types for creating and updating opportunities
+input CreateOpportunityInput {
+  name: String!
+  description: String
+  stage: String!
+  amount: Float!
+  closeDate: String!
+  probability: Float
+  leadId: ID!
+  accountId: ID
+  ownerId: ID!
+}
+
+input UpdateOpportunityInput {
+  id: ID!
+  name: String
+  description: String
+  stage: String
+  amount: Float
+  closeDate: String
+  probability: Float
+  leadId: ID
+  accountId: ID
+  ownerId: ID
+}
+
+# Input types for creating and updating Contacts
+input CreateContactInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String
+  address: String
+  city: String
+  state: String
+  country: String
+  zipCode: String
+  company: String
+  position: String
+  socialMediaProfiles: String
+  notes: String
+}
+
+# Warehouse input type for managing warehouse information
+input WarehouseStockInput {
+    warehouseID: String!
+    stockLevel: Int!
+}
+
+input UpdateContactInput {
+  id: ID!
+  firstName: String
+  lastName: String
+  email: String
+  phone: String
+  address: String
+  city: String
+  state: String
+  country: String
+  zipCode: String
+  company: String
+  position: String
+  socialMediaProfiles: String
+  notes: String
+}
+
+# Input types for creating and updating Activities
+input CreateActivityInput {
+  title: String!
+  description: String
+  type: String!
+  status: ActivityStatus!
+  dueDate: String
+  contactId: ID!
+}
+
+input UpdateActivityInput {
+  id: ID!
+  title: String
+  description: String
+  type: String
+  status: ActivityStatus
+  dueDate: String
+  contactId: ID
+}
+
+# Input types for creating and updating Tasks
+input CreateTaskInput {
+  title: String!
+  description: String
+  status: TaskStatus!
+  priority: TaskPriority!
+  dueDate: String
+  activityId: ID!
+}
+
+input UpdateTaskInput {
+  id: ID!
+  title: String
+  description: String
+  status: TaskStatus
+  priority: TaskPriority
+  dueDate: String
+  activityId: ID
+}
+
+# Input types for creating and updating Leads
+input CreateLeadInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String
+  status: LeadStatus!
+  assignedTo: String!
+  organizationId: ID!
+}
+
+input UpdateLeadInput {
+  id: ID!
+  firstName: String
+  lastName: String
+  email: String
+  phone: String
+  status: LeadStatus
+  assignedTo: String!
+  organizationId: ID
+}
+
+# Combining all queries into a single Query type
+type Query {
+    getUser(id: ID!): User!                    # Get user by ID
+    getOrganization(id: ID!): Organization!    # Get organization by ID
+    leads: [Lead!]!                            # Get all leads
+    lead(id: ID!): Lead                        # Get lead by ID
+    leadByEmail(email: String!): Lead          # Get lead by email
+
+    # Opportunity queries
+    getOpportunity(id: ID!): Opportunity       # Get opportunity by ID
+    listOpportunities(ownerId: ID): [Opportunity!]!  # List opportunities, optionally filtered by ownerId
+
+    # Contacts queries
+    getContact(id: ID!): Contact
+    listContacts(
+      pageNumber: Int, 
+      pageSize: Int, 
+      sortBy: ContactSortField,            # Using enum for sortBy
+      ascending: Boolean
+    ): [Contact!]!
+
+    # Activity queries
+    getActivity(id: ID!): Activity
+    listActivities(
+      pageNumber: Int, 
+      pageSize: Int, 
+      sortBy: ActivitySortField!,          # Using enum for sortBy
+      ascending: Boolean!, 
+      contactId: ID
+    ): [Activity!]!
+
+    # Task queries
+    getTask(id: ID!): Task
+    listTasks(
+      pageNumber: Int, 
+      pageSize: Int, 
+      sortBy: TaskSortField!,              # Using enum for sortBy
+      ascending: Boolean!, 
+      activityId: ID
+    ): [Task!]!
+
+    getVendorByID(id: ID!): Vendor
+    searchVendors(query: String!): [Vendor]
+    getPurchaseOrderByID(id: ID!): PurchaseOrder
+    getPerformanceByID(id: ID!): VendorPerformance
+    getPaymentByID(id: ID!): Payment
+
+    getInvoiceById(id: ID!): Invoice!
+    listInvoices(page: Int, pageSize: Int): [Invoice!]!
+
+    getCreditDebitNoteById(id: ID!): CreditDebitNote!
+    listCreditDebitNotes: [CreditDebitNote!]!
+
+    getLedgerEntryById(id: ID!): LedgerEntry!
+    listLedgerEntries: [LedgerEntry!]!
+
+    getPaymentDueById(id: ID!): PaymentDue!
+    listPaymentDues: [PaymentDue!]!
+
+    # CRUD for Inventory Items
+    getInventoryItem(productID: String!): InventoryItem
+    listInventoryItems(limit: Int, offset: Int): [InventoryItem!]!
+
+    # Stock Management
+    trackInventory(productID: String!): InventoryItem
+}
+
+# Combining all mutations into a single Mutation type
+type Mutation {
+    signup(
+        firstName: String!,
+        lastName: String!,
+        email: String!,
+        password: String!,
+        phone: String!,
+        role: String!,
+        organizationName: String!,
+        gstIn: String!,
+        address: String!,
+        city: String!,
+        state: String!,
+        country: String!,
+        zipcode: String!,
+        website: String!
+    ): SignupResponse!                         # Signup mutation
+
+    signin(email: String!, password: String!): SigninResponse! # Signin mutation
+
+    createLead(input: CreateLeadInput!): Lead            # Create a lead
+    updateLead(input: UpdateLeadInput!): Lead            # Update a lead
+    deleteLead(id: ID!): Boolean                         # Delete a lead by ID
+
+    # Opportunity mutations
+    createOpportunity(input: CreateOpportunityInput!): Opportunity  # Create an opportunity
+    updateOpportunity(input: UpdateOpportunityInput!): Opportunity  # Update an opportunity
+    deleteOpportunity(id: ID!): Boolean                             # Delete an opportunity by ID
+
+    # Contacts mutations
+    createContact(input: CreateContactInput!): Contact
+    updateContact(input: UpdateContactInput!): Contact
+    deleteContact(id: ID!): Boolean
+
+    # Activity mutations
+    createActivity(input: CreateActivityInput!): Activity
+    updateActivity(input: UpdateActivityInput!): Activity
+    deleteActivity(id: ID!): Boolean
+
+    # Task mutations
+    createTask(input: CreateTaskInput!): Task
+    updateTask(input: UpdateTaskInput!): Task
+    deleteTask(id: ID!): Boolean
+
+    createVendor(name: String!, category: String!, service: String!, industry: String!, gstin: String!, certifications: String, licenses: String): Vendor
+    updateVendor(id: ID!, name: String!, category: String!, service: String!, industry: String!, gstin: String!, certifications: String, licenses: String): Vendor
+    deleteVendor(id: ID!): String
+    createPurchaseOrder(vendorId: ID!, orderDetails: String!, deliveryDate: String!): PurchaseOrder
+    updatePurchaseOrder(id: ID!, orderDetails: String!, status: String!, deliveryDate: String, receivedDate: String): PurchaseOrder
+    deletePurchaseOrder(id: ID!): String
+    recordPerformance(vendorId: ID!, score: Float!, riskLevel: String!, evaluatedAt: String!): VendorPerformance
+    processInvoice(purchaseOrderId: ID!, amount: Float!, paymentTerms: String!): Payment
+
+    createInvoice(input: CreateInvoiceInput!): Invoice!
+    updateInvoice(input: UpdateInvoiceInput!): Invoice!
+    deleteInvoice(id: ID!): String!
+
+    createCreditDebitNote(input: CreateCreditDebitNoteInput!): CreditDebitNote!
+    deleteCreditDebitNote(id: ID!): String!
+
+    addLedgerEntry(input: CreateLedgerEntryInput!): LedgerEntry!
+    deleteLedgerEntry(id: ID!): String!
+
+    addPaymentDue(input: AddPaymentDueInput!): PaymentDue!
+    markPaymentAsPaid(id: ID!): PaymentDue!
+
+    # CRUD for Inventory Items
+    createInventoryItem(
+        productID: String!,
+        productName: String!,
+        productDescription: String,
+        sku: String!,
+        supplierID: String!,
+        category: String,
+        price: Float!,
+        availableQuantity: Int!,
+        reorderPoint: Int!
+    ): InventoryItem
+
+    updateInventoryItem(
+        productID: String!,
+        productName: String,
+        productDescription: String,
+        sku: String,
+        supplierID: String,
+        category: String,
+        price: Float,
+        availableQuantity: Int,
+        reorderPoint: Int
+    ): InventoryItem
+
+    deleteInventoryItem(productID: String!): Boolean
+
+    # Stock Management
+    setReorderPoint(productID: String!, reorderPoint: Int!): Boolean
+    addOrUpdateInventoryItem(
+        productID: String!,
+        productName: String!,
+        productDescription: String,
+        sku: String!,
+        supplierID: String!,
+        category: String,
+        price: Float!,
+        availableQuantity: Int!,
+        reorderPoint: Int!,
+        warehouseStocks: [WarehouseStockInput!]  # Optional input for stock levels in warehouses
+    ): InventoryItem
+
+    # Order Fulfillment
+    processOrder(orderItems: [OrderItemInput!]!): Boolean
+    generatePickingList(orderID: String!): [PickingItem!]!
+    updateInventoryStock(
+        productID: String!,
+        quantity: Int!,
+        warehouseID: String!
+    ): Boolean
+
+    # Vendor and Finance Integrations
+    placeVendorOrder(vendorID: String!, orderItems: [OrderItemInput!]!): Boolean
+    notifyFinanceForOrder(orderID: String!, totalAmount: Float!): Boolean
+}
+
+# schema.graphqls
+
+scalar DateTime
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+# ====================================================
+# Root Query Type
+# ====================================================
+type Query {
+  # Attendance
+  attendance(id: ID!): Attendance
+  attendances(filter: AttendanceFilterInput, limit: Int, offset: Int): AttendanceList!
+
+  # Bonus
+  bonus(id: ID!): Bonus
+  bonuses(filter: BonusFilterInput, limit: Int, offset: Int): BonusList!
+
+  # Department
+  department(id: ID!): Department
+  departments(filter: DepartmentFilterInput, limit: Int, offset: Int): DepartmentList!
+
+  # Designation
+  designation(id: ID!): Designation
+  designations(filter: DesignationFilterInput, limit: Int, offset: Int): DesignationList!
+
+  # Employee Benefits
+  employeeBenefits(employeeID: ID!): EmployeeBenefits
+  listEmployeeBenefits(healthPlan: HealthInsurancePlan, retirementPlan: RetirementPlan): [EmployeeBenefits!]!
+
+  # Employee Document
+  employeeDocument(id: ID!): EmployeeDocument
+  employeeDocuments(employeeID: ID!): [EmployeeDocument!]!
+  expiredEmployeeDocuments: [EmployeeDocument!]!
+
+  # Employee Exit
+  employeeExit(id: ID!): EmployeeExit
+  employeeExits(employeeID: ID!): [EmployeeExit!]!
+  pendingClearances: [EmployeeExit!]!
+
+  # Employee Perk
+  employeePerks(employeeID: ID!): [EmployeePerk!]!
+
+  # Employee
+  employee(id: ID!): Employee
+  employees: [Employee!]!
+
+  # Expense
+  expense(id: ID!): Expense
+  employeeExpenses(employeeID: ID!): [Expense!]!
+
+  # Leave Balance
+  leaveBalance(employeeID: ID!, leaveType: LeaveType!): LeaveBalance
+  leaveBalances(employeeID: ID, limit: Int, offset: Int): LeaveBalanceList!
+
+  # Leave Policy
+  leavePolicy(id: ID!): LeavePolicy
+  leavePolicies(organizationID: ID!): [LeavePolicy!]!
+
+  # Leave
+  leave(id: ID!): Leave
+  leaves(employeeID: ID, status: LeaveStatus, startDate: DateTime, endDate: DateTime, limit: Int, offset: Int): [Leave!]!
+
+  # Loan Advance
+  loanAdvance(id: ID!): LoanAdvance
+  loanAdvances(filter: LoanAdvanceFilterInput): [LoanAdvance!]!
+
+  # Payroll
+  payroll(id: ID!): Payroll
+  payrolls(filter: PayrollFilterInput): PaginatedPayrollResponse!
+
+  # Performance KPI
+  performanceKPI(id: ID!): PerformanceKPI
+  performanceKPIs(reviewID: ID!, limit: Int, offset: Int): PerformanceKPIList!
+
+  # Performance Review
+  performanceReview(id: ID!): PerformanceReview
+  performanceReviews(employeeID: ID!, limit: Int, offset: Int): PerformanceReviewList!
+
+  # Public Holiday
+  publicHoliday(id: ID!): PublicHoliday
+  publicHolidays(organizationID: ID!, year: Int): [PublicHoliday!]!
+
+  # Salary Structure
+  salaryStructure(id: ID!): SalaryStructure
+  salaryStructures(organizationID: ID, designationID: ID): [SalaryStructure!]!
+
+  # Shift
+  shift(id: ID!): Shift
+  shifts(limit: Int, offset: Int, search: String): ShiftList!
+
+  # Skill Development
+  skillDevelopment(id: ID!): SkillDevelopment
+  skillDevelopments(reviewID: ID!, limit: Int, offset: Int): [SkillDevelopment!]!
+
+  # Work History
+  workHistory(id: ID!): WorkHistory
+  workHistories(employeeID: ID!): [WorkHistory!]!
+}
+
+# ====================================================
+# Root Mutation Type
+# ====================================================
+type Mutation {
+  # Attendance
+  createAttendance(input: CreateAttendanceInput!): Attendance!
+  checkOutAttendance(employeeID: ID!, checkOut: DateTime!): Attendance!
+  deleteAttendance(id: ID!): Boolean!
+
+  # Bonus
+  createBonus(input: CreateBonusInput!): Bonus!
+  updateBonus(id: ID!, input: UpdateBonusInput!): Bonus!
+  deleteBonus(id: ID!): Boolean!
+
+  # Department
+  createDepartment(input: CreateDepartmentInput!): Department!
+  updateDepartment(id: ID!, input: UpdateDepartmentInput!): Department!
+  deleteDepartment(id: ID!): Boolean!
+
+  # Designation
+  createDesignation(input: CreateDesignationInput!): Designation!
+  updateDesignation(id: ID!, input: UpdateDesignationInput!): Designation!
+  deleteDesignation(id: ID!): Boolean!
+
+  # Employee Benefits
+  createEmployeeBenefits(input: CreateEmployeeBenefitsInput!): EmployeeBenefits!
+  updateEmployeeBenefits(employeeID: ID!, input: UpdateEmployeeBenefitsInput!): EmployeeBenefits!
+  deleteEmployeeBenefits(employeeID: ID!): Boolean!
+
+  # Employee Document
+  createEmployeeDocument(input: CreateEmployeeDocumentInput!): EmployeeDocument!
+  updateEmployeeDocument(documentID: ID!, input: UpdateEmployeeDocumentInput!): EmployeeDocument!
+  deleteEmployeeDocument(documentID: ID!): Boolean!
+
+  # Employee Exit
+  createEmployeeExit(input: CreateEmployeeExitInput!): EmployeeExit!
+  updateClearanceStatus(exitID: ID!, input: UpdateClearanceStatusInput!): EmployeeExit!
+  deleteEmployeeExit(exitID: ID!): Boolean!
+
+  # Employee Perk
+  createEmployeePerk(input: CreateEmployeePerkInput!): EmployeePerk!
+  updateEmployeePerk(perkID: ID!, input: UpdateEmployeePerkInput!): EmployeePerk!
+  deleteEmployeePerk(perkID: ID!): Boolean!
+
+  # Employee
+  createEmployee(input: CreateEmployeeInput!): Employee!
+  updateEmployee(employeeID: ID!, input: UpdateEmployeeInput!): Employee!
+  deleteEmployee(employeeID: ID!, reason: String!): Boolean!
+
+  # Expense
+  createExpense(input: CreateExpenseInput!): Expense!
+  updateExpenseStatus(input: UpdateExpenseStatusInput!): Expense!
+  deleteExpense(expenseID: ID!, employeeID: ID!): Boolean!
+
+  # Leave Balance
+  createLeaveBalance(input: CreateLeaveBalanceInput!): LeaveBalance!
+  deductLeaveBalance(input: DeductLeaveBalanceInput!): Boolean!
+  restoreLeaveBalance(input: RestoreLeaveBalanceInput!): Boolean!
+  deleteLeaveBalance(employeeID: ID!, leaveType: LeaveType!): Boolean!
+
+  # Leave Policy
+  createLeavePolicy(input: CreateLeavePolicyInput!): LeavePolicy!
+  updateLeavePolicy(id: ID!, input: UpdateLeavePolicyInput!): LeavePolicy!
+  deleteLeavePolicy(id: ID!): Boolean!
+
+  # Leave
+  createLeave(input: CreateLeaveInput!): Leave!
+  updateLeaveStatus(input: UpdateLeaveStatusInput!): Leave!
+  deleteLeave(leaveID: ID!): Boolean!
+
+  # Loan Advance
+  requestLoanAdvance(input: RequestLoanAdvanceInput!): LoanAdvance!
+  approveLoanAdvance(input: ApproveLoanAdvanceInput!): LoanAdvance!
+  rejectLoanAdvance(input: RejectLoanAdvanceInput!): LoanAdvance!
+  deleteLoanAdvance(loanID: ID!): Boolean!
+
+  # Payroll
+  createPayroll(input: CreatePayrollInput!): Payroll!
+  updatePayroll(id: ID!, input: UpdatePayrollInput!): Payroll!
+  deletePayroll(id: ID!): Boolean!
+
+  # Performance KPI
+  createPerformanceKPI(input: CreatePerformanceKPIInput!): PerformanceKPI!
+  updatePerformanceKPI(id: ID!, input: UpdatePerformanceKPIInput!): PerformanceKPI!
+  deletePerformanceKPI(id: ID!): Boolean!
+
+  # Performance Review
+  createPerformanceReview(input: CreatePerformanceReviewInput!): PerformanceReview!
+  updatePerformanceReview(id: ID!, input: UpdatePerformanceReviewInput!): PerformanceReview!
+  deletePerformanceReview(id: ID!): Boolean!
+
+  # Public Holiday
+  createPublicHoliday(input: CreatePublicHolidayInput!): PublicHoliday!
+  updatePublicHoliday(id: ID!, input: UpdatePublicHolidayInput!): PublicHoliday!
+  deletePublicHoliday(id: ID!): Boolean!
+
+  # Salary Structure
+  createSalaryStructure(input: CreateSalaryStructureInput!): SalaryStructure!
+  updateSalaryStructure(id: ID!, input: UpdateSalaryStructureInput!): SalaryStructure!
+  deleteSalaryStructure(id: ID!): Boolean!
+
+  # Shift
+  createShift(input: CreateShiftInput!): Shift!
+  updateShift(id: ID!, input: UpdateShiftInput!): Shift!
+  deleteShift(id: ID!): Boolean!
+
+  # Skill Development
+  createSkillDevelopment(input: CreateSkillDevelopmentInput!): SkillDevelopment!
+  updateSkillDevelopment(id: ID!, input: UpdateSkillDevelopmentInput!): SkillDevelopment!
+  deleteSkillDevelopment(id: ID!): Boolean!
+
+  # Work History
+  createWorkHistory(input: CreateWorkHistoryInput!): WorkHistory!
+  updateWorkHistory(id: ID!, input: UpdateWorkHistoryInput!): WorkHistory!
+  deleteWorkHistory(id: ID!): Boolean!
+}
+
+# ====================================================
+# Domain Types, Inputs, and Enums
+# ====================================================
+
+# ----------------------------
+# Attendance
+# ----------------------------
+type Attendance {
+  id: ID!
+  employeeID: ID!
+  date: DateTime!
+  checkIn: DateTime!
+  checkOut: DateTime
+  workHours: Float!
+  overtime: Float!
+  breakTime: Float!
+  location: String!
+  isRemote: Boolean!
+  punchMethod: PunchMethod!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type AttendanceList {
+  items: [Attendance!]!
+  total: Int!
+}
+
+input CreateAttendanceInput {
+  employeeID: ID!
+  date: DateTime!
+  checkIn: DateTime!
+  location: String!
+  isRemote: Boolean!
+  punchMethod: PunchMethod!
+}
+
+input AttendanceFilterInput {
+  employeeID: ID
+  startDate: DateTime
+  endDate: DateTime
+  isRemote: Boolean
+}
+
+enum PunchMethod {
+  Manual
+  Biometric
+  Geolocation
+}
+
+# ----------------------------
+# Bonus
+# ----------------------------
+type Bonus {
+  id: ID!
+  employeeID: ID!
+  amount: Float!
+  bonusType: BonusType!
+  description: String!
+  approvedBy: ID!
+  approvalDate: DateTime
+  issueDate: DateTime!
+  status: BonusStatus!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type BonusList {
+  items: [Bonus!]!
+  total: Int!
+}
+
+input CreateBonusInput {
+  employeeID: ID!
+  amount: Float!
+  bonusType: BonusType!
+  description: String!
+  approvedBy: ID!
+  approvalDate: DateTime
+  issueDate: DateTime!
+  status: BonusStatus!
+}
+
+input UpdateBonusInput {
+  status: BonusStatus
+  approvalDate: DateTime
+  description: String
+}
+
+input BonusFilterInput {
+  employeeID: ID
+  status: BonusStatus
+}
+
+enum BonusType {
+  Performance
+  Festival
+  Retention
+  Referral
+}
+
+enum BonusStatus {
+  Pending
+  Approved
+  Rejected
+}
+
+# ----------------------------
+# Department
+# ----------------------------
+type Department {
+  id: ID!
+  name: String!
+  organizationID: ID!
+}
+
+type DepartmentList {
+  items: [Department!]!
+  total: Int!
+}
+
+input CreateDepartmentInput {
+  name: String!
+  organizationID: ID!
+}
+
+input UpdateDepartmentInput {
+  name: String
+}
+
+input DepartmentFilterInput {
+  organizationID: ID
+  search: String
+}
+
+# ----------------------------
+# Designation
+# ----------------------------
+type Designation {
+  id: ID!
+  title: String!
+  level: String!
+  hierarchyLevel: Int!
+  departmentID: ID!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type DesignationList {
+  items: [Designation!]!
+  total: Int!
+}
+
+input CreateDesignationInput {
+  title: String!
+  level: String!
+  hierarchyLevel: Int!
+  departmentID: ID!
+}
+
+input UpdateDesignationInput {
+  title: String
+  level: String
+  hierarchyLevel: Int
+}
+
+input DesignationFilterInput {
+  departmentID: ID
+  search: String
+}
+
+# ----------------------------
+# Employee Benefits
+# ----------------------------
+type EmployeeBenefits {
+  id: ID!
+  employeeID: ID!
+  healthPlan: HealthInsurancePlan!
+  retirementPlan: RetirementPlan!
+}
+
+input CreateEmployeeBenefitsInput {
+  employeeID: ID!
+  healthPlan: HealthInsurancePlan!
+  retirementPlan: RetirementPlan!
+}
+
+input UpdateEmployeeBenefitsInput {
+  healthPlan: HealthInsurancePlan
+  retirementPlan: RetirementPlan
+}
+
+enum HealthInsurancePlan {
+  Basic
+  Premium
+  Family
+}
+
+enum RetirementPlan {
+  PensionFund
+  ProvidentFund
+  StockOptionsPlan
+}
+
+# ----------------------------
+# Employee Document
+# ----------------------------
+type EmployeeDocument {
+  id: ID!
+  employeeID: ID!
+  documentName: String!
+  documentURL: String!
+  expiryDate: DateTime
+}
+
+input CreateEmployeeDocumentInput {
+  employeeID: ID!
+  documentName: String!
+  documentURL: String!
+  expiryDate: DateTime
+}
+
+input UpdateEmployeeDocumentInput {
+  documentName: String
+  documentURL: String
+  expiryDate: DateTime
+}
+
+# ----------------------------
+# Employee Exit
+# ----------------------------
+type EmployeeExit {
+  id: ID!
+  employeeID: ID!
+  exitType: EmployeeExitType!
+  exitDate: DateTime!
+  clearanceStatus: EmployeeExitClearanceStatusType!
+}
+
+input CreateEmployeeExitInput {
+  employeeID: ID!
+  exitType: EmployeeExitType!
+  exitDate: DateTime!
+  clearanceStatus: EmployeeExitClearanceStatusType!
+}
+
+input UpdateClearanceStatusInput {
+  clearanceStatus: EmployeeExitClearanceStatusType!
+}
+
+enum EmployeeExitType {
+  Resignation
+  Termination
+  Retirement
+}
+
+enum EmployeeExitClearanceStatusType {
+  Pending
+  Completed
+}
+
+# ----------------------------
+# Employee Perk
+# ----------------------------
+type EmployeePerk {
+  id: ID!
+  employeeID: ID!
+  perk: String!
+}
+
+input CreateEmployeePerkInput {
+  employeeID: ID!
+  perk: String!
+}
+
+input UpdateEmployeePerkInput {
+  perk: String!
+}
+
+# ----------------------------
+# Employee
+# ----------------------------
+type Employee {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String!
+  dateOfBirth: DateTime!
+  employmentType: EmploymentType!
+  status: EmployeeStatus!
+  hiredDate: DateTime
+  organizationID: ID!
+  departmentID: ID!
+  designationID: ID!
+  reportsTo: ID
+}
+
+input CreateEmployeeInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String!
+  dateOfBirth: DateTime!
+  employmentType: EmploymentType!
+  hiredDate: DateTime
+  organizationID: ID!
+  departmentID: ID!
+  designationID: ID!
+  reportsTo: ID
+}
+
+input UpdateEmployeeInput {
+  firstName: String
+  lastName: String
+  phone: String
+  employmentType: EmploymentType
+  status: EmployeeStatus
+}
+
+enum EmploymentType {
+  FullTime
+  PartTime
+  Contract
+  Internship
+}
+
+enum EmployeeStatus {
+  Active
+  Resigned
+  Terminated
+  Intern
+  Probation
+  Hired
+}
+
+# ----------------------------
+# Expense
+# ----------------------------
+type Expense {
+  id: ID!
+  employeeID: ID!
+  expenseType: String!
+  amount: Float!
+  status: ExpenseStatus!
+  date: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input CreateExpenseInput {
+  employeeID: ID!
+  expenseType: String!
+  amount: Float!
+}
+
+input UpdateExpenseStatusInput {
+  expenseID: ID!
+  approverID: ID!
+  newStatus: ExpenseStatus!
+}
+
+enum ExpenseStatus {
+  Pending
+  Approved
+  Rejected
+}
+
+# ----------------------------
+# Leave Balance
+# ----------------------------
+type LeaveBalance {
+  id: ID!
+  employeeID: ID!
+  leaveType: LeaveType!
+  totalLeaves: Float!
+  usedLeaves: Float!
+  remaining: Float!
+}
+
+type LeaveBalanceList {
+  items: [LeaveBalance!]!
+  total: Int!
+}
+
+input CreateLeaveBalanceInput {
+  employeeID: ID!
+  leaveType: LeaveType!
+  totalLeaves: Float!
+}
+
+input DeductLeaveBalanceInput {
+  employeeID: ID!
+  leaveType: LeaveType!
+  leaveDays: Float!
+}
+
+input RestoreLeaveBalanceInput {
+  employeeID: ID!
+  leaveType: LeaveType!
+  leaveDays: Float!
+}
+
+# ----------------------------
+# Leave Policy
+# ----------------------------
+type LeavePolicy {
+  id: ID!
+  organizationID: ID!
+  leaveType: LeaveType!
+  maxDays: Int!
+  carryForward: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input CreateLeavePolicyInput {
+  organizationID: ID!
+  leaveType: LeaveType!
+  maxDays: Int!
+  carryForward: Boolean!
+}
+
+input UpdateLeavePolicyInput {
+  maxDays: Int
+  carryForward: Boolean
+}
+
+# ----------------------------
+# Leave
+# ----------------------------
+type Leave {
+  id: ID!
+  employeeID: ID!
+  leaveType: LeaveType!
+  startDate: DateTime!
+  endDate: DateTime!
+  status: LeaveStatus!
+  approverID: ID
+  comments: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input CreateLeaveInput {
+  employeeID: ID!
+  leaveType: LeaveType!
+  startDate: DateTime!
+  endDate: DateTime!
+}
+
+input UpdateLeaveStatusInput {
+  leaveID: ID!
+  approverID: ID!
+  status: LeaveStatus!
+  comments: String
+}
+
+enum LeaveStatus {
+  Pending
+  Approved
+  Rejected
+}
+
+enum LeaveType {
+  Annual
+  Sick
+  Casual
+  Maternity
+  Paternity
+  Custom
+}
+
+# ----------------------------
+# Loan Advance
+# ----------------------------
+type LoanAdvance {
+  id: ID!
+  employeeID: ID!
+  amount: Float!
+  purpose: String!
+  status: LoanAdvanceStatus!
+  approvedBy: ID
+  approvalDate: DateTime
+  repaymentStart: DateTime
+  repaymentMonths: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input RequestLoanAdvanceInput {
+  employeeID: ID!
+  amount: Float!
+  purpose: String!
+  repaymentMonths: Int!
+}
+
+input ApproveLoanAdvanceInput {
+  loanID: ID!
+  approverID: ID!
+  approvalDate: DateTime!
+  repaymentStart: DateTime!
+}
+
+input RejectLoanAdvanceInput {
+  loanID: ID!
+  approverID: ID!
+}
+
+input LoanAdvanceFilterInput {
+  status: LoanAdvanceStatus
+  employeeID: ID
+}
+
+enum LoanAdvanceStatus {
+  Pending
+  Approved
+  Rejected
+}
+
+# ----------------------------
+# Payroll
+# ----------------------------
+type Payroll {
+  id: ID!
+  employeeID: ID!
+  salary: Float!
+  tax: Float!
+  allowances: Float!
+  deductions: Float!
+  netSalary: Float!
+  paymentDate: DateTime!
+  status: PayrollStatus!
+  payslipURL: String
+  bankName: String!
+  bankAccountNumber: String
+  branchCode: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input CreatePayrollInput {
+  employeeID: ID!
+  salary: Float!
+  tax: Float!
+  allowances: Float!
+  deductions: Float!
+  netSalary: Float!
+  paymentDate: DateTime!
+  status: PayrollStatus!
+  payslipURL: String
+  bankName: String!
+  bankAccountNumber: String
+  branchCode: String!
+}
+
+input UpdatePayrollInput {
+  status: PayrollStatus
+  payslipURL: String
+}
+
+input PayrollFilterInput {
+  employeeID: ID
+  month: DateTime
+  limit: Int
+  offset: Int
+}
+
+enum PayrollStatus {
+  Pending
+  Processed
+  Failed
+}
+
+type PaginatedPayrollResponse {
+  total: Int!
+  limit: Int!
+  offset: Int!
+  payrolls: [Payroll!]!
+}
+
+# ----------------------------
+# Performance KPI
+# ----------------------------
+type PerformanceKPI {
+  id: ID!
+  reviewID: ID!
+  kpiName: String!
+  score: Float!
+  comments: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type PerformanceKPIList {
+  items: [PerformanceKPI!]!
+  total: Int!
+}
+
+input CreatePerformanceKPIInput {
+  reviewID: ID!
+  kpiName: String!
+  score: Float!
+  comments: String
+}
+
+input UpdatePerformanceKPIInput {
+  kpiName: String
+  score: Float
+  comments: String
+}
+
+# ----------------------------
+# Performance Review
+# ----------------------------
+type PerformanceReview {
+  id: ID!
+  employeeID: ID!
+  reviewerID: ID!
+  reviewDate: DateTime!
+  reviewPeriod: String!
+  overallRating: Int!
+  feedback: String!
+  promotion: Boolean!
+  KPIs: [PerformanceKPI!]!
+  skillDevelopments: [SkillDevelopment!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type PerformanceReviewList {
+  items: [PerformanceReview!]!
+  total: Int!
+}
+
+input CreatePerformanceReviewInput {
+  employeeID: ID!
+  reviewerID: ID!
+  reviewDate: DateTime!
+  reviewPeriod: String!
+  overallRating: Int!
+  feedback: String!
+  promotion: Boolean!
+}
+
+input UpdatePerformanceReviewInput {
+  overallRating: Int
+  feedback: String
+  promotion: Boolean
+}
+
+# ----------------------------
+# Public Holiday
+# ----------------------------
+type PublicHoliday {
+  id: ID!
+  organizationID: ID!
+  name: String!
+  date: DateTime!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input CreatePublicHolidayInput {
+  organizationID: ID!
+  name: String!
+  date: DateTime!
+}
+
+input UpdatePublicHolidayInput {
+  name: String
+  date: DateTime
+}
+
+# ----------------------------
+# Salary Structure
+# ----------------------------
+type SalaryStructure {
+  id: ID!
+  organizationID: ID!
+  designationID: ID!
+  baseSalary: Float!
+  allowances: Float!
+  taxPercentage: Float!
+  deductions: Float!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input CreateSalaryStructureInput {
+  organizationID: ID!
+  designationID: ID!
+  baseSalary: Float!
+  allowances: Float!
+  taxPercentage: Float!
+  deductions: Float!
+}
+
+input UpdateSalaryStructureInput {
+  baseSalary: Float
+  allowances: Float
+  taxPercentage: Float
+  deductions: Float
+}
+
+# ----------------------------
+# Shift
+# ----------------------------
+type Shift {
+  id: ID!
+  name: String!
+  shiftType: ShiftType!
+  startTime: String!
+  endTime: String!
+  daysOfWeek: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type ShiftList {
+  items: [Shift!]!
+  total: Int!
+}
+
+input CreateShiftInput {
+  name: String!
+  shiftType: ShiftType!
+  startTime: String!
+  endTime: String!
+  daysOfWeek: String!
+}
+
+input UpdateShiftInput {
+  name: String
+  shiftType: ShiftType
+  startTime: String
+  endTime: String
+  daysOfWeek: String
+}
+
+enum ShiftType {
+  Flexible
+  Fixed
+  Rotational
+}
+
+# ----------------------------
+# Skill Development
+# ----------------------------
+type SkillDevelopment {
+  id: ID!
+  reviewID: ID!
+  skill: String!
+  progress: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input CreateSkillDevelopmentInput {
+  reviewID: ID!
+  skill: String!
+  progress: String!
+}
+
+input UpdateSkillDevelopmentInput {
+  skill: String
+  progress: String
+}
+
+# ----------------------------
+# Work History
+# ----------------------------
+type WorkHistory {
+  id: ID!
+  employeeID: ID!
+  company: String!
+  designation: String!
+  startDate: DateTime!
+  endDate: DateTime
+  reasonForExit: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+input CreateWorkHistoryInput {
+  employeeID: ID!
+  company: String!
+  designation: String!
+  startDate: DateTime!
+  endDate: DateTime
+  reasonForExit: String!
+}
+
+input UpdateWorkHistoryInput {
+  company: String
+  designation: String
+  startDate: DateTime
+  endDate: DateTime
+  reasonForExit: String
+}
+
+# schema.graphqls
+
+scalar DateTime
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+# ----------------------------
+# Query Type
+# ----------------------------
+type Query {
+  # Pantry Item Queries
+  getPantryItem(id: ID!): PantryItem
+  listPantryItems(limit: Int, offset: Int): [PantryItem!]!
+
+  # Bucket Item Queries
+  getBucketItem(productId: String!): BucketItem
+  listBucketItems(limit: Int, offset: Int): [BucketItem!]!
+
+  # Expense Log Queries
+  getExpenseLog(id: ID!): ExpenseLog
+  listExpenseLogs(limit: Int, offset: Int): [ExpenseLog!]!
+}
+
+# ----------------------------
+# Mutation Type
+# ----------------------------
+type Mutation {
+  # Pantry Item Mutations
+  createPantryItem(input: CreatePantryItemInput!): PantryItem!
+  updatePantryItem(id: ID!, input: UpdatePantryItemInput!): PantryItem!
+  deletePantryItem(id: ID!): Boolean!
+
+  # Bucket Item Mutations
+  createBucketItem(input: CreateBucketItemInput!): BucketItem!
+  updateBucketItem(productId: String!, input: UpdateBucketItemInput!): BucketItem!
+  deleteBucketItem(productId: String!): Boolean!
+
+  # Expense Log Mutations
+  createExpenseLog(input: CreateExpenseLogInput!): ExpenseLog!
+  updateExpenseLog(id: ID!, input: UpdateExpenseLogInput!): ExpenseLog!
+  deleteExpenseLog(id: ID!): Boolean!
+}
+
+# ----------------------------
+# Type Definitions
+# ----------------------------
+
+type PantryItem {
+  id: ID!
+  productName: String!
+  price: Float!
+  category: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type BucketItem {
+  id: ID!
+  productId: String!
+  qty: Float!
+  price: Float!
+  total: Float!
+  paidBy: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type ExpenseLog {
+  id: ID!
+  amtReceived: Float!
+  amtSpend: Float!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+# ----------------------------
+# Input Types
+# ----------------------------
+
+input CreatePantryItemInput {
+  productName: String!
+  price: Float!
+  category: String!
+}
+
+input UpdatePantryItemInput {
+  productName: String
+  price: Float
+  category: String
+}
+
+input CreateBucketItemInput {
+  productId: String!
+  qty: Float!
+  price: Float!
+  total: Float!
+  paidBy: String!
+}
+
+input UpdateBucketItemInput {
+  productId: String
+  qty: Float
+  price: Float
+  total: Float
+  paidBy: String
+}
+
+input CreateExpenseLogInput {
+  amtReceived: Float!
+  amtSpend: Float!
+}
+
+input UpdateExpenseLogInput {
+  amtReceived: Float
+  amtSpend: Float
+}
+
+scalar DateTime
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+# ----------------------------
+# Query Type
+# ----------------------------
+type Query {
+  # Asset Queries
+  getAsset(id: ID!): Asset
+  listAssets(limit: Int, offset: Int): [Asset!]!
+
+  # Allocation Queries
+  getAllocation(id: ID!): Allocation
+  listAllocations(limit: Int, offset: Int): [Allocation!]!
+
+  # Maintenance Queries
+  getMaintenance(id: ID!): Maintenance
+  listMaintenanceRecords(assetId: ID!): [Maintenance!]!
+}
+
+# ----------------------------
+# Mutation Type
+# ----------------------------
+type Mutation {
+  # Allocation Mutations
+  allocateAsset(input: AllocateAssetInput!): Allocation!
+  reallocateAsset(input: ReallocateAssetInput!): GenericResponse!
+  deallocateAsset(input: DeallocateAssetInput!): GenericResponse!
+
+  # Asset Mutations
+  createAsset(input: CreateAssetInput!): Asset!
+  updateAsset(id: ID!, input: UpdateAssetInput!): Asset!
+  deleteAsset(id: ID!): GenericResponse!
+
+  # Maintenance Mutations
+  scheduleMaintenance(input: ScheduleMaintenanceInput!): Maintenance!
+}
+
+# ----------------------------
+# Type Definitions
+# ----------------------------
+type Allocation {
+  id: ID!
+  assetId: ID!
+  assignedTo: String!
+  assignmentDate: DateTime!
+  releaseDate: DateTime
+}
+
+type Asset {
+  id: ID!
+  name: String!
+  description: String!
+  category: String!
+  purchaseDate: DateTime!
+  purchasePrice: Float!
+  currentValue: Float!
+  location: String!
+  status: String!
+  depreciationRate: Float!
+  guidelines: String!
+}
+
+type Maintenance {
+  id: ID!
+  assetId: ID!
+  maintenanceDate: DateTime!
+  description: String!
+  cost: Float!
+}
+
+type GenericResponse {
+  message: String!
+}
+
+# ----------------------------
+# Input Types
+# ----------------------------
+input AllocateAssetInput {
+  assetId: ID!
+  assignedTo: String!
+}
+
+input ReallocateAssetInput {
+  assetId: ID!
+  newAssignedTo: String!
+}
+
+input DeallocateAssetInput {
+  allocationId: ID!
+}
+
+input CreateAssetInput {
+  name: String!
+  description: String!
+  category: String!
+  purchaseDate: DateTime!
+  purchasePrice: Float!
+  location: String!
+  depreciationRate: Float!
+  guidelines: String!
+}
+
+input UpdateAssetInput {
+  name: String
+  description: String
+  category: String
+  purchaseDate: DateTime
+  purchasePrice: Float
+  currentValue: Float
+  location: String
+  status: String
+  depreciationRate: Float
+  guidelines: String
+}
+
+input ScheduleMaintenanceInput {
+  assetId: ID!
+  description: String!
+  cost: Float!
+}

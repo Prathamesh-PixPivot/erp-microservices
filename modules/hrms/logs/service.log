@@ -133,3 +133,22 @@ runtime.main
 2025-03-19T12:19:44.392+0530	[34mINFO[0m	cmd/server.go:40	🚀 gRPC server started	{"port": "50006"}
 2025-03-19T12:19:50.398+0530	[34mINFO[0m	cmd/server.go:57	🔄 Gracefully shutting down gRPC server...
 2025-03-19T12:19:50.400+0530	[34mINFO[0m	cmd/server.go:66	✅ gRPC server stopped
+2025-04-01T01:08:00.618+0530	[34mINFO[0m	infrastructure/logger.go:75	✅ Logger initialized successfully	{"level": "info", "format": "console", "output": "logs"}
+2025-04-01T01:08:00.817+0530	[31mFATAL[0m	infrastructure/database.go:31	Failed to connect to database	{"error": "failed to connect to `user=postgres database=hrms-service`: 127.0.0.1:5432 (127.0.0.1): server error: FATAL: database \"hrms-service\" does not exist (SQLSTATE 3D000)"}
+hrms/infrastructure.NewDatabase
+	D:/PixERP/erp-microservices/modules/hrms/infrastructure/database.go:31
+main.InitializeDatabase
+	D:/PixERP/erp-microservices/modules/hrms/cmd/wire_gen.go:66
+main.InitializeDependencies
+	D:/PixERP/erp-microservices/modules/hrms/cmd/wire_gen.go:28
+main.main
+	D:/PixERP/erp-microservices/modules/hrms/cmd/main.go:10
+runtime.main
+	C:/Program Files/Go/src/runtime/proc.go:283
+2025-04-01T01:08:44.863+0530	[34mINFO[0m	infrastructure/logger.go:75	✅ Logger initialized successfully	{"level": "info", "format": "console", "output": "logs"}
+2025-04-01T01:08:44.979+0530	[34mINFO[0m	infrastructure/database.go:45	✅ Database connection successfully established!
+2025-04-01T01:08:45.314+0530	[34mINFO[0m	migrations/migrations.go:51	✅ Database migration completed successfully
+2025-04-01T01:08:45.315+0530	[34mINFO[0m	cmd/server.go:21	🔁 Starting the GRPC server	{"port": "50006"}
+2025-04-01T01:08:45.316+0530	[34mINFO[0m	cmd/server.go:40	🚀 gRPC server started	{"port": "50006"}
+2025-04-01T01:08:52.815+0530	[34mINFO[0m	cmd/server.go:57	🔄 Gracefully shutting down gRPC server...
+2025-04-01T01:08:52.836+0530	[34mINFO[0m	cmd/server.go:66	✅ gRPC server stopped
